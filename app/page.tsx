@@ -117,7 +117,21 @@ export default function Home() {
           (s) => s.id === initialActiveId,
         );
         if (currentSession) {
-          setMessages(currentSession.messages);
+          const sanitizedMessages = currentSession.messages.filter((msg) => {
+            //逻辑：如果这一条是 assistant 发的，且包含“思考”、“演算”、“正在”等关键字
+            // 且该条消息是最后一条，那就说明是上次崩溃残留的“骨架屏”
+            const isTempLoading =
+              msg.role === "assistant" &&
+              (msg.content.includes("思考") ||
+                msg.content.includes("演算") ||
+                msg.content === "");
+
+            // 仅保留非临时的消息
+            return !isTempLoading;
+          });
+
+          // 设置清理后的消息
+          setMessages(sanitizedMessages);
         }
       } catch (e) {
         console.error("IndexedDB 初始化故障，开启兜底存储机制:", e);
