@@ -12,6 +12,7 @@
     "@google/genai": "^2.6.0",
     "@langchain/core": "^1.1.49",
     "@langchain/langgraph": "^1.4.2",
+    "@sentry/nextjs": "^10.58.0",
     "https-proxy-agent": "^9.0.0",
     "next": "16.2.6",
     "node-fetch": "^2.7.0",

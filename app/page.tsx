@@ -459,14 +459,20 @@ export default function Home() {
         }
       }
     } catch (error) {
-      if (abortController.signal.aborted) return;
-      const message =
-        error instanceof Error ? error.message : "Streaming failed.";
-      finalTextRef.current = message;
+      // 🎯 核心拦截 2：这里会捕获 断网、fetch 失败、以及上面抛出的 response.ok 异常
+      console.error("请求中断或失败:", error);
+
+      // 强制把最后一条卡住的占位消息，替换成你要求的统一样板文案
       setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1] = { role: "assistant", content: message };
-        return updated;
+        const newMessages = [...prev];
+        if (
+          newMessages.length > 0 &&
+          newMessages[newMessages.length - 1].role === "assistant"
+        ) {
+          newMessages[newMessages.length - 1].content =
+            "⚠️ 网络问题，稍后再试。";
+        }
+        return newMessages;
       });
     } finally {
       isFetchingRef.current = false;

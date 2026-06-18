@@ -60,7 +60,7 @@ export async function POST(req: Request): Promise<Response> {
     const outputStream = new ReadableStream({
       async start(controller) {
         controller.enqueue(encoder.encode(": connected\n\n"));
-        
+
         // ==========================================
         // ⏱️ 开启总计时器与流水节点计时器
         // ==========================================
@@ -68,7 +68,9 @@ export async function POST(req: Request): Promise<Response> {
         let lastNodeTimestamp = performance.now();
 
         controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify({ type: "STATUS", content: "🤖 Agent 收到指令，开始激活工作流拓扑网..." })}\n\n`)
+          encoder.encode(
+            `data: ${JSON.stringify({ type: "STATUS", content: "🤖 Agent 收到指令，开始激活工作流拓扑网..." })}\n\n`,
+          ),
         );
 
         let finalState: AgentStateValues | null = null;
@@ -76,7 +78,11 @@ export async function POST(req: Request): Promise<Response> {
         try {
           const graphStream = await graph.stream(
             { messages: inputMessages },
-            { configurable: { thread_id: sessionId }, recursionLimit: 10, streamMode: "updates" }
+            {
+              configurable: { thread_id: sessionId },
+              recursionLimit: 10,
+              streamMode: "updates",
+            },
           );
 
           for await (const chunk of graphStream) {
@@ -86,47 +92,65 @@ export async function POST(req: Request): Promise<Response> {
             lastNodeTimestamp = now; // 重置锚点给下一个节点用
 
             const updates = chunk as Record<string, Record<string, unknown>>;
-            
+
             if ("router" in updates) {
               controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ type: "STATUS", content: `🔍 意图路由分析完成 (耗时: ${nodeElapsed}s)` })}\n\n`)
+                encoder.encode(
+                  `data: ${JSON.stringify({ type: "STATUS", content: `🔍 意图路由分析完成 (耗时: ${nodeElapsed}s)` })}\n\n`,
+                ),
               );
             }
-            
+
             if ("execute_tools" in updates) {
               controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ type: "TOOL_STATUS", content: `propose_file_change (耗时: ${nodeElapsed}s)` })}\n\n`)
+                encoder.encode(
+                  `data: ${JSON.stringify({ type: "TOOL_STATUS", content: `propose_file_change (耗时: ${nodeElapsed}s)` })}\n\n`,
+                ),
               );
-              
+
               const toolPayload = updates.execute_tools as ToolPayload;
               if (toolPayload?.pendingDiffResult) {
                 controller.enqueue(
-                  encoder.encode(`data: ${JSON.stringify({ type: "TEXT", content: toolPayload.pendingDiffResult })}\n\n`)
+                  encoder.encode(
+                    `data: ${JSON.stringify({ type: "TEXT", content: toolPayload.pendingDiffResult })}\n\n`,
+                  ),
                 );
               }
             }
 
             if ("summarize" in updates) {
               controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ type: "STATUS", content: `📦 历史上下文压缩精炼完成 (耗时: ${nodeElapsed}s)` })}\n\n`)
+                encoder.encode(
+                  `data: ${JSON.stringify({ type: "STATUS", content: `📦 历史上下文压缩精炼完成 (耗时: ${nodeElapsed}s)` })}\n\n`,
+                ),
               );
             }
           }
 
-          const graphSnapshot = await graph.getState({ configurable: { thread_id: sessionId } });
+          const graphSnapshot = await graph.getState({
+            configurable: { thread_id: sessionId },
+          });
           finalState = graphSnapshot.values as AgentStateValues;
-
         } catch (graphErr) {
           console.error("LangGraph 运行期异常:", graphErr);
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "ERROR", content: "Agent 思考流中断" })}\n\n`));
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({ type: "ERROR", content: "Agent 思考流中断" })}\n\n`,
+            ),
+          );
           controller.close();
           return;
         }
 
         // 计算 LangGraph 核心图处理完毕的总耗时
-        const totalGraphElapsed = ((performance.now() - totalGraphStart) / 1000).toFixed(1);
+        const totalGraphElapsed = (
+          (performance.now() - totalGraphStart) /
+          1000
+        ).toFixed(1);
         controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify({ type: "STATUS", content: `✨ 拓扑网络演算完毕，总耗时: ${totalGraphElapsed}s。开始接入大模型深度推理...` })}\n\n`)
+          encoder.encode(
+            `data: ${JSON.stringify({ type: "STATUS", content: `✨ 拓扑网络演算完毕，总耗时: ${totalGraphElapsed}s。开始接入大模型深度推理...` })}\n\n`,
+          ),
         );
 
         const memorySummaryText = finalState?.summary
@@ -145,24 +169,33 @@ You MUST output your internal chain of thought wrapped inside <think> and </thin
           .filter((m) => m._getType() !== "system")
           .map((m) => {
             const type = m._getType();
-            if (type === "human") return { role: "user" as const, content: m.content as string };
+            if (type === "human")
+              return { role: "user" as const, content: m.content as string };
             if (type === "ai") {
               const aiM = m as AIMessage;
               return {
                 role: "assistant" as const,
                 content: aiM.content as string,
-                tool_calls: aiM.tool_calls && aiM.tool_calls.length > 0
-                  ? aiM.tool_calls.map((tc) => ({
-                      id: tc.id,
-                      type: "function" as const,
-                      function: { name: tc.name, arguments: JSON.stringify(tc.args) },
-                    }))
-                  : undefined,
+                tool_calls:
+                  aiM.tool_calls && aiM.tool_calls.length > 0
+                    ? aiM.tool_calls.map((tc) => ({
+                        id: tc.id,
+                        type: "function" as const,
+                        function: {
+                          name: tc.name,
+                          arguments: JSON.stringify(tc.args),
+                        },
+                      }))
+                    : undefined,
               };
             }
             if (type === "tool") {
               const toolM = m as ToolMessage;
-              return { role: "tool" as const, content: toolM.content as string, tool_call_id: toolM.tool_call_id };
+              return {
+                role: "tool" as const,
+                content: toolM.content as string,
+                tool_call_id: toolM.tool_call_id,
+              };
             }
             return { role: "user" as const, content: String(m.content) };
           });
@@ -182,6 +215,15 @@ You MUST output your internal chain of thought wrapped inside <think> and </thin
           });
 
           if (!streamResponse.ok) {
+            const errorText = await streamResponse.text();
+            console.error("千问报错详情:", errorText);
+
+            // 🎯 核心修复：在崩溃前，通过你流式定义的 writer 或 controller 塞一个错误状态给前端
+            const errorPayload = {
+              type: "STATUS", // 或者自定义一个 type: "ERROR"
+              content: "❌ 大模型调用失败，请检查账户余额或上下文长度。",
+            };
+            controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(errorPayload)}\n\n`));
             throw new Error(`Qwen API return status ${streamResponse.status}`);
           }
 
@@ -212,12 +254,16 @@ You MUST output your internal chain of thought wrapped inside <think> and </thin
                   }
 
                   controller.enqueue(
-                    encoder.encode(`data: ${JSON.stringify({ type: "TEXT", content: text })}\n\n`)
+                    encoder.encode(
+                      `data: ${JSON.stringify({ type: "TEXT", content: text })}\n\n`,
+                    ),
                   );
 
                   if (text.includes("</think>")) {
                     isThinking = false;
-                    console.log(`模型思考完毕，转入正式回答，状态锁定为: ${String(isThinking)}`);
+                    console.log(
+                      `模型思考完毕，转入正式回答，状态锁定为: ${String(isThinking)}`,
+                    );
                   }
                 }
               } catch {
@@ -241,10 +287,12 @@ You MUST output your internal chain of thought wrapped inside <think> and </thin
         "X-Accel-Buffering": "no",
       },
     });
-
   } catch (error: unknown) {
     console.error("❌ [Fatal Error]:", error);
-    return NextResponse.json({ error: "SERVER_INTERNAL_FATAL" }, { status: 500 });
+    return NextResponse.json(
+      { error: "SERVER_INTERNAL_FATAL" },
+      { status: 500 },
+    );
   }
 }
 
