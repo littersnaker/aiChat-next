@@ -46,7 +46,8 @@ const tools = [
     type: "function",
     function: {
       name: "read_pdf_from_disk",
-      description: "读取本地 PDF 文件并提取其中的文本内容。当用户询问 PDF 文档内容时使用。",
+      description:
+        "读取本地 PDF 文件并提取其中的文本内容。当用户询问 PDF 文档内容时使用。",
       parameters: {
         type: "object",
         properties: {
@@ -60,11 +61,95 @@ const tools = [
     type: "function",
     function: {
       name: "get_local_time",
-      description: "获取用户当前系统或所在地区的本地时间与日期。当用户询问‘现在几点’、‘今天几号’或涉及时间敏感型信息时使用。",
+      description:
+        "获取用户当前系统或所在地区的本地时间与日期。当用户询问‘现在几点’、‘今天几号’或涉及时间敏感型信息时使用。",
       parameters: {
         type: "object",
         properties: {}, // 无需传参，直接返回当前系统时间
         required: [],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "search_codebase",
+      description: "搜索整个项目中的代码、函数、组件、变量或关键字。",
+      parameters: {
+        type: "object",
+        properties: {
+          keyword: {
+            type: "string",
+            description: "要搜索的关键字",
+          },
+        },
+        required: ["keyword"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "run_terminal_command",
+      description:
+        "执行终端命令并返回执行结果。例如 pnpm lint、pnpm build、git status。",
+      parameters: {
+        type: "object",
+        properties: {
+          command: {
+            type: "string",
+            description: "终端命令",
+          },
+        },
+        required: ["command"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "list_directory",
+      description: "查看项目目录结构，用于分析项目文件组织。",
+      parameters: {
+        type: "object",
+        properties: {
+          dirPath: {
+            type: "string",
+            description: "目录路径，默认 '.'",
+          },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_diff",
+      description: "比较原文件和pending文件差异",
+      parameters: {
+        type: "object",
+        properties: {
+          filePath: {
+            type: "string",
+          },
+        },
+        required: ["filePath"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "apply_file_change",
+      description: "将 pending 文件正式覆盖到原文件",
+      parameters: {
+        type: "object",
+        properties: {
+          filePath: {
+            type: "string",
+          },
+        },
+        required: ["filePath"],
       },
     },
   },

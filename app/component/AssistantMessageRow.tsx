@@ -83,6 +83,7 @@ export default function AssistantMessageRow({
 }: AssistantMessageRowProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const { thinking, finalText, isThinking } = parseThinkingStream(content);
+  
 
   if (currentTool) {
     return (

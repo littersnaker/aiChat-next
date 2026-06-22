@@ -32,5 +32,5 @@ workflow.addEdge("summarize", END);
 
 export const graph = workflow.compile({
   checkpointer: new MemorySaver(),
-  interruptBefore: ["execute_tools"], // ⚡ 任何工具执行前，图都会自动暂停
+  // interruptBefore: ["execute_tools"], // ⚡ 任何工具执行前，图都会自动暂停
 });

@@ -455,7 +455,7 @@ export default function Home() {
                     const updated = [...prev];
                     updated[updated.length - 1] = {
                       role: "assistant",
-                      content: `🔧 正在调用代码控制台执行修改: [${toolName}]...`,
+                      content: `[${toolName}]`,
                     };
                     return updated;
                   });
@@ -517,26 +517,40 @@ export default function Home() {
     abortRef.current?.abort();
   }
 
-  function clearChat() {
+  async function clearChat() {
     abortRef.current?.abort();
+
+    // 1. 生成全新的 ID
+    const newSessionId =
+      // eslint-disable-next-line react-hooks/purity
+      "session_" + Date.now() + Math.random().toString(36).substring(2, 9);
+
+    // 2. 更新本地状态 (messages 和 id)
     setMessages(starterMessages);
-    setInput("");
-    setAttachedFile(null);
-    setIsStreaming(false);
+    setActiveSessionId(newSessionId); // 切换当前活动 ID
+
+    // 3. 更新侧边栏列表 (把当前的变成新的)
     setSessions((prev) =>
       prev.map((s) =>
         s.id === activeSessionId
-          ? { ...s, title: "新的对话", messages: starterMessages }
+          ? {
+              ...s,
+              id: newSessionId,
+              title: "新的对话",
+              messages: starterMessages,
+            }
           : s,
       ),
     );
-    openDB().then((db) => {
-      const tx = db.transaction("sessions", "readwrite");
-      tx.objectStore("sessions").put({
-        id: activeSessionId,
-        title: "新的对话",
-        messages: starterMessages,
-      });
+
+    // 4. IndexedDB 操作：由于 ID 变了，put 就是新增，你应该考虑是否要删掉旧的
+    const db = await openDB();
+    const tx = db.transaction("sessions", "readwrite");
+    // 建议：如果你不需要保留旧的，可以在这里 db.delete('sessions', activeSessionId)
+    tx.objectStore("sessions").put({
+      id: newSessionId,
+      title: "新的对话",
+      messages: starterMessages,
     });
   }
 
@@ -606,7 +620,7 @@ export default function Home() {
               className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium bg-white hover:bg-zinc-200"
               onClick={clearChat}
             >
-              Clear Current
+              清空对话
             </button>
           </div>
         </header>
