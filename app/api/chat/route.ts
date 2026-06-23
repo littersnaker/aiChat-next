@@ -21,6 +21,7 @@ interface StreamDeltaResponse {
   choices?: Array<{
     delta?: {
       content?: string;
+      reasoning_content?: string; // 👈 必须加上这个，否则 TS 会报错
     };
   }>;
 }
@@ -32,48 +33,6 @@ interface AgentStateValues extends Record<string, unknown> {
 
 interface ToolPayload extends Record<string, unknown> {
   pendingDiffResult?: string;
-}
-
-// ====================================================
-// 🛡️ 核心修复：高级 XML 流碎片过滤器
-// 专门解决流式输出时 `<func` 和 `tion_calls>` 被切断导致的泄露问题
-// ====================================================
-class XMLStreamFilter {
-  private buffer = "";
-
-  public process(chunk: string): string {
-    this.buffer += chunk;
-
-    // 核心改进：无论模型输出了什么奇怪的 XML 标签碎片，
-    // 如果它包含 "<" 但还没有拼成一个完整的标签，我们先缓存；
-    // 如果它看起来像是一个完整的 XML 标签，直接整体干掉！
-
-    // 1. 尝试匹配所有可能的 XML 标签 (包含 <function_calls>, <think> 等)
-    // 注意：如果我们想保留 <think> 标签，这里要排除它
-    const xmlTagRegex = /<[^>]+>|<\/[^>]+>/g;
-
-    // 2. 将缓冲区中所有匹配到的 XML 标签替换为空
-    // 我们只处理已经完整出现的标签，半截的先留在 buffer 里
-    const output = this.buffer.replace(xmlTagRegex, (match) => {
-      // 只要不是我们想要保留的 <think> 和 </think>，全部过滤掉
-      if (match.includes("<think") || match.includes("</think")) {
-        return match;
-      }
-      return "";
-    });
-
-    // 3. 简单的碎片保护：如果缓冲区末尾以 "<" 开头，说明可能有一个标签在切断中
-    // 我们把剩余部分留给下一个 chunk 处理，防止截断导致显示乱码
-    if (this.buffer.includes("<") && !this.buffer.endsWith(">")) {
-      const lastBracket = this.buffer.lastIndexOf("<");
-      const completePart = this.buffer.slice(0, lastBracket);
-      this.buffer = this.buffer.slice(lastBracket); // 留下半截
-      return completePart.replace(xmlTagRegex, "");
-    }
-
-    this.buffer = ""; // 缓冲区清空
-    return output;
-  }
 }
 
 export async function POST(req: Request): Promise<Response> {
@@ -117,8 +76,21 @@ export async function POST(req: Request): Promise<Response> {
         let finalState: AgentStateValues | null = null;
 
         try {
+          // 检查 MemorySaver 中是否已有该会话的状态
+          const graphSnapshot = await graph.getState({
+            configurable: { thread_id: sessionId },
+          });
+          const hasExistingState =
+            (graphSnapshot.values?.messages?.length || 0) > 0;
+
+          // 如果 MemorySaver 已有状态，只传入新消息（最后一条），避免消息重复
+          // 如果服务器重启后状态丢失，传入前端发送的所有消息恢复上下文
+          const messagesToGraph = hasExistingState
+            ? [inputMessages[inputMessages.length - 1]]
+            : inputMessages;
+
           const graphStream = await graph.stream(
-            { messages: inputMessages },
+            { messages: messagesToGraph },
             {
               configurable: { thread_id: sessionId },
               recursionLimit: 50,
@@ -127,6 +99,7 @@ export async function POST(req: Request): Promise<Response> {
           );
 
           for await (const chunk of graphStream) {
+            console.log("🔍 当前图流转节点:", Object.keys(chunk));
             const now = performance.now();
             const nodeElapsed = ((now - lastNodeTimestamp) / 1000).toFixed(1);
             lastNodeTimestamp = now;
@@ -142,7 +115,9 @@ export async function POST(req: Request): Promise<Response> {
             }
 
             if ("execute_tools" in updates) {
-              const messages = updates.execute_tools.messages as Array<{ name?: string }> | undefined;
+              const messages = updates.execute_tools.messages as
+                | Array<{ name?: string }>
+                | undefined;
               const firstMessageName = messages?.[0]?.name ?? "Unknown";
               controller.enqueue(
                 encoder.encode(
@@ -173,6 +148,16 @@ export async function POST(req: Request): Promise<Response> {
             configurable: { thread_id: sessionId },
           });
           finalState = graphSnapshot.values as AgentStateValues;
+          if (finalState.summary) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  type: "TEXT",
+                  content: `### \n${finalState.summary}\n\n`,
+                })}\n\n`,
+              ),
+            );
+          }
         } catch (graphErr) {
           console.error("LangGraph 运行期异常:", graphErr);
           controller.enqueue(
@@ -198,14 +183,15 @@ export async function POST(req: Request): Promise<Response> {
           ? `\n\n[此前久远的对话背景历史摘要]:\n${finalState.summary}`
           : "";
 
-        // 🛡️ 核心修复 2：系统提示词强压迫，禁止模型在最终回复阶段输出任何内部 XML
+        // 系统提示词：禁止模型在最终回复阶段输出任何内部 XML，并明确要求模型必须输出最终正文
         const systemPrompt = {
           role: "system",
           content: `You are an expert AI software architect and coding agent. Respond in Chinese.
 ⚠️ CRITICAL OUTPUT PROTOCOL:
-1. Before writing any final response, you MUST perform deep reasoning and planning. 
-2. You MUST output your internal chain of thought wrapped inside <think> and </think> tags.
-3. 🚫 STRICT RULE: The tool execution phase is OVER. DO NOT output ANY raw XML tool calls (like <function_calls>, <invoke>, <tool_call>). Provide your answer directly using standard Markdown!${memorySummaryText}`,
+1. Before writing any final response, you MUST perform deep reasoning and planning.
+2. The API will automatically separate your reasoning into 'reasoning_content' and your final answer into 'content'. You do NOT need to manually wrap your thinking in any tags.
+3. After reading files or analyzing code, you MUST provide a comprehensive response in the final content, including key findings, file structure analysis, and actionable suggestions.
+4. 🚫 STRICT RULE: The tool execution phase is OVER. DO NOT output ANY raw XML tool calls (like <function_calls>, <invoke>, <tool_call>). Provide your answer directly using standard Markdown!${memorySummaryText}`,
         };
 
         const recentMessages = (finalState?.messages || [])
@@ -213,7 +199,7 @@ export async function POST(req: Request): Promise<Response> {
           .map((m) => {
             const type = m._getType();
             if (type === "human")
-              return { role: "user" as const, content: m.content as string };
+              return { role: "user" as const, content: m.content };
             if (type === "ai") {
               const aiM = m as AIMessage;
               return {
@@ -275,24 +261,60 @@ export async function POST(req: Request): Promise<Response> {
 
           const reader = streamResponse.body!.getReader();
           let buffer = "";
-          let isThinking = false;
+          let isThinkingPhase = false;
+          let hasFinishedThinking = false;
 
           // ⚡ 实例化高级过滤器
-          const xmlFilter = new XMLStreamFilter();
 
           while (true) {
             const { done, value } = await reader.read();
             if (done) {
-              // 结尾时把缓冲器里确认无害的残留文本吐干净
-              const leftOver = xmlFilter.process("");
-              if (leftOver) {
+              console.log("✅ 流式传输正常结束");
+              // 处理残留 buffer 中最后不完整的一行
+              if (buffer) {
+                const trimmed = buffer.trim();
+                if (trimmed && trimmed.startsWith("data:")) {
+                  const dataJson = trimmed.slice("data:".length).trim();
+                  if (dataJson !== "[DONE]") {
+                    try {
+                      const parsed = JSON.parse(dataJson) as StreamDeltaResponse;
+                      const delta = parsed.choices?.[0]?.delta;
+                      const reasoning = delta?.reasoning_content || "";
+                      const content = delta?.content || "";
+                      let chunkToFrontend = "";
+                      if (reasoning) {
+                        if (!isThinkingPhase) {
+                          isThinkingPhase = true;
+                          chunkToFrontend += "<INTERNAL_THINK_START>";
+                        }
+                        chunkToFrontend += reasoning;
+                      }
+                      if (content) {
+                        if (isThinkingPhase && !hasFinishedThinking) {
+                          hasFinishedThinking = true;
+                          chunkToFrontend += "<INTERNAL_THINK_END>";
+                        }
+                        chunkToFrontend += content;
+                      }
+                      if (chunkToFrontend) {
+                        controller.enqueue(
+                          encoder.encode(
+                            `data: ${JSON.stringify({ type: "TEXT", content: chunkToFrontend })}\n\n`,
+                          ),
+                        );
+                      }
+                    } catch {}
+                  }
+                }
+              }
+              // 如果流结束时 thinking 还没有关闭，自动关闭标签
+              if (isThinkingPhase && !hasFinishedThinking) {
                 controller.enqueue(
                   encoder.encode(
-                    `data: ${JSON.stringify({ type: "TEXT", content: leftOver })}\n\n`,
+                    `data: ${JSON.stringify({ type: "TEXT", content: "<INTERNAL_THINK_END>" })}\n\n`,
                   ),
                 );
               }
-              console.log("✅ 流式传输正常结束");
               break;
             }
 
@@ -308,31 +330,38 @@ export async function POST(req: Request): Promise<Response> {
 
               try {
                 const parsed = JSON.parse(dataJson) as StreamDeltaResponse;
-                const rawText = parsed.choices?.[0]?.delta?.content || "";
+                const delta = parsed.choices?.[0]?.delta;
 
-                if (rawText) {
-                  // ⚡ 将原始 token 喂给过滤器，拿到干净的文本
-                  const cleanText = xmlFilter.process(rawText);
+                const reasoning = delta?.reasoning_content || "";
+                const content = delta?.content || "";
 
-                  if (cleanText) {
-                    // 注意：<think> 会原样通过过滤器，所以前端的思考骨架屏逻辑完全不受影响
-                    if (cleanText.includes("<think>")) {
-                      isThinking = true;
-                    }
+                let chunkToFrontend = "";
 
-                    controller.enqueue(
-                      encoder.encode(
-                        `data: ${JSON.stringify({ type: "TEXT", content: cleanText })}\n\n`,
-                      ),
-                    );
-
-                    if (cleanText.includes("</think>")) {
-                      isThinking = false;
-                      console.log(
-                        `模型思考完毕，转入正式回答，状态锁定为: ${String(isThinking)}`,
-                      );
-                    }
+                // 1. 处理推理阶段 (思考中)
+                if (reasoning) {
+                  if (!isThinkingPhase) {
+                    isThinkingPhase = true;
+                    chunkToFrontend += "<INTERNAL_THINK_START>"; // 首次收到推理内容，添加思考标签
                   }
+                  chunkToFrontend += reasoning;
+                }
+
+                // 2. 处理正文阶段 (思考结束闭合)
+                if (content) {
+                  if (isThinkingPhase && !hasFinishedThinking) {
+                    hasFinishedThinking = true;
+                    chunkToFrontend += "<INTERNAL_THINK_END>";
+                  }
+                  chunkToFrontend += content;
+                }
+
+                // 3. 将拼接好的流推给前端
+                if (chunkToFrontend) {
+                  controller.enqueue(
+                    encoder.encode(
+                      `data: ${JSON.stringify({ type: "TEXT", content: chunkToFrontend })}\n\n`,
+                    ),
+                  );
                 }
               } catch {
                 // 忽略残缺流数据

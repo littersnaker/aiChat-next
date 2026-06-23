@@ -1,5 +1,5 @@
-export // 1. 工具列表：将原来的强行写入，升级为“提议修改(Diff)”
-const tools = [
+// 1. 工具列表：将原来的强行写入，升级为“提议修改(Diff)”
+export const tools = [
   {
     type: "function",
     function: {

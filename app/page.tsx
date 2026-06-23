@@ -49,6 +49,7 @@ export default function Home() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
   const [isParsingFile, setIsParsingFile] = useState(false);
+  const [currentTool, setCurrentTool] = useState<string>(""); // ⚡ 新增：当前执行的工具名状态
   const isFetchingRef = useRef(false);
   const finalTextRef = useRef("");
 
@@ -118,13 +119,10 @@ export default function Home() {
         );
         if (currentSession) {
           const sanitizedMessages = currentSession.messages.filter((msg) => {
-            //逻辑：如果这一条是 assistant 发的，且包含“思考”、“演算”、“正在”等关键字
-            // 且该条消息是最后一条，那就说明是上次崩溃残留的“骨架屏”
+            //逻辑：如果这一条是 assistant 发的，且包含"思考"、"演算"、"正在"等关键字
+            // 且该条消息是最后一条，那就说明是上次崩溃残留的"骨架屏"
             const isTempLoading =
-              msg.role === "assistant" &&
-              (msg.content.includes("思考") ||
-                msg.content.includes("演算") ||
-                msg.content === "");
+              msg.role === "assistant" && msg.content === "";
 
             // 仅保留非临时的消息
             return !isTempLoading;
@@ -159,6 +157,7 @@ export default function Home() {
     if (isStreaming || sessionId === activeSessionId) return;
     abortRef.current?.abort();
     setIsStreaming(false);
+    setCurrentTool(""); // ⚡ 切换会话时清空工具状态
 
     setActiveSessionId(sessionId);
     const targetSession = sessions.find((s) => s.id === sessionId);
@@ -175,6 +174,7 @@ export default function Home() {
     if (isStreaming) return;
     abortRef.current?.abort();
     setIsStreaming(false);
+    setCurrentTool(""); // ⚡ 创建新会话时清空工具状态
 
     const newSession: ChatSession = {
       id: "session_" + Date.now() + Math.random().toString(36).substring(2, 9),
@@ -251,7 +251,7 @@ export default function Home() {
       }
       if (file.type === "application/pdf") {
         const pdfjsLib = await import("pdfjs-dist");
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
         const arrayBuffer = await file.arrayBuffer();
         const loadingTask = pdfjsLib.getDocument({
           data: new Uint8Array(arrayBuffer),
@@ -265,6 +265,10 @@ export default function Home() {
             .map((item) => item.str || "")
             .join(" ");
           fullText += pageText + "\n";
+          // 每 3 页让出一次主线程，防止大 PDF 阻塞 UI
+          if (i % 3 === 0) {
+            await new Promise((resolve) => setTimeout(resolve, 0));
+          }
         }
         setAttachedFile({
           name: file.name,
@@ -380,6 +384,7 @@ export default function Home() {
     finalTextRef.current = "";
     isFetchingRef.current = true;
     setIsStreaming(true);
+    setCurrentTool(""); // ⚡ 开始新请求时清空工具状态
 
     const abortController = new AbortController();
     abortRef.current = abortController;
@@ -424,6 +429,8 @@ export default function Home() {
                   const textToken = packet.content || "";
                   if (textToken) {
                     finalTextRef.current += textToken;
+                    // 文本开始返回，立即清除工具状态，避免 currentTool 遮挡文本
+                    if (currentTool) setCurrentTool("");
                     setMessages((prev) => {
                       const updated = [...prev];
                       updated[updated.length - 1] = {
@@ -436,29 +443,35 @@ export default function Home() {
                 }
 
                 // 分支二：处理 LangGraph 拓扑节点的普通进度状态
+                // 如果已经收到过文字内容，不再覆盖，避免打断打字机效果
                 else if (packet.type === "STATUS") {
                   const statusText = packet.content || "";
-                  setMessages((prev) => {
-                    const updated = [...prev];
-                    updated[updated.length - 1] = {
-                      role: "assistant",
-                      content: statusText, // 💡 临时渲染成状态文字，带给用户极佳的动态反馈
-                    };
-                    return updated;
-                  });
+                  if (!finalTextRef.current.trim()) {
+                    setMessages((prev) => {
+                      const updated = [...prev];
+                      updated[updated.length - 1] = {
+                        role: "assistant",
+                        content: statusText,
+                      };
+                      return updated;
+                    });
+                  }
                 }
 
                 // 分支三：处理 LangGraph 正在调用特定工具的状态
                 else if (packet.type === "TOOL_STATUS") {
                   const toolName = packet.content || "";
-                  setMessages((prev) => {
-                    const updated = [...prev];
-                    updated[updated.length - 1] = {
-                      role: "assistant",
-                      content: `[${toolName}]`,
-                    };
-                    return updated;
-                  });
+                  setCurrentTool(toolName); // ⚡ 更新当前工具状态
+                  if (!finalTextRef.current.trim()) {
+                    setMessages((prev) => {
+                      const updated = [...prev];
+                      updated[updated.length - 1] = {
+                        role: "assistant",
+                        content: `[${toolName}]`,
+                      };
+                      return updated;
+                    });
+                  }
                 }
 
                 // 分支四：处理补丁就绪信号
@@ -473,25 +486,50 @@ export default function Home() {
         }
       }
     } catch (error) {
-      // 🎯 核心拦截 2：这里会捕获 断网、fetch 失败、以及上面抛出的 response.ok 异常
-      console.error("请求中断或失败:", error);
+      // 区分主动取消和其他网络错误
+      if (error instanceof DOMException && error.name === "AbortError") {
+        console.log("用户主动取消请求");
+        setMessages((prev) => {
+          const newMessages = [...prev];
+          if (
+            newMessages.length > 0 &&
+            newMessages[newMessages.length - 1].role === "assistant"
+          ) {
+            const lastContent = newMessages[newMessages.length - 1].content;
+            if (!lastContent.trim()) {
+              newMessages[newMessages.length - 1].content = "⏹️ 已停止生成";
+            }
+          }
+          return newMessages;
+        });
+      } else {
+        // 🎯 核心拦截 2：这里会捕获 断网、fetch 失败、以及上面抛出的 response.ok 异常
+        console.error("请求中断或失败:", error);
 
-      // 强制把最后一条卡住的占位消息，替换成你要求的统一样板文案
-      setMessages((prev) => {
-        const newMessages = [...prev];
-        if (
-          newMessages.length > 0 &&
-          newMessages[newMessages.length - 1].role === "assistant"
-        ) {
-          newMessages[newMessages.length - 1].content =
-            "⚠️ 网络问题，稍后再试。";
-        }
-        return newMessages;
-      });
+        // 强制把最后一条卡住的占位消息，替换成你要求的统一样板文案
+        setMessages((prev) => {
+          const newMessages = [...prev];
+          if (
+            newMessages.length > 0 &&
+            newMessages[newMessages.length - 1].role === "assistant"
+          ) {
+            newMessages[newMessages.length - 1].content =
+              "⚠️ 网络问题，稍后再试。";
+          }
+          return newMessages;
+        });
+      }
     } finally {
       isFetchingRef.current = false;
       abortRef.current = null;
       setIsStreaming(false);
+      setCurrentTool(""); // ⚡ 请求结束后清空工具状态
+
+      // 如果当前会话已被 "清空对话" 标记为清除，不再保存旧数据
+      if (clearedSessionRef.current === activeSessionId) {
+        clearedSessionRef.current = null;
+        return;
+      }
 
       const finalHistory = [
         ...updatedHistory.slice(0, -1),
@@ -515,38 +553,35 @@ export default function Home() {
   function stopStreaming() {
     isFetchingRef.current = false;
     abortRef.current?.abort();
+    setCurrentTool(""); // ⚡ 停止流式时清空工具状态
   }
+
+  // 标记当前会话是否已被清空，防止 sendMessage 的 finally 保存旧数据
+  const clearedSessionRef = useRef<string | null>(null);
 
   async function clearChat() {
     abortRef.current?.abort();
 
-    // 1. 生成全新的 ID
+    // 1. 标记当前会话已被清空，防止 sendMessage 的 finally 保存旧数据
+    clearedSessionRef.current = activeSessionId;
+
+    // 2. 生成全新的 ID
     const newSessionId =
-      // eslint-disable-next-line react-hooks/purity
       "session_" + Date.now() + Math.random().toString(36).substring(2, 9);
 
-    // 2. 更新本地状态 (messages 和 id)
+    // 3. 更新本地状态
     setMessages(starterMessages);
-    setActiveSessionId(newSessionId); // 切换当前活动 ID
+    setActiveSessionId(newSessionId);
 
-    // 3. 更新侧边栏列表 (把当前的变成新的)
-    setSessions((prev) =>
-      prev.map((s) =>
-        s.id === activeSessionId
-          ? {
-              ...s,
-              id: newSessionId,
-              title: "新的对话",
-              messages: starterMessages,
-            }
-          : s,
-      ),
-    );
+    // 4. 更新侧边栏：添加新会话，不删除旧的（旧的保留在列表中，方便回顾）
+    setSessions((prev) => [
+      { id: newSessionId, title: "新的对话", messages: starterMessages },
+      ...prev,
+    ]);
 
-    // 4. IndexedDB 操作：由于 ID 变了，put 就是新增，你应该考虑是否要删掉旧的
+    // 5. IndexedDB 写入新会话
     const db = await openDB();
     const tx = db.transaction("sessions", "readwrite");
-    // 建议：如果你不需要保留旧的，可以在这里 db.delete('sessions', activeSessionId)
     tx.objectStore("sessions").put({
       id: newSessionId,
       title: "新的对话",
@@ -631,6 +666,7 @@ export default function Home() {
           key={activeSessionId}
           messages={messages}
           isStreaming={isStreaming}
+          currentTool={currentTool} // ⚡ 传递当前工具状态给 ChatList
         />
 
         {/* 底部输入框表单 (保持原样...) */}

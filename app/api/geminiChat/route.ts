@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 
 // ⚠️【重要：请核对你的梯子端口】如果是 Clash 默认通常是 7890，v2ray 通常是 10809
 // 把顶部的代理配置改成这样：
-const MY_PROXY_PORT = "7890"; 
+const MY_PROXY_PORT = process.env.PROXY_PORT || "7890"; 
 
 // 显式指定 http 协议头，有时候能解决 node-fetch 的握手失败问题
 const proxyUrl = `http://127.0.0.1:${MY_PROXY_PORT}`; 
@@ -197,16 +197,17 @@ export async function POST(req: Request) {
       },
     });
 
-  } catch (error: any) {
-    console.error("[Gemini 路由致命错误]:", error);
-    if (error?.message?.includes("429") || error?.message?.includes("RESOURCE_EXHAUSTED")) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[Gemini 路由致命错误]:", errorMessage);
+    if (errorMessage.includes("429") || errorMessage.includes("RESOURCE_EXHAUSTED")) {
       return NextResponse.json(
         { error: "RATE_LIMIT_EXCEEDED", message: "谷歌免费版限制太严格了，请等待 30 秒等额度刷新后再试。" },
         { status: 429 }
       );
     }
     return NextResponse.json(
-      { error: "INTERNAL_SERVER_ERROR", message: error?.message || "Internal Server Error" },
+      { error: "INTERNAL_SERVER_ERROR", message: errorMessage },
       { status: 500 }
     );
   }

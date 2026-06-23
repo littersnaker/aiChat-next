@@ -8,7 +8,7 @@ import remarkGfm from "remark-gfm";
 // 1. 强类型接口契约
 interface AssistantMessageRowProps {
   content: string;
-  currentTool?: string; // ⚡ 新增：当前执行的工具名
+  currentTool?: string; // 新增：当前执行的工具名
 }
 
 interface ParsedContent {
@@ -17,28 +17,28 @@ interface ParsedContent {
   isThinking: boolean;
 }
 
-// 2. 内部工具函数：流式核心解析器
+// 2. 内部工具函数：流式核心解析器（使用不可见于自然语言的内部标签，避免与模型输出冲突）
+const THINK_START = "<INTERNAL_THINK_START>";
+const THINK_END = "<INTERNAL_THINK_END>";
+
 function parseThinkingStream(content: string): ParsedContent {
-  const thinkStartTag = "<think>";
-  const thinkEndTag = "</think>";
-  
-  const startIndex = content.indexOf("<think>");
-  const endIndex = content.indexOf(thinkEndTag);
+  const startIndex = content.indexOf(THINK_START);
+  const endIndex = content.indexOf(THINK_END);
 
   if (startIndex === -1) {
     return { thinking: "", finalText: content, isThinking: false };
   }
 
   if (endIndex === -1) {
-    const thinking = content.substring(startIndex + thinkStartTag.length);
+    const thinking = content.substring(startIndex + THINK_START.length);
     return { thinking, finalText: "", isThinking: true };
   }
 
   const thinking = content.substring(
-    startIndex + thinkStartTag.length,
+    startIndex + THINK_START.length,
     endIndex,
   );
-  const finalText = content.substring(endIndex + thinkEndTag.length);
+  const finalText = content.substring(endIndex + THINK_END.length);
   return { thinking, finalText, isThinking: false };
 }
 
@@ -85,7 +85,9 @@ export default function AssistantMessageRow({
   const { thinking, finalText, isThinking } = parseThinkingStream(content);
   
 
-  if (currentTool) {
+  // 兜底：如果 content 已经有实际文本（不是空且不是纯工具占位符），优先显示文本内容
+  // 只有当 content 真正为空时，才显示工具状态
+  if (currentTool && !content.trim()) {
     return (
       <div className="py-2 w-72 animate-pulse font-mono select-none">
         <div className="flex items-center gap-2 text-blue-600 text-xs font-semibold mb-2">
@@ -111,7 +113,7 @@ export default function AssistantMessageRow({
 
   return (
     <div className="w-full flex flex-col gap-3">
-      {/* 🧠 思考大纲面板 */}
+      {/* 思考大纲面板 */}
       {thinking && (
         <div className="border border-zinc-100 rounded-lg bg-zinc-50 overflow-hidden shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]">
           <button
@@ -139,7 +141,13 @@ export default function AssistantMessageRow({
 
           {isExpanded && (
             <div className="p-3 max-h-48 overflow-y-auto text-xs text-zinc-500 font-mono leading-5 break-all whitespace-pre-wrap">
-              {thinking}
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                disallowedElements={["script", "iframe", "object", "embed", "form", "input", "style"]}
+                unwrapDisallowed
+              >
+                {thinking}
+              </ReactMarkdown>
               {isThinking && (
                 <div className="mt-2 h-2.5 bg-zinc-200 rounded animate-pulse w-1/3" />
               )}
@@ -148,11 +156,15 @@ export default function AssistantMessageRow({
         </div>
       )}
 
-      {/* 📝 Markdown 正文回答区 */}
+      {/* Markdown 正文回答区 */}
       {(finalText.trim() || !isThinking) && (
         <div className="prose prose-sm prose-zinc max-w-none w-full overflow-x-auto wrap-break-word whitespace-normal">
           {finalText.trim() ? (
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              disallowedElements={["script", "iframe", "object", "embed", "form", "input", "style"]}
+              unwrapDisallowed
+            >
               {finalText}
             </ReactMarkdown>
           ) : (

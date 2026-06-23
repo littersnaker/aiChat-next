@@ -32,50 +32,58 @@ interface QwenSummaryResponse {
 export async function routerNode(
   state: typeof AgentState.State,
 ): Promise<Record<string, unknown>> {
-  const recentMessages = state.messages.slice(-6);
+  // 只保留 user/assistant 消息，排除 ToolMessage，避免历史工具结果强制触发新工具调用
+  const recentMessages = state.messages
+    .filter((m) => m._getType() !== "tool")
+    .slice(-6);
 
   const firstStageContext = [
     {
       role: "system",
       content: `You are an autonomous coding agent.
 
-                  Role:
-                  Senior Full Stack Engineer.
+            Role:
+            Senior Full Stack Engineer.
 
-                  Capabilities:
-                  - Explore project structure
-                  - Search source code
-                  - Read files
-                  - Modify files
-                  - Execute commands
-                  - Analyze errors
-                  - Fix issues
+            Capabilities:
+            - Explore project structure
+            - Search source code
+            - Read files
+            - Modify files
+            - Execute commands
+            - Analyze errors
+            - Fix issues
 
-                  Tool Strategy:
+            Tool Strategy:
+            1. Unknown project? -> list_directory
+            2. Unknown file location? -> search_codebase
+            3. Before modifying code? -> read_file_from_disk
+            4. Need code changes? -> propose_file_change
+            5. Need validation? -> run_terminal_command
 
-                  1. Unknown project?
-                    -> list_directory
+            Rules:
+            - Never assume file contents.
+            - Always inspect before modifying.
+            - Prefer tool usage over guessing.
+            - Continue using tools until enough information is gathered.
+            - Return NO_TOOL only when no further tool usage is required and you have perfectly resolved the user's request.  
 
-                  2. Unknown file location?
-                    -> search_codebase
+            CRITICAL RULES FOR RE-ROUTING:
+            - Focus on the user's CURRENT request. If it is unrelated to previous tool calls or conversation history, return 'NO_TOOL'.
+            - If the current request requires tools based on previous results or is a direct continuation, use the appropriate tool.
+            - Only return 'NO_TOOL' when the user's CURRENT request has been fully addressed or clearly requires no tools.
 
-                  3. Before modifying code?
-                    -> read_file_from_disk
+            YOUR OUTPUT RULES:
+          - If you have read a file and identified bugs, you MUST propose a change.
+          - DO NOT just acknowledge that you read the file.
+          - The user will see your final answer only if you call a tool or produce final text content.
+          - If you stop without proposing a fix, you are failing your objective.
 
-                  4. Need code changes?
-                    -> propose_file_change
-
-                  5. Need validation?
-                    -> run_terminal_command
-
-                  Rules:
-
-                  - Never assume file contents.
-                  - Always inspect before modifying.
-                  - Prefer tool usage over guessing.
-                  - Continue using tools until enough information is gathered.
-                  - Return NO_TOOL only when no further tool usage is required.
-                The tool execution phase is OVER. DO NOT output ANY raw XML tool calls  
+          INSTRUCTION:
+    1. Analyze the user's CURRENT request against the conversation history.
+    2. If the current request is new and unrelated to previous tool results, return 'NO_TOOL' immediately.
+    3. If the current request requires further tools or is a direct follow-up, output the appropriate tool call.
+    4. Only continue analyzing previous tool results if the user's current request explicitly references them.
                   `,
     },
     {
@@ -91,7 +99,7 @@ export async function routerNode(
       Authorization: `Bearer ${process.env.DASHSCOPE_API_KEY}`,
     },
     body: JSON.stringify({
-      model: "qwen3.6-plus-2026-04-02",
+      model: "qwen3.6-plus",
       messages: firstStageContext,
       tools: tools,
       tool_choice: "auto",
@@ -103,6 +111,10 @@ export async function routerNode(
   const assistantMessage = result.choices?.[0]?.message;
 
   if (assistantMessage?.tool_calls && assistantMessage.tool_calls.length > 0) {
+    console.log(
+      `🤖 [Router Node] 成功触发工具调用:`,
+      assistantMessage.tool_calls.map((t) => t.function.name),
+    );
     const aiMessage = new AIMessage({
       content: assistantMessage.content || "",
       tool_calls: assistantMessage.tool_calls.map((tc) => ({
@@ -118,7 +130,6 @@ export async function routerNode(
       messages: [aiMessage],
     };
   }
-
   return { routeDecision: "NO_TOOL" };
 }
 
@@ -205,9 +216,9 @@ async function searchCodebase(keyword: string): Promise<string> {
 
       for (const entry of entries) {
         if (
-          entry.name === "node_modules" ||
-          entry.name === ".next" ||
-          entry.name === ".git"
+          ["node_modules", ".next", ".git", ".pnpm-store", "public"].includes(
+            entry.name,
+          )
         ) {
           continue;
         }
@@ -331,6 +342,11 @@ export async function executeToolsNode(
   state: typeof AgentState.State,
 ): Promise<Record<string, unknown>> {
   const lastMessage = state.messages[state.messages.length - 1];
+  console.log(
+    "🔍 Execute Tools 节点被触发，当前最后一条消息类型:",
+    lastMessage._getType(),
+  );
+  console.log("🔍 当前总结内容:", state.summary);
 
   if (!AIMessage.isInstance(lastMessage) || !lastMessage.tool_calls) {
     return { messages: [] };
@@ -434,21 +450,26 @@ export async function summarizeHistoryNode(
 ): Promise<Record<string, unknown>> {
   const messages = state.messages || [];
   const summary = state.summary || "";
+  const keepCount = 5; // 保留最近5条消息，确保文件读取内容不被删除
+  if (messages.length <= keepCount) return {};
 
-  // 🎯 优化一：【数量水位线哨兵】
-  // 如果当前总消息数还没有超过 14 条（或者你指定的 MAX_CONTEXT_MESSAGES），
-  // 证明上下文非常轻量，不需要做任何压缩，直接 0 毫秒闪回通过！
-  if (messages.length < 14) {
-    return {};
+  if (state.messages.length < 5) {
+    return { summary: state.summary };
   }
 
-  // 只有在消息爆满时，才裁剪最老的 4 条消息进行摘要融合
-  const messagesToSummarize = messages.slice(0, 4);
+  // 1. 策略：保留最近的 keepCount 条消息（包含最后一次工具调用的往返）
+  // 2. 策略：对 keepCount 条之前的消息进行摘要
+  const messagesToSummarize = messages.slice(0, messages.length - keepCount);
+
+  // ⚡ 核心修复：保护 ToolMessage 不被删除，确保文件读取结果保留
+  if (messagesToSummarize.length === 0) return {};
 
   const summaryPrompt = `
-    你是一个记忆管理专家。请根据现有的摘要内容以及新提供的对话历史，将它们融合成一段最新、最精炼的中文上下文大纲。
-    要求：保留所有关键的工程进展、讨论过的文件名和核心结论，去除寒暄。字数控制在 200 字以内。
-
+    请精炼总结以下对话历史，重点保留：
+    1. 文件读取的结果和关键内容
+    2. 文件修改进度和bug修复结论
+    3. 用户的原始请求和意图
+    
     [当前已有历史摘要]:
     ${summary || "暂无历史摘要"}
 
@@ -481,22 +502,69 @@ export async function summarizeHistoryNode(
     }
 
     const result = (await res.json()) as QwenSummaryResponse;
-    const nextSummary = result.choices?.[0]?.message?.content || summary;
+    const nextSummary = result.choices?.[0]?.message?.content || state.summary;
+    console.log("✅ 摘要生成成功:", nextSummary);
 
-    // 构造 LangGraph 的老消息清除指令
+    // 构造删除指令：删除被选中进行摘要的那些消息（包括 ToolMessage）
+    // ⚠️ 我们不再无差别保护 ToolMessage，而是在生成摘要时，让 AI 把 ToolMessage 的“结果”总结进去！
     const deletionMessages = messagesToSummarize
-      .map((m) => {
-        const id = m.id;
-        return id ? new RemoveMessage({ id }) : null;
-      })
+      .map((m) => (m.id ? new RemoveMessage({ id: m.id }) : null))
       .filter((m): m is RemoveMessage => m !== null);
-
+    console.log("📝 摘要节点执行完毕，新摘要长度:", nextSummary.length);
     return {
       messages: deletionMessages,
-      summary: nextSummary,
+      summary: nextSummary, // 工具执行结果的信息现在被塞进 summary 里了
     };
   } catch (error) {
-    console.error("⚠️ Token 摘要压缩失败，跳过此次压缩:", error);
+    console.error("❌ 摘要节点炸了:", error); // 如果这里打印了错误，说明问题找到了！
     return {};
+  }
+}
+export async function reportNode(state: typeof AgentState.State) {
+  const summary = state.summary;
+  // 增加防御性判断
+  if (!summary) return { messages: [] };
+
+  try {
+    const res = await fetch(QWEN_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.DASHSCOPE_API_KEY}`, // 确保环境变量存在
+      },
+      body: JSON.stringify({
+        model: "qwen3.7-max-2026-06-08", // 确保模型名称正确，之前你可能用了别的qwen3.6-plus
+        messages: [
+          {
+            role: "system",
+            content: "你是一位代码分析专家，请根据摘要给出建议。",
+          },
+          { role: "user", content: `摘要内容: ${summary}` },
+        ],
+        stream: false, // 强制非流式
+      }),
+    });
+
+    // 1. 必须先检查 res.ok
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("ReportNode API Error:", errorText);
+      return {
+        messages: [new AIMessage("分析总结生成失败，请检查 API 配置。")],
+      };
+    }
+
+    // 2. 只有确认是 JSON 才解析
+    const data = await res.json();
+
+    // 3. 安全提取内容
+    const content = data.choices?.[0]?.message?.content || "无法生成详细建议。";
+
+    return {
+      messages: [new AIMessage(content)],
+    };
+  } catch (error) {
+    console.error("ReportNode Exception:", error);
+    return { messages: [new AIMessage("分析总结过程出现异常。")] };
   }
 }
