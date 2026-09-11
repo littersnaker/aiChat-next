@@ -72,8 +72,30 @@ export function useChatStream({
   const mediaAttachmentsRef = useRef<Message["attachments"] | undefined>(undefined);
   const imageResultRef = useRef<Message["imageResult"] | undefined>(undefined);
   const hasLifecycleRef = useRef(false);
+  // 流式文本按 rAF 批量提交：每个 SSE 分包都 setMessages 会让长回复
+  // 以 O(n²) 的代价整段重解析 markdown。分包只累积文本，每帧最多提交一次。
+  const streamFrameRef = useRef<number | null>(null);
+  const finalResponseMarkedRef = useRef(false);
+  const scheduleStreamFlush = useCallback(() => {
+    if (streamFrameRef.current !== null) return;
+    streamFrameRef.current = window.requestAnimationFrame(() => {
+      streamFrameRef.current = null;
+      setMessages((current) => [
+        ...current.slice(0, -1),
+        { role: "assistant", content: finalTextRef.current },
+      ]);
+    });
+  }, []);
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      if (streamFrameRef.current !== null) {
+        window.cancelAnimationFrame(streamFrameRef.current);
+        streamFrameRef.current = null;
+      }
+    };
+  }, []);
   const checkpointBinding = useChatCheckpointBinding();
-  useEffect(() => () => abortRef.current?.abort(), []);
   const stop = useCallback(() => abortRef.current?.abort(), []);
 
   /**
@@ -272,6 +294,12 @@ export function useChatStream({
       setAgentLifecycleEvents([]);
       setWorkListSnapshot(null);
       hasLifecycleRef.current = false;
+      finalResponseMarkedRef.current = false;
+      if (streamFrameRef.current !== null) {
+        // 上一轮流里可能还挂着未触发的帧，开新流前作废。
+        window.cancelAnimationFrame(streamFrameRef.current);
+        streamFrameRef.current = null;
+      }
       setInteractiveAnswer("");
       let nextInteractiveRequest: InteractiveRequest | null = null;
       let checkpointResult: import("../../types/checkpoints").CheckpointFinishResult = {
@@ -342,11 +370,12 @@ export function useChatStream({
               if (packet.type === "TEXT" && typeof streamContent === "string") {
                 finalTextRef.current += streamContent;
                 setAgentStatus("");
-                agents.markFinalResponse();
-                setMessages((current) => [
-                  ...current.slice(0, -1),
-                  { role: "assistant", content: finalTextRef.current },
-                ]);
+                if (!finalResponseMarkedRef.current) {
+                  // 编排器“最终回复中”状态标记一次即可，无需每个分包都刷。
+                  finalResponseMarkedRef.current = true;
+                  agents.markFinalResponse();
+                }
+                scheduleStreamFlush();
                 continue;
               }
               if (packet.type === "TOOL_STATUS" && typeof streamContent === "string") {
@@ -515,6 +544,12 @@ export function useChatStream({
           );
         }
       } finally {
+        // 作废挂起的 rAF 帧：若放任其在 finalHistory 写入后再触发，
+        // 会用裸文本覆盖掉带 checkpoint 等元数据的最终消息。
+        if (streamFrameRef.current !== null) {
+          window.cancelAnimationFrame(streamFrameRef.current);
+          streamFrameRef.current = null;
+        }
         setToolActivities((current) =>
           current.map((activity) =>
             activity.status === "running"

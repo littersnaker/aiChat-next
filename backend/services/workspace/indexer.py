@@ -169,22 +169,53 @@ async def index_project(project_id: str) -> dict[str, object]:
     try:
         records = await asyncio.to_thread(_collect_files, root)
         async with open_database() as connection:
-            await connection.execute("DELETE FROM file_index WHERE project_id = ?", (project_id,))
-            await connection.executemany(
-                "INSERT INTO file_index "
-                "(project_id, relative_path, content, size, modified_at) "
-                "VALUES (?, ?, ?, ?, ?)",
-                [
-                    (
-                        project_id,
-                        record.relative_path,
-                        record.content,
-                        record.size,
-                        record.modified_at,
-                    )
-                    for record in records
-                ],
+            # 增量 upsert：只写新增/变化行，跳过未变文件，避免每轮重写整表。
+            cursor = await connection.execute(
+                "SELECT relative_path, content, size, modified_at FROM file_index "
+                "WHERE project_id = ?",
+                (project_id,),
             )
+            existing = {
+                str(row["relative_path"]): (
+                    str(row["content"]),
+                    int(row["size"]),
+                    float(row["modified_at"]),
+                )
+                for row in await cursor.fetchall()
+            }
+            current_paths = {record.relative_path for record in records}
+            removed = [path for path in existing if path not in current_paths]
+            if removed:
+                await connection.executemany(
+                    "DELETE FROM file_index WHERE project_id = ? AND relative_path = ?",
+                    [(project_id, path) for path in removed],
+                )
+            changed = [
+                record
+                for record in records
+                if existing.get(record.relative_path)
+                != (record.content, record.size, record.modified_at)
+            ]
+            if changed:
+                await connection.executemany(
+                    "INSERT INTO file_index "
+                    "(project_id, relative_path, content, size, modified_at) "
+                    "VALUES (?, ?, ?, ?, ?) "
+                    "ON CONFLICT(project_id, relative_path) DO UPDATE SET "
+                    "content = excluded.content, "
+                    "size = excluded.size, "
+                    "modified_at = excluded.modified_at",
+                    [
+                        (
+                            project_id,
+                            record.relative_path,
+                            record.content,
+                            record.size,
+                            record.modified_at,
+                        )
+                        for record in changed
+                    ],
+                )
         # 向量化失败只记录日志，不阻塞关键词索引与主流程。
         try:
             await _vectorize_project_files(project_id, records)

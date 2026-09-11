@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import json
 import sqlite3
+import weakref
 from collections.abc import AsyncIterator, Callable, Iterable
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
@@ -296,9 +297,7 @@ class AsyncConnection:
         task.add_done_callback(self._pending.discard)
         return await task
 
-    async def execute(
-        self, sql: str, parameters: Iterable[Any] = ()
-    ) -> AsyncCursor:
+    async def execute(self, sql: str, parameters: Iterable[Any] = ()) -> AsyncCursor:
         """执行单条 SQL 并返回异步游标（在 worker 线程执行）。"""
 
         return cast(
@@ -311,9 +310,7 @@ class AsyncConnection:
 
         return AsyncCursor(self._connection.execute(sql, parameters))
 
-    async def executemany(
-        self, sql: str, parameter_rows: Iterable[Iterable[Any]]
-    ) -> AsyncCursor:
+    async def executemany(self, sql: str, parameter_rows: Iterable[Iterable[Any]]) -> AsyncCursor:
         """批量执行同一条 SQL（在 worker 线程执行）。"""
 
         rows = [tuple(row) for row in parameter_rows]
@@ -322,9 +319,7 @@ class AsyncConnection:
             await self._dispatch(self._executemany, sql, rows),
         )
 
-    def _executemany(
-        self, sql: str, rows: list[tuple[Any, ...]]
-    ) -> AsyncCursor:
+    def _executemany(self, sql: str, rows: list[tuple[Any, ...]]) -> AsyncCursor:
         return AsyncCursor(self._connection.executemany(sql, rows))
 
     async def executescript(self, sql: str) -> AsyncCursor:
@@ -365,15 +360,44 @@ def utc_now_iso() -> str:
     return datetime.now(UTC).isoformat()
 
 
-@asynccontextmanager
-async def open_database() -> AsyncIterator[AsyncConnection]:
-    """打开一个自动提交、异常回滚并自动关闭的 SQLite 连接。"""
+class _SharedConnectionState:
+    """单个事件循环 + 数据库路径共享的连接状态。"""
 
-    database_path = get_settings().database_path
-    database_path.parent.mkdir(parents=True, exist_ok=True)
+    __slots__ = ("connection", "database_path", "depth", "lock", "owner")
+
+    def __init__(self, database_path: Path) -> None:
+        self.database_path = database_path
+        self.lock = asyncio.Lock()
+        self.connection: AsyncConnection | None = None
+        self.owner: asyncio.Task[object] | None = None
+        self.depth = 0
+
+
+# 键为事件循环：服务器进程只有一个主循环（长生命周期连接），pytest-asyncio
+# 每个测试新建循环（天然隔离不同 tmp 数据库），循环销毁后条目自动回收。
+_shared_connections: weakref.WeakKeyDictionary[
+    asyncio.AbstractEventLoop,
+    _SharedConnectionState,
+] = weakref.WeakKeyDictionary()
+
+
+def _get_shared_state(database_path: Path) -> _SharedConnectionState:
+    """取当前循环的共享状态；数据库路径变化（如测试重定向）时重建。"""
+
+    loop = asyncio.get_running_loop()
+    state = _shared_connections.get(loop)
+    if state is None or state.database_path != database_path:
+        state = _SharedConnectionState(database_path)
+        _shared_connections[loop] = state
+    return state
+
+
+def _new_async_connection(database_path: Path) -> AsyncConnection:
+    """建立一条启用了外键约束的异步连接。"""
+
     # check_same_thread=False：AsyncConnection 的 SQL 操作经 asyncio.to_thread
-    # 在 worker 线程执行，必须允许连接跨线程使用；连接仍是单协程串行持有，
-    # 不会出现并发写（并发写同一连接会触发 InterfaceError）。
+    # 在 worker 线程执行，必须允许连接跨线程使用；外层 asyncio.Lock 保证同一
+    # 时刻只有一个协程在用这条连接，事务不会交错。
     raw_connection = sqlite3.connect(
         database_path,
         timeout=30.0,
@@ -381,15 +405,43 @@ async def open_database() -> AsyncIterator[AsyncConnection]:
     )
     raw_connection.row_factory = sqlite3.Row
     raw_connection.execute("PRAGMA foreign_keys=ON")
-    connection = AsyncConnection(raw_connection)
-    try:
-        yield connection
-        await connection.commit()
-    except Exception:
-        await connection.rollback()
-        raise
-    finally:
-        await connection.close()
+    return AsyncConnection(raw_connection)
+
+
+@asynccontextmanager
+async def open_database() -> AsyncIterator[AsyncConnection]:
+    """获取共享 SQLite 连接，退出时自动提交、异常回滚。
+
+    连接按「事件循环 + 数据库路径」缓存复用，省去每次操作的 connect/PRAGMA
+    开销；``asyncio.Lock`` 保证事务串行。同一任务内的嵌套调用（例如一个仓储
+    函数内部再开一次）复用外层连接与事务，提交权归最外层，避免自锁死锁。
+    """
+
+    database_path = get_settings().database_path
+    database_path.parent.mkdir(parents=True, exist_ok=True)
+    state = _get_shared_state(database_path)
+    current_task = cast("asyncio.Task[object]", asyncio.current_task())
+    if state.connection is not None and state.owner is current_task:
+        state.depth += 1
+        try:
+            yield state.connection
+        finally:
+            state.depth -= 1
+        return
+    async with state.lock:
+        if state.connection is None:
+            state.connection = _new_async_connection(database_path)
+        state.owner = current_task
+        state.depth = 1
+        try:
+            yield state.connection
+            await state.connection.commit()
+        except Exception:
+            await state.connection.rollback()
+            raise
+        finally:
+            state.owner = None
+            state.depth = 0
 
 
 async def initialize_database() -> None:
