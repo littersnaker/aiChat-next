@@ -24,6 +24,8 @@
 /.agent-data/
 /.agent-mcp.json
 /.trae/
+/workspace.db*
+/evaluations/
 
 # Credentials
 /backend/core/_builtin_credentials_generated.py
