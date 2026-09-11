@@ -17,13 +17,7 @@ export interface Props {
   onClose: () => void;
 }
 
-export type MarketProviderId =
-  | "talordata"
-  | "keepa"
-  | "amazon"
-  | "tiktok"
-  | "temu"
-  | "1688";
+export type MarketProviderId = "talordata" | "keepa" | "amazon" | "tiktok" | "temu" | "1688";
 
 export type ConnectionState =
   | "idle"

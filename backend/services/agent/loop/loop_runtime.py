@@ -110,18 +110,14 @@ def merge_worker_result(
             "agentId": f"modify_worker:{result.work_id}",
             "status": "failed",
             "detail": (
-                f"{result.work_id} 运行时失败，准备干净重试："
-                f"{str(result.error)[:120]}"
+                f"{result.work_id} 运行时失败，准备干净重试：" f"{str(result.error)[:120]}"
                 if result.failure_kind == "runtime"
-                else f"{result.work_id} 执行失败，等待统一重规划："
-                f"{str(result.error)[:120]}"
+                else f"{result.work_id} 执行失败，等待统一重规划：" f"{str(result.error)[:120]}"
             ),
             "iteration": replan_round,
         },
         failed_id=result.work_id,
-        failure_observation=(
-            f"{result.work_id} [{result.failure_kind}]: {summary_data}"
-        ),
+        failure_observation=(f"{result.work_id} [{result.failure_kind}]: {summary_data}"),
         failure_kind=result.failure_kind,
     )
 
@@ -136,7 +132,6 @@ def max_work_attempts() -> int:
     """读取单个 Work 的最大尝试次数。"""
 
     return _env_int("CODE_AGENT_MAX_WORK_ATTEMPTS", 3, 1, 10)
-
 
 
 def max_runtime_attempts() -> int:

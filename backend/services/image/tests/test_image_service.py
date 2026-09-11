@@ -147,10 +147,7 @@ async def test_recognize_single_image_parses_grid_with_empty_and_uncertain() -> 
 async def test_recognize_single_image_parses_grid_stack_rows() -> None:
     """整图路径：网格模板中的“第N层第M排”叠放行保留排号。"""
 
-    content = (
-        "第1层：第1位=003, 第2位=005\n"
-        "第1层第2排：第1位=004\n"
-    )
+    content = "第1层：第1位=003, 第2位=005\n" "第1层第2排：第1位=004\n"
     client = FakeClient(content)
     rows, _summary, error = await recognize_single_image(
         image=SimpleNamespace(name="shelf_a.jpg"),
@@ -208,11 +205,7 @@ def test_parse_compact_output_handles_stacks_and_continuation() -> None:
 
     from backend.services.image.recognition import _parse_compact_output
 
-    content = (
-        "第1层:1=325,2=空,3=编号无法辨认\n"
-        ";2排:1=179,2=222\n"
-        "第2层:1=62;2排:1=71,2=240"
-    )
+    content = "第1层:1=325,2=空,3=编号无法辨认\n" ";2排:1=179,2=222\n" "第2层:1=62;2排:1=71,2=240"
     rows = _parse_compact_output(content, source_image="shelf.jpg")
     assert [(item.sheet_no, item.layer, item.stack, item.position, item.note) for item in rows] == [
         ("325", 1, 1, 1, ""),
@@ -356,11 +349,7 @@ async def test_recognize_single_image_keeps_uncertain_placeholders() -> None:
 async def test_recognize_single_image_parses_stack_rows() -> None:
     """整图路径：识别“第N排”叠放信息，叠放不再被拍平。"""
 
-    content = (
-        "003|第1层|第1排|第2位|\n"
-        "004|第1层|第2排|第2位|\n"
-        "005|第1层|第3位|"
-    )
+    content = "003|第1层|第1排|第2位|\n" "004|第1层|第2排|第2位|\n" "005|第1层|第3位|"
     client = FakeClient(content)
     rows, summary, error = await recognize_single_image(
         image=SimpleNamespace(name="shelf_a.jpg"),

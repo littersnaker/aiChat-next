@@ -78,9 +78,7 @@ export default function CodeAgentModeSelector({
         aria-expanded={open}
       >
         <div className="min-w-0">
-          <div className="truncate text-[9px] text-[var(--text-tertiary)]">
-            执行模式
-          </div>
+          <div className="truncate text-[9px] text-[var(--text-tertiary)]">执行模式</div>
           <div className="truncate text-[11px] font-medium">{selected.label}</div>
         </div>
         <svg

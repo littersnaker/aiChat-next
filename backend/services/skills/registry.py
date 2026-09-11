@@ -56,7 +56,6 @@ class SkillRegistry:
             resolved.append(versions[0])
         return resolved
 
-
     def match(
         self,
         task_text: str,
@@ -107,4 +106,3 @@ class SkillRegistry:
             digits = "".join(character for character in segment if character.isdigit())
             parts.append(int(digits) if digits else 0)
         return tuple(parts or [0])
-

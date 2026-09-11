@@ -28,9 +28,7 @@ export interface BackendStartupProgress {
   progress: number;
 }
 
-export type BackendProgressListener = (
-  progress: BackendStartupProgress,
-) => void;
+export type BackendProgressListener = (progress: BackendStartupProgress) => void;
 
 interface HealthPayload {
   ok?: boolean;
@@ -93,23 +91,14 @@ function resolveDevelopmentPython(): string {
 /** 解析生产包内的 onedir Python 后端，并兼容旧 onefile 布局。 */
 function resolvePackagedBackend(): string {
   const executableName =
-    process.platform === "win32"
-      ? "multi-agent-backend.exe"
-      : "multi-agent-backend";
+    process.platform === "win32" ? "multi-agent-backend.exe" : "multi-agent-backend";
   const candidates = [
     path.join(process.resourcesPath, "backend", executableName),
-    path.join(
-      process.resourcesPath,
-      "backend",
-      "multi-agent-backend",
-      executableName,
-    ),
+    path.join(process.resourcesPath, "backend", "multi-agent-backend", executableName),
   ];
   const executablePath = firstExistingPath(candidates);
   if (!executablePath) {
-    throw new Error(
-      `未找到打包后的 Python 后端。已检查：\n${candidates.join("\n")}`,
-    );
+    throw new Error(`未找到打包后的 Python 后端。已检查：\n${candidates.join("\n")}`);
   }
   return executablePath;
 }
@@ -129,9 +118,7 @@ function buildBackendEnvironment(port: number): NodeJS.ProcessEnv {
     PYTHONUTF8: "1",
     PYTHONIOENCODING: "utf-8",
     PYTHONUNBUFFERED: "1",
-    PYTHONDONTWRITEBYTECODE: development
-      ? "1"
-      : process.env.PYTHONDONTWRITEBYTECODE,
+    PYTHONDONTWRITEBYTECODE: development ? "1" : process.env.PYTHONDONTWRITEBYTECODE,
     BACKEND_RELOAD: development ? "1" : "0",
     BACKEND_HOST: SERVER_HOST,
     BACKEND_PORT: String(port),
@@ -142,21 +129,19 @@ function buildBackendEnvironment(port: number): NodeJS.ProcessEnv {
     ...(development
       ? {}
       : {
-          CODE_AGENT_PYTHON: path.join(
-            process.resourcesPath,
-            "python-runtime",
-            "python.exe",
-          ),
+          CODE_AGENT_PYTHON: path.join(process.resourcesPath, "python-runtime", "python.exe"),
         }),
     ...(fs.existsSync(envFile) ? { APP_ENV_FILE: envFile } : {}),
   };
 }
 
 /** 创建启动日志文件；失败时返回 undefined，不阻断应用。 */
-function createStartupLog(): {
-  path: string;
-  stream: fs.WriteStream;
-} | undefined {
+function createStartupLog():
+  | {
+      path: string;
+      stream: fs.WriteStream;
+    }
+  | undefined {
   try {
     const logDirectory = getStableDataPath("logs");
     fs.mkdirSync(logDirectory, { recursive: true });
@@ -215,9 +200,7 @@ function bindBackendStream(
 /** 创建 Electron 自己管理的后端子进程。 */
 function spawnBackend(port: number): BackendRuntime {
   const development = isDevelopmentMode();
-  const command = development
-    ? resolveDevelopmentPython()
-    : resolvePackagedBackend();
+  const command = development ? resolveDevelopmentPython() : resolvePackagedBackend();
   const args = development
     ? [
         "-m",
@@ -352,14 +335,10 @@ function backendFailure(runtime: BackendRuntime, summary: string): Error {
 /** 获取详细健康信息；生产环境中诊断失败只记录，不阻断启动。 */
 async function readHealthDiagnostics(runtime: BackendRuntime): Promise<void> {
   try {
-    const response = await fetchWithTimeout(
-      `${runtime.baseUrl}/api/health`,
-      2_500,
-    );
+    const response = await fetchWithTimeout(`${runtime.baseUrl}/api/health`, 2_500);
     if (!response.ok) {
       console.warn(
-        `[Electron] 详细健康检查返回 HTTP ${response.status}：` +
-          (await responsePreview(response)),
+        `[Electron] 详细健康检查返回 HTTP ${response.status}：` + (await responsePreview(response)),
       );
       return;
     }
@@ -392,10 +371,7 @@ async function waitUntilHealthy(
       throw backendFailure(runtime, "Python 后端进程无法创建");
     }
     if (runtime.process && runtime.process.exitCode !== null) {
-      throw backendFailure(
-        runtime,
-        `Python 后端提前退出，退出码：${runtime.process.exitCode}`,
-      );
+      throw backendFailure(runtime, `Python 后端提前退出，退出码：${runtime.process.exitCode}`);
     }
 
     try {
@@ -446,13 +422,8 @@ async function waitUntilHealthy(
 }
 
 /** 启动或连接 FastAPI；标准开发模式优先连接独立的 reload 服务。 */
-export async function startBackend(
-  listener?: BackendProgressListener,
-): Promise<BackendRuntime> {
-  if (
-    activeRuntime &&
-    (!activeRuntime.process || activeRuntime.process.exitCode === null)
-  ) {
+export async function startBackend(listener?: BackendProgressListener): Promise<BackendRuntime> {
+  if (activeRuntime && (!activeRuntime.process || activeRuntime.process.exitCode === null)) {
     return activeRuntime;
   }
 
@@ -487,11 +458,7 @@ export async function startBackend(
 export function stopBackend(): void {
   const runtime = activeRuntime;
   activeRuntime = null;
-  if (
-    !runtime?.ownedByElectron ||
-    !runtime.process ||
-    runtime.process.exitCode !== null
-  ) {
+  if (!runtime?.ownedByElectron || !runtime.process || runtime.process.exitCode !== null) {
     return;
   }
 

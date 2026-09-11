@@ -26,9 +26,7 @@ class ImpactAnalyzer:
         """根据模块名匹配导入关系，返回潜在受影响文件。"""
 
         module_names = {
-            self._module_name(path)
-            for path in changed_paths
-            if Path(path).suffix.lower() == ".py"
+            self._module_name(path) for path in changed_paths if Path(path).suffix.lower() == ".py"
         }
         module_names.discard("")
         impacted: list[str] = []

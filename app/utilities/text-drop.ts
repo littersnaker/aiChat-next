@@ -88,9 +88,7 @@ export function resolveComposerDropKind(
   if (hasFiles) return allowFiles ? "files" : null;
 
   const hasTextType = types.some((type) => TEXT_MIME_TYPES.has(type));
-  const hasStringItem = Array.from(dataTransfer.items).some(
-    (item) => item.kind === "string",
-  );
+  const hasStringItem = Array.from(dataTransfer.items).some((item) => item.kind === "string");
   if (hasTextType || hasStringItem || selectedTextFallback) return "text";
 
   // Chromium 在页面选区刚进入目标区域时可能暂不公开 MIME；允许 drop 后再读取。
@@ -109,10 +107,7 @@ function convertHtmlToText(html: string): string {
 }
 
 /** 从不同浏览器和桌面应用的 DataTransfer 中读取可编辑文字。 */
-export function readDroppedText(
-  dataTransfer: DataTransfer,
-  selectedTextFallback = "",
-): string {
+export function readDroppedText(dataTransfer: DataTransfer, selectedTextFallback = ""): string {
   const directText =
     dataTransfer.getData(SELECTED_TEXT_MIME) ||
     dataTransfer.getData("text/plain") ||

@@ -16,10 +16,7 @@ const COLORS = {
 
 export function StepsTimeline({ steps }: { steps: ToolActivity[] }) {
   const [open, setOpen] = useState(false);
-  const sorted = useMemo(
-    () => [...steps].sort((a, b) => a.startedAt - b.startedAt),
-    [steps],
-  );
+  const sorted = useMemo(() => [...steps].sort((a, b) => a.startedAt - b.startedAt), [steps]);
   if (sorted.length === 0) return null;
 
   return (
@@ -51,24 +48,16 @@ export function StepsTimeline({ steps }: { steps: ToolActivity[] }) {
                 : "";
           return (
             <li key={step.id} className="flex gap-2 text-[11px]">
-              <span
-                className="mt-1 h-2 w-2 shrink-0 rounded-full"
-                style={{ background: color }}
-              />
+              <span className="mt-1 h-2 w-2 shrink-0 rounded-full" style={{ background: color }} />
               <div className="min-w-0">
                 <div className="flex items-baseline gap-2">
                   <span className="font-medium" style={{ color: COLORS.text }}>
                     {step.label || "工具调用"}
                   </span>
-                  {duration ? (
-                    <span style={{ color: COLORS.textSubtle }}>{duration}</span>
-                  ) : null}
+                  {duration ? <span style={{ color: COLORS.textSubtle }}>{duration}</span> : null}
                 </div>
                 {step.detail ? (
-                  <div
-                    className="break-words text-[10px]"
-                    style={{ color: COLORS.textMuted }}
-                  >
+                  <div className="break-words text-[10px]" style={{ color: COLORS.textMuted }}>
                     {step.detail}
                   </div>
                 ) : null}

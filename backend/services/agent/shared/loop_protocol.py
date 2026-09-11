@@ -81,7 +81,15 @@ _OPERATION_TYPE_ALIASES = {
     "remove": "delete",
     "unlink": "delete",
 }
-_OPERATION_PATH_KEYS = ("path", "file", "filePath", "file_path", "target", "targetPath", "target_path")
+_OPERATION_PATH_KEYS = (
+    "path",
+    "file",
+    "filePath",
+    "file_path",
+    "target",
+    "targetPath",
+    "target_path",
+)
 _OPERATION_CONTENT_KEYS = ("content", "data", "text", "body")
 _OPERATION_OLD_KEYS = (
     "old",
@@ -149,9 +157,7 @@ class EditOperationModel(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
-    type: OperationKind = Field(
-        validation_alias=AliasChoices("type", "op", "operation", "action")
-    )
+    type: OperationKind = Field(validation_alias=AliasChoices("type", "op", "operation", "action"))
     path: str = Field(validation_alias=AliasChoices(*_OPERATION_PATH_KEYS))
     content: str = Field(
         "",
@@ -206,9 +212,7 @@ class EditOperationModel(BaseModel):
         if not self.path:
             raise ValueError("编辑操作缺少 path")
         if self.type == "write" and not self.content.strip():
-            raise ValueError(
-                f"write 操作必须包含非空 content（禁止空文件/占位）：{self.path}"
-            )
+            raise ValueError(f"write 操作必须包含非空 content（禁止空文件/占位）：{self.path}")
         if self.type == "replace" and not self.old_text:
             raise ValueError(f"replace 操作缺少 oldText：{self.path}")
         return self
@@ -421,9 +425,7 @@ class ActionRequestModel(BaseModel):
             raise ValueError("inspect 动作必须包含 paths 或 query")
         if action == "factory":
             if self.mode not in {"plan", "generate", "validate", "manifest"}:
-                raise ValueError(
-                    "factory 动作 mode 必须是 plan、generate、validate 或 manifest"
-                )
+                raise ValueError("factory 动作 mode 必须是 plan、generate、validate 或 manifest")
             if self.mode == "validate" and not self.output_root:
                 raise ValueError("factory validate 必须包含 outputRoot")
         if action == "edit":
@@ -692,11 +694,7 @@ def coerce_read_paths(value: object) -> list[str]:
 
     raw: list[object] = []
     if isinstance(value, str):
-        raw = [
-            part.strip()
-            for part in re.split(r"[,，\n]+", value)
-            if part.strip()
-        ]
+        raw = [part.strip() for part in re.split(r"[,，\n]+", value) if part.strip()]
     elif isinstance(value, list):
         raw = []
         for item in value:
@@ -716,9 +714,7 @@ def coerce_read_paths(value: object) -> list[str]:
 def _check_batch_size(operations: list[Any]) -> None:
     """单轮编辑内容过大时必须拆批，避免一次请求携带巨型负载。"""
 
-    payload_size = sum(
-        len(op.content) + len(op.old_text) + len(op.new_text) for op in operations
-    )
+    payload_size = sum(len(op.content) + len(op.old_text) + len(op.new_text) for op in operations)
     if payload_size > MAX_BATCH_TEXT_CHARS:
         raise ValueError("单轮编辑内容过大，请拆成多个 edit 动作")
 

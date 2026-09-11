@@ -142,9 +142,7 @@ async def test_upsert_and_search_vectors(monkeypatch, tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_document_metadata_filter_and_helpers(
-    monkeypatch, tmp_path: Path
-) -> None:
+async def test_document_metadata_filter_and_helpers(monkeypatch, tmp_path: Path) -> None:
     """Document 归一化：metadata 随文档存储，检索支持等值过滤。"""
 
     _isolated_db(monkeypatch, tmp_path)

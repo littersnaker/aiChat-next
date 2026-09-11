@@ -138,9 +138,7 @@ class TokenBudgetGuard:
         """返回超出预算域的报告。"""
 
         return {
-            domain: budget.to_json()
-            for domain, budget in self._budgets.items()
-            if budget.exceeded
+            domain: budget.to_json() for domain, budget in self._budgets.items() if budget.exceeded
         }
 
     def apply_mitigation(self, domain: str) -> dict[str, Any]:
@@ -198,10 +196,7 @@ class TokenBudgetGuard:
 
         total = self.total_consumed()
         limit = self.total_limit()
-        active = sum(
-            max(0, b.consumed - b.compressed - b.cleaned)
-            for b in self._budgets.values()
-        )
+        active = sum(max(0, b.consumed - b.compressed - b.cleaned) for b in self._budgets.values())
         return {
             "totalTokens": total,
             "activeTokens": active,

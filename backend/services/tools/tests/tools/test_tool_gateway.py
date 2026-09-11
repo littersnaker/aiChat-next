@@ -91,9 +91,7 @@ async def test_sensitive_read_is_soft_filtered_without_retry_failure(tmp_path: P
         await execute_code_tool(
             "workspace.read",
             root=tmp_path,
-            arguments={
-                "paths": [".env.development", "src/app.ts", ".env.example"]
-            },
+            arguments={"paths": [".env.development", "src/app.ts", ".env.example"]},
             permissions={"read"},
             agent_id="test-agent",
         ),
@@ -126,6 +124,4 @@ async def test_write_alias_can_create_file_through_edit_tool(tmp_path: Path) -> 
     )
 
     assert "src/created.ts" in result.changed_files
-    assert (tmp_path / "src/created.ts").read_text("utf-8") == (
-        "export const created = true;\n"
-    )
+    assert (tmp_path / "src/created.ts").read_text("utf-8") == ("export const created = true;\n")

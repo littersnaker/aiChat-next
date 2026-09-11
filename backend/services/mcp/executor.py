@@ -23,9 +23,7 @@ async def resolve_mcp_tool(
         if tool["llmName"] == llm_name:
             server = servers.get(str(tool["serverId"]))
             if server is None:
-                raise McpExecutionError(
-                    f"MCP server {tool['serverId']} 未启用或未配置"
-                )
+                raise McpExecutionError(f"MCP server {tool['serverId']} 未启用或未配置")
             return server, tool
     raise McpExecutionError(f"未找到 MCP 工具：{llm_name}")
 

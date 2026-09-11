@@ -47,27 +47,80 @@ DEFAULT_VERSION = "0.0.0"
 
 _AGENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "coding": (
-        "react", "vue", "taro", "css", "html", "javascript", "typescript",
-        "gsap", "frontend", "前端", "小程序", "组件", "component", "动画",
-        "animation", "web",
+        "react",
+        "vue",
+        "taro",
+        "css",
+        "html",
+        "javascript",
+        "typescript",
+        "gsap",
+        "frontend",
+        "前端",
+        "小程序",
+        "组件",
+        "component",
+        "动画",
+        "animation",
+        "web",
     ),
     "commerce": (
-        "amazon", "listing", "marketplace", "ecommerce", "电商", "运营",
-        "广告", "listing", "关键词",
+        "amazon",
+        "listing",
+        "marketplace",
+        "ecommerce",
+        "电商",
+        "运营",
+        "广告",
+        "listing",
+        "关键词",
     ),
     "media": (
-        "comic", "storyboard", "漫剧", "视频生成", "图片生成", "图片编辑",
-        "视频编辑", "media", "图像",
+        "comic",
+        "storyboard",
+        "漫剧",
+        "视频生成",
+        "图片生成",
+        "图片编辑",
+        "视频编辑",
+        "media",
+        "图像",
     ),
     "qa": (
-        "问答", "知识库", "文档", "knowledge", "qa", "faq",
+        "问答",
+        "知识库",
+        "文档",
+        "knowledge",
+        "qa",
+        "faq",
     ),
 }
 
 _TEXT_SUFFIXES = {
-    ".md", ".markdown", ".yaml", ".yml", ".json", ".txt", ".py", ".ts", ".tsx",
-    ".js", ".jsx", ".sh", ".bash", ".ps1", ".sql", ".html", ".css", ".toml",
-    ".ini", ".cfg", ".env", ".csv", ".xml", ".svg",
+    ".md",
+    ".markdown",
+    ".yaml",
+    ".yml",
+    ".json",
+    ".txt",
+    ".py",
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx",
+    ".sh",
+    ".bash",
+    ".ps1",
+    ".sql",
+    ".html",
+    ".css",
+    ".toml",
+    ".ini",
+    ".cfg",
+    ".env",
+    ".csv",
+    ".xml",
+    ".svg",
 }
 
 _SKIP_DIR_PARTS = {
@@ -224,9 +277,7 @@ async def _download_github_tarball(owner: str, repo: str, ref: str) -> bytes:
         response.raise_for_status()
     content = response.content
     if len(content) > MAX_TARBALL_BYTES:
-        raise ValueError(
-            f"仓库压缩包超过 {MAX_TARBALL_BYTES // (1024 * 1024)}MB 上限"
-        )
+        raise ValueError(f"仓库压缩包超过 {MAX_TARBALL_BYTES // (1024 * 1024)}MB 上限")
     if len(content) < 2:
         raise ValueError("下载的仓库压缩包为空")
     return content
@@ -261,8 +312,7 @@ def _extract_skill_files(
             )
             if subpath:
                 if not (
-                    full_relative == subpath_base
-                    or full_relative.startswith(subpath_base + "/")
+                    full_relative == subpath_base or full_relative.startswith(subpath_base + "/")
                 ):
                     continue
             elif "/" in full_relative:
@@ -639,9 +689,7 @@ async def install_skill_from_url(url: str) -> dict[str, Any]:
                 "source_format": str(converted["sourceFormat"]),
                 "enabled": 1 if recommended_agents else 0,
                 "agent_ids": recommended_agents,
-                "content_json": dumps_json(
-                    {"yaml": skill_yaml, "prompt": prompt_text}
-                ),
+                "content_json": dumps_json({"yaml": skill_yaml, "prompt": prompt_text}),
                 "files_json": "{}",
                 "installed_at": now,
                 "updated_at": now,
@@ -693,9 +741,7 @@ async def _install_extracted(
                 "source_format": f"github:{converted['sourceFormat']}",
                 "enabled": 1 if recommended_agents else 0,
                 "agent_ids": recommended_agents,
-                "content_json": dumps_json(
-                    {"yaml": skill_yaml, "prompt": prompt_text}
-                ),
+                "content_json": dumps_json({"yaml": skill_yaml, "prompt": prompt_text}),
                 "files_json": dumps_json(_encode_extra_files(extra_files)),
                 "installed_at": now,
                 "updated_at": now,
@@ -728,10 +774,7 @@ async def install_skill_from_github(source: str) -> dict[str, Any]:
 
     owner, repo, ref, subpath = _parse_github_spec(source)
     tarball = await _download_github_tarball(owner, repo, ref)
-    base_url = (
-        f"https://github.com/{owner}/{repo}"
-        + (f"/tree/{ref}" if ref else "")
-    )
+    base_url = f"https://github.com/{owner}/{repo}" + (f"/tree/{ref}" if ref else "")
 
     if subpath:
         skill_text, extra_files = _extract_skill_files(tarball, subpath)
@@ -772,9 +815,7 @@ async def install_skill_from_github(source: str) -> dict[str, Any]:
                 )
             )
         except Exception as exc:
-            failed_list.append(
-                {"path": directory, "error": str(exc)[:300]}
-            )
+            failed_list.append({"path": directory, "error": str(exc)[:300]})
             LOGGER.warning("批量安装失败：%s（%s）", directory, exc)
 
     LOGGER.info(
@@ -863,9 +904,7 @@ async def restore_installed_skills() -> int:
             LOGGER.warning("Skill %s 持久化内容不完整，跳过恢复", skill_id)
             continue
         try:
-            extra_files = _decode_extra_files(
-                loads_json(str(row["files_json"] or "{}"), {})
-            )
+            extra_files = _decode_extra_files(loads_json(str(row["files_json"] or "{}"), {}))
             _export_files(skill_id, skill_yaml, prompt_text, extra_files)
             restored += 1
         except Exception:
@@ -924,11 +963,7 @@ async def update_skill_config(
 
     skill_id = (skill_id or "").strip()
     normalized_agents = list(
-        dict.fromkeys(
-            str(item).strip()
-            for item in (agent_ids or [])
-            if str(item).strip()
-        )
+        dict.fromkeys(str(item).strip() for item in (agent_ids or []) if str(item).strip())
     )
     async with open_database() as connection:
         cursor = await connection.execute(

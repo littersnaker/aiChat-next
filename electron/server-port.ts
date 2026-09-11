@@ -87,27 +87,15 @@ function requestEphemeralPort(): Promise<number> {
  * 该变量只决定“从哪里开始找”，不会强制占用某个固定端口。
  */
 export async function findAvailableServerPort(): Promise<number> {
-  const configuredStart = Number.parseInt(
-    process.env.ELECTRON_PORT_SCAN_START ?? "",
-    10,
-  );
+  const configuredStart = Number.parseInt(process.env.ELECTRON_PORT_SCAN_START ?? "", 10);
   const scanStart =
-    Number.isInteger(configuredStart) &&
-    configuredStart >= 1024 &&
-    configuredStart <= 65535
+    Number.isInteger(configuredStart) && configuredStart >= 1024 && configuredStart <= 65535
       ? configuredStart
       : DEFAULT_PORT_SCAN_START;
 
-  const scanEnd = Math.min(
-    scanStart + MAX_SEQUENTIAL_PORT_CHECKS - 1,
-    65535,
-  );
+  const scanEnd = Math.min(scanStart + MAX_SEQUENTIAL_PORT_CHECKS - 1, 65535);
 
-  for (
-    let candidatePort = scanStart;
-    candidatePort <= scanEnd;
-    candidatePort += 1
-  ) {
+  for (let candidatePort = scanStart; candidatePort <= scanEnd; candidatePort += 1) {
     if (RESERVED_PORTS.has(candidatePort)) continue;
 
     if (await isPortAvailable(candidatePort)) {

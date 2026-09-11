@@ -201,9 +201,7 @@ async def test_same_target_file_runs_serially_in_priority_order(tmp_path, monkey
         await asyncio.sleep(0.01)
         active -= 1
         return (
-            json.dumps(
-                {"action": "complete_work", "workId": work_id, "summary": "完成"}
-            ),
+            json.dumps({"action": "complete_work", "workId": work_id, "summary": "完成"}),
             LlmUsage(),
             SimpleNamespace(name="Worker Model"),
         )
@@ -311,9 +309,7 @@ async def test_parallel_wave_replans_once_with_full_success_and_failure_json(
                 "action": "edit",
                 "workId": "W002",
                 "summary": "创建 B",
-                "operations": [
-                    {"type": "write", "path": "b.py", "content": "B = 2\n"}
-                ],
+                "operations": [{"type": "write", "path": "b.py", "content": "B = 2\n"}],
             }
         else:
             response = {

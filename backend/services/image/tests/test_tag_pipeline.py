@@ -133,9 +133,7 @@ async def test_recognize_tag_batches_degrades_on_batch_failure() -> None:
         ):
             raise RuntimeError("mock 失败")
 
-    numbers = await recognize_tag_batches(
-        crops=[_crop("a"), _crop("b")], client=FailingClient()
-    )
+    numbers = await recognize_tag_batches(crops=[_crop("a"), _crop("b")], client=FailingClient())
     assert numbers == [None, None]
 
 

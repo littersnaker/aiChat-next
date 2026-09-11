@@ -7,11 +7,47 @@ import re
 from backend.services.skills.contracts import SkillDefinition
 
 _STOP_WORDS = {
-    "the", "and", "for", "with", "from", "that", "this", "your", "you",
-    "use", "when", "what", "how", "are", "not", "can", "will", "into",
-    "about", "have", "has", "its", "than", "then", "them", "they",
-    "their", "there", "where", "which", "while", "should", "would", "could",
-    "want", "need", "needs", "help", "using", "used", "make",
+    "the",
+    "and",
+    "for",
+    "with",
+    "from",
+    "that",
+    "this",
+    "your",
+    "you",
+    "use",
+    "when",
+    "what",
+    "how",
+    "are",
+    "not",
+    "can",
+    "will",
+    "into",
+    "about",
+    "have",
+    "has",
+    "its",
+    "than",
+    "then",
+    "them",
+    "they",
+    "their",
+    "there",
+    "where",
+    "which",
+    "while",
+    "should",
+    "would",
+    "could",
+    "want",
+    "need",
+    "needs",
+    "help",
+    "using",
+    "used",
+    "make",
 }
 
 
@@ -69,14 +105,8 @@ class SkillMatcher:
         desc_chinese = re.sub(r"[^\u4e00-\u9fff]", "", description)
         task_chinese = re.sub(r"[^\u4e00-\u9fff]", "", normalized)
         if len(desc_chinese) >= 4 and len(task_chinese) >= 4:
-            desc_pieces = {
-                desc_chinese[i : i + 4]
-                for i in range(len(desc_chinese) - 3)
-            }
-            task_pieces = {
-                task_chinese[i : i + 4]
-                for i in range(len(task_chinese) - 3)
-            }
+            desc_pieces = {desc_chinese[i : i + 4] for i in range(len(desc_chinese) - 3)}
+            task_pieces = {task_chinese[i : i + 4] for i in range(len(task_chinese) - 3)}
             if desc_pieces & task_pieces:
                 score += 2
         return score

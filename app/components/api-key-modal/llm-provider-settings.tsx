@@ -5,11 +5,7 @@ import { apiFetch } from "../../lib/api-client";
 import { buildLlmRequestHeaders } from "../../lib/llm/client-request";
 import { getDefaultModelForProvider } from "../../lib/llm/registry/models";
 import { LLM_PROVIDER_CATALOG } from "../../lib/llm/registry/providers";
-import type {
-  LlmCredentials,
-  LlmEndpointOverrides,
-  LlmProviderId,
-} from "../../lib/llm/types";
+import type { LlmCredentials, LlmEndpointOverrides, LlmProviderId } from "../../lib/llm/types";
 import { AppleButton } from "../ui/AppleModalControls";
 import {
   COLORS,
@@ -40,10 +36,7 @@ interface ProbeResponse {
 /** 为所有供应商生成独立状态，避免一次验证覆盖其他行。 */
 function createInitialStates(): Record<LlmProviderId, ProviderViewState> {
   return Object.fromEntries(
-    LLM_PROVIDER_CATALOG.map((provider) => [
-      provider.id,
-      { state: "idle", message: "" },
-    ]),
+    LLM_PROVIDER_CATALOG.map((provider) => [provider.id, { state: "idle", message: "" }]),
   ) as Record<LlmProviderId, ProviderViewState>;
 }
 
@@ -121,10 +114,7 @@ export function LlmProviderSettings({
               : ok
                 ? `${model.name} 连接正常。`
                 : `${model.name} 连接验证失败。`,
-          latencyMs:
-            typeof payload.latencyMs === "number"
-              ? payload.latencyMs
-              : undefined,
+          latencyMs: typeof payload.latencyMs === "number" ? payload.latencyMs : undefined,
         },
       }));
     } catch (error) {
@@ -141,9 +131,7 @@ export function LlmProviderSettings({
   return (
     <section>
       <div className="mb-3">
-        <div className="text-[11px] font-semibold text-[var(--text-primary)]">
-          模型服务
-        </div>
+        <div className="text-[11px] font-semibold text-[var(--text-primary)]">模型服务</div>
         <div className="mt-0.5 text-[9px] leading-4 text-[var(--text-tertiary)]">
           Auto 会先使用近期验证成功的模型；模型不存在时向下兼容，端点断网或鉴权失败时跳过该供应商。
         </div>
@@ -191,9 +179,7 @@ export function LlmProviderSettings({
                       : provider.placeholder
                   }
                   value={keys[provider.id] || ""}
-                  onChange={(event) =>
-                    updateKey(provider.id, event.target.value)
-                  }
+                  onChange={(event) => updateKey(provider.id, event.target.value)}
                 />
                 <AppleButton
                   type="button"
@@ -233,9 +219,7 @@ export function LlmProviderSettings({
                     style={{ color: COLORS.text, borderColor: COLORS.border }}
                     placeholder={endpointPlaceholder(provider.id)}
                     value={endpoints[provider.id] || ""}
-                    onChange={(event) =>
-                      updateEndpoint(provider.id, event.target.value)
-                    }
+                    onChange={(event) => updateEndpoint(provider.id, event.target.value)}
                   />
                 </label>
               ) : null}
@@ -246,8 +230,8 @@ export function LlmProviderSettings({
                   <span className="font-mono"> /compatible-mode/v1 </span>
                   地址。保存后聊天、图片和视频请求都会使用该业务空间；媒体接口会自动去掉
                   <span className="font-mono"> /compatible-mode/v1 </span>
-                  再拼接 DashScope 原生路径。设置页值优先于后端环境变量，单个自定义模型填写的
-                  Base URL 又优先于设置页。
+                  再拼接 DashScope 原生路径。设置页值优先于后端环境变量，单个自定义模型填写的 Base
+                  URL 又优先于设置页。
                 </div>
               ) : null}
 
@@ -258,9 +242,7 @@ export function LlmProviderSettings({
                   </span>
                   <span className="min-w-0 break-words" style={{ color }}>
                     {status.message}
-                    {typeof status.latencyMs === "number"
-                      ? `（${status.latencyMs} ms）`
-                      : ""}
+                    {typeof status.latencyMs === "number" ? `（${status.latencyMs} ms）` : ""}
                   </span>
                 </div>
               ) : null}

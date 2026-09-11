@@ -178,10 +178,7 @@ async def skip_redundant_works(
     for item in ledger.items:
         if item.status != "pending":
             continue
-        if any(
-            term in f"{item.title} {item.objective}"
-            for term in _REDO_TERMS
-        ):
+        if any(term in f"{item.title} {item.objective}" for term in _REDO_TERMS):
             # 用户明确要求重做/覆盖时不得跳过。
             continue
         candidates.append(item)

@@ -75,11 +75,7 @@ export type AttachedFile = {
   size?: number;
   lastModified?: number;
   relativePath?: string;
-  sourceKind?:
-    | "file-picker"
-    | "clipboard"
-    | "drop-file"
-    | "drop-directory";
+  sourceKind?: "file-picker" | "clipboard" | "drop-file" | "drop-directory";
 };
 
 export type MediaMode =
@@ -92,10 +88,7 @@ export type MediaMode =
 
 export type ComposerMode = "chat" | MediaMode;
 
-export type TypographyPolicy =
-  | "avoid-generated-text"
-  | "strict-short-text"
-  | "model-default";
+export type TypographyPolicy = "avoid-generated-text" | "strict-short-text" | "model-default";
 
 /**
  * 图片编辑保真策略。
@@ -126,12 +119,8 @@ export function isVideoAttachment(
   return isVideoMimeType(attachment?.type);
 }
 
-export function parseImageDataUrl(
-  value: string,
-): { mimeType: string; data: string } | null {
-  const match = /^data:([^;,]+)(?:;[^,]*)?;base64,([\s\S]+)$/iu.exec(
-    value.trim(),
-  );
+export function parseImageDataUrl(value: string): { mimeType: string; data: string } | null {
+  const match = /^data:([^;,]+)(?:;[^,]*)?;base64,([\s\S]+)$/iu.exec(value.trim());
   if (!match) return null;
 
   return {
@@ -157,9 +146,7 @@ export function resolveAttachmentDataUrl(
 /**
  * 文件读取后立即归一化，保证预览、聊天请求和媒体请求读取同一份数据。
  */
-export function normalizeAttachedFile(
-  attachment: AttachedFile,
-): AttachedFile {
+export function normalizeAttachedFile(attachment: AttachedFile): AttachedFile {
   if (!isImageAttachment(attachment) && !isVideoAttachment(attachment)) {
     return attachment;
   }
@@ -183,9 +170,7 @@ export function toMessageAttachments(
   return attachments.map((attachment) => {
     const isImage = isImageAttachment(attachment);
     const isVideo = isVideoAttachment(attachment);
-    const dataUrl = isImage || isVideo
-      ? resolveAttachmentDataUrl(attachment)
-      : undefined;
+    const dataUrl = isImage || isVideo ? resolveAttachmentDataUrl(attachment) : undefined;
 
     return {
       name: attachment.relativePath || attachment.name,
@@ -227,12 +212,7 @@ export type WorkspaceProject = {
 };
 
 export interface StreamPacket {
-  type?:
-    | "TEXT"
-    | "STATUS"
-    | "TOOL_STATUS"
-    | "DIFF_READY"
-    | "INTERACTIVE_REQUEST";
+  type?: "TEXT" | "STATUS" | "TOOL_STATUS" | "DIFF_READY" | "INTERACTIVE_REQUEST";
   content?: string;
   payload?: unknown;
 }

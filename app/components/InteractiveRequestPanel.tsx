@@ -15,11 +15,9 @@ function FileCreateConfirmationCard({
   onReply,
 }: Pick<InteractiveRequestPanelProps, "request" | "onReply">) {
   const createOption =
-    request.options.find((option) => option.value === "create") ||
-    request.options[0];
+    request.options.find((option) => option.value === "create") || request.options[0];
   const cancelOption =
-    request.options.find((option) => option.value === "cancel") ||
-    request.options[1];
+    request.options.find((option) => option.value === "cancel") || request.options[1];
 
   return (
     <section
@@ -27,8 +25,7 @@ function FileCreateConfirmationCard({
       style={{
         background: "color-mix(in srgb, var(--glass-strong) 92%, transparent)",
         borderColor: "color-mix(in srgb, var(--border) 82%, white 18%)",
-        boxShadow:
-          "0 18px 55px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.10)",
+        boxShadow: "0 18px 55px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.10)",
         backdropFilter: "blur(32px) saturate(150%)",
         WebkitBackdropFilter: "blur(32px) saturate(150%)",
       }}
@@ -131,11 +128,9 @@ function RiskApprovalCard({
   onReply,
 }: Pick<InteractiveRequestPanelProps, "request" | "onReply">) {
   const approveOption =
-    request.options.find((option) => option.value === "approve") ||
-    request.options[0];
+    request.options.find((option) => option.value === "approve") || request.options[0];
   const rejectOption =
-    request.options.find((option) => option.value === "reject") ||
-    request.options[1];
+    request.options.find((option) => option.value === "reject") || request.options[1];
   const isHighRisk = request.riskLevel === "high";
   const argumentPreview =
     request.toolArguments && Object.keys(request.toolArguments).length > 0
@@ -147,11 +142,8 @@ function RiskApprovalCard({
       className="mb-3 overflow-hidden rounded-[22px] border"
       style={{
         background: "color-mix(in srgb, var(--glass-strong) 94%, transparent)",
-        borderColor: isHighRisk
-          ? "rgba(255,69,58,0.34)"
-          : "rgba(255,159,10,0.34)",
-        boxShadow:
-          "0 18px 55px rgba(0,0,0,0.13), inset 0 1px 0 rgba(255,255,255,0.10)",
+        borderColor: isHighRisk ? "rgba(255,69,58,0.34)" : "rgba(255,159,10,0.34)",
+        boxShadow: "0 18px 55px rgba(0,0,0,0.13), inset 0 1px 0 rgba(255,255,255,0.10)",
       }}
       aria-live="polite"
     >
@@ -159,12 +151,8 @@ function RiskApprovalCard({
         <span
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border text-lg"
           style={{
-            background: isHighRisk
-              ? "rgba(255,69,58,0.11)"
-              : "rgba(255,159,10,0.11)",
-            borderColor: isHighRisk
-              ? "rgba(255,69,58,0.22)"
-              : "rgba(255,159,10,0.22)",
+            background: isHighRisk ? "rgba(255,69,58,0.11)" : "rgba(255,159,10,0.11)",
+            borderColor: isHighRisk ? "rgba(255,69,58,0.22)" : "rgba(255,159,10,0.22)",
           }}
           aria-hidden="true"
         >
@@ -173,18 +161,13 @@ function RiskApprovalCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p
-              className="text-[13px] font-semibold"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <p className="text-[13px] font-semibold" style={{ color: "var(--text-primary)" }}>
               {request.title || "操作需要人工批准"}
             </p>
             <span
               className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase"
               style={{
-                background: isHighRisk
-                  ? "rgba(255,69,58,0.12)"
-                  : "rgba(255,159,10,0.12)",
+                background: isHighRisk ? "rgba(255,69,58,0.12)" : "rgba(255,159,10,0.12)",
                 color: isHighRisk ? "#ff453a" : "#ff9f0a",
               }}
             >
@@ -286,8 +269,7 @@ function TerminalInteractiveCard({
       style={{
         background: "linear-gradient(180deg, var(--glass), var(--glass-soft))",
         borderColor: "rgba(10,132,255,0.22)",
-        boxShadow:
-          "var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,0.055)",
+        boxShadow: "var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,0.055)",
       }}
     >
       <div className="flex items-start gap-3 px-4 py-3.5">
@@ -328,9 +310,7 @@ function TerminalInteractiveCard({
             </span>
           </div>
 
-          <div className="mt-3 text-[11px] text-[var(--text-tertiary)]">
-            运行命令
-          </div>
+          <div className="mt-3 text-[11px] text-[var(--text-tertiary)]">运行命令</div>
           <div
             className="mt-1 rounded-[10px] border px-3 py-2 font-mono text-[11px] leading-5"
             style={{
@@ -368,11 +348,8 @@ function TerminalInteractiveCard({
             className="rounded-[10px] border px-3 py-2 text-[11px] font-medium transition-all hover:-translate-y-px active:translate-y-0"
             style={{
               background:
-                index === 0
-                  ? "linear-gradient(180deg, #168dff, #0879eb)"
-                  : "var(--glass)",
-              borderColor:
-                index === 0 ? "rgba(10,132,255,0.46)" : "var(--border)",
+                index === 0 ? "linear-gradient(180deg, #168dff, #0879eb)" : "var(--glass)",
+              borderColor: index === 0 ? "rgba(10,132,255,0.46)" : "var(--border)",
               color: index === 0 ? "white" : "var(--text-secondary)",
             }}
           >
@@ -407,10 +384,7 @@ function TerminalInteractiveCard({
         </button>
       </div>
 
-      <div
-        className="flex gap-2 border-t px-4 py-3"
-        style={{ borderColor: "var(--border)" }}
-      >
+      <div className="flex gap-2 border-t px-4 py-3" style={{ borderColor: "var(--border)" }}>
         <input
           value={answer}
           onChange={(event) => onAnswerChange(event.target.value)}
@@ -443,25 +417,13 @@ function TerminalInteractiveCard({
  * 缺失文件确认使用简洁的 Apple 风格双按钮卡片；现有 PTY/CLI 交互保持原来的
  * 终端信息密度，两类请求共用同一个 SSE/回复通道，不需要额外接口。
  */
-export default function InteractiveRequestPanel(
-  props: InteractiveRequestPanelProps,
-) {
+export default function InteractiveRequestPanel(props: InteractiveRequestPanelProps) {
   if (props.request.source === "file_create_confirmation") {
-    return (
-      <FileCreateConfirmationCard
-        request={props.request}
-        onReply={props.onReply}
-      />
-    );
+    return <FileCreateConfirmationCard request={props.request} onReply={props.onReply} />;
   }
 
-  if (
-    props.request.source === "risk_approval" ||
-    props.request.source === "mcp_tool_approval"
-  ) {
-    return (
-      <RiskApprovalCard request={props.request} onReply={props.onReply} />
-    );
+  if (props.request.source === "risk_approval" || props.request.source === "mcp_tool_approval") {
+    return <RiskApprovalCard request={props.request} onReply={props.onReply} />;
   }
 
   return <TerminalInteractiveCard {...props} />;

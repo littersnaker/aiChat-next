@@ -393,10 +393,7 @@ class GLM46VClient:
 
             message = _error_message(response)
             retry_after = response.headers.get("retry-after", "").strip()
-            if (
-                response.status_code == 429
-                and rate_step < self.settings.retries_429
-            ):
+            if response.status_code == 429 and rate_step < self.settings.retries_429:
                 delay = _retry_after_seconds(retry_after, _backoff_delay(rate_step, 429))
                 await asyncio.sleep(max(0.0, min(delay, 120.0)))
                 rate_step += 1
@@ -411,9 +408,7 @@ class GLM46VClient:
                 await asyncio.sleep(max(0.0, min(delay, 30.0)))
                 other_step += 1
                 continue
-            raise GLM46VError(
-                f"智谱 API 请求失败（HTTP {response.status_code}）：{message}"
-            )
+            raise GLM46VError(f"智谱 API 请求失败（HTTP {response.status_code}）：{message}")
 
         raise GLM46VError(f"智谱 API 请求失败：{last_error or '未知错误'}")
 

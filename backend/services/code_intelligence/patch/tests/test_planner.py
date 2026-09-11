@@ -17,9 +17,7 @@ class TestPatchPlanner:
     def test_medium_risk_plan(self):
         """验证 test medium risk plan 场景的输入、执行结果与兼容行为。"""
         planner = PatchPlanner()
-        plan = planner.plan(
-            changed_files=[f"src/file_{i}.py" for i in range(5)]
-        )
+        plan = planner.plan(changed_files=[f"src/file_{i}.py" for i in range(5)])
         assert plan.can_proceed is True
         assert plan.strategy == "local_analysis"
 

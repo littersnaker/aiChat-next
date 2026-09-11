@@ -10,11 +10,11 @@ from typing import Any
 import yaml
 
 import backend.services.agent.adapters  # noqa: F401 - 导入即触发适配器注册
+from backend.services.agent.adapters.base import BaseAgent
 from backend.services.agent.adapters.registry import (
     get_adapter_class,
     registered_adapter_names,
 )
-from backend.services.agent.adapters.base import BaseAgent
 
 AgentFactory = Callable[[], BaseAgent]
 

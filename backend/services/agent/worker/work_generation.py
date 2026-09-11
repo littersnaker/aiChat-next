@@ -223,9 +223,7 @@ async def _try_write_then_review(
     generated_all = False
     if not targets:
         system_prompt = (
-            _GENERATE_MISSING_SYSTEM
-            if not _is_greenfield_root(root)
-            else _GENERATE_ALL_SYSTEM
+            _GENERATE_MISSING_SYSTEM if not _is_greenfield_root(root) else _GENERATE_ALL_SYSTEM
         )
         generated = await _try_generate_all_files(
             root=root,
@@ -317,9 +315,7 @@ async def _try_write_then_review(
     except Exception as exc:
         LOGGER.warning("review_patch 调用失败，接受已写入结果：%s", exc)
         reason = str(exc)[:160]
-        state.append_transcript(
-            f"REVIEW CALL FAILED: {reason or '未知原因'}，接受已写入结果"
-        )
+        state.append_transcript(f"REVIEW CALL FAILED: {reason or '未知原因'}，接受已写入结果")
         return WorkExecutionResult(
             work_id=work.id,
             succeeded=True,
@@ -435,13 +431,9 @@ async def _apply_review_patch(
         return None
     paths = {operation.path for operation in action.operations}
     try:
-        async with coordinator.reserve(
-            paths, owner=work.id, priority=work.priority
-        ):
+        async with coordinator.reserve(paths, owner=work.id, priority=work.priority):
             expected = {
-                path: state.read_versions[path]
-                for path in paths
-                if path in state.read_versions
+                path: state.read_versions[path] for path in paths if path in state.read_versions
             }
             edit_result = cast(
                 EditBatchResult,

@@ -147,7 +147,12 @@ export default function SidebarSettingsMenu({
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-              <path d="M13 4.5h3v3" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" />
+              <path
+                d="M13 4.5h3v3"
+                stroke="currentColor"
+                strokeWidth="1.45"
+                strokeLinecap="round"
+              />
             </svg>
             Agent 评测
           </button>

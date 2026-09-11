@@ -42,8 +42,7 @@ export default function CustomTitleBar({
         <span
           className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[7px] border"
           style={{
-            background:
-              "linear-gradient(145deg, rgba(100,181,255,0.22), rgba(191,90,242,0.17))",
+            background: "linear-gradient(145deg, rgba(100,181,255,0.22), rgba(191,90,242,0.17))",
             borderColor: "var(--border)",
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.1)",
           }}

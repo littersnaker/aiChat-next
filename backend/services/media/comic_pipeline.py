@@ -220,9 +220,7 @@ def build_comic_pipeline(
                     break
             except Exception as exc:  # noqa: BLE001
                 record["error"] = f"出图失败：{exc}"
-                await asyncio.sleep(
-                    10 + attempt * 10 if "429" in str(exc) else 2 + attempt * 2
-                )
+                await asyncio.sleep(10 + attempt * 10 if "429" in str(exc) else 2 + attempt * 2)
         if not image_attachment:
             record["status"] = "failed"
             return {"shots": [record]}
@@ -251,9 +249,7 @@ def build_comic_pipeline(
                     break
             except Exception as exc:  # noqa: BLE001
                 record["error"] = f"视频生成失败：{exc}"
-                await asyncio.sleep(
-                    10 + attempt * 10 if "429" in str(exc) else 2 + attempt * 2
-                )
+                await asyncio.sleep(10 + attempt * 10 if "429" in str(exc) else 2 + attempt * 2)
         if not video_attachment:
             record["status"] = "failed"
             return {"shots": [record]}
@@ -292,9 +288,7 @@ def build_comic_pipeline(
         await lifecycle(f"正在合并 {len(videos)} 个分镜视频…")
 
         def progress(current: int, total: int) -> None:
-            asyncio.create_task(
-                lifecycle(f"合并进度 {current}/{total}")
-            )
+            asyncio.create_task(lifecycle(f"合并进度 {current}/{total}"))
 
         try:
             merged = await merge_videos(
@@ -327,9 +321,9 @@ def build_comic_pipeline(
             "mergedPath": merged_path,
         }
         if failed:
-            report["reason"] = "；".join(
-                f"分镜{s.get('index')}：{s.get('error')}" for s in failed
-            )[:2000]
+            report["reason"] = "；".join(f"分镜{s.get('index')}：{s.get('error')}" for s in failed)[
+                :2000
+            ]
         return {"report": report}
 
     graph = StateGraph(ComicState)

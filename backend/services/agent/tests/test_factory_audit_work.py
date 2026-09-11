@@ -93,9 +93,7 @@ async def test_audit_ignores_page_binding_errors(tmp_path, monkeypatch) -> None:
         if name == "software_factory.validate":
             return {
                 "ok": False,
-                "errors": [
-                    "业务页面 src/pages/cart/index.tsx 需要导入 createCommerceDataSource"
-                ],
+                "errors": ["业务页面 src/pages/cart/index.tsx 需要导入 createCommerceDataSource"],
                 "warnings": [],
             }
         raise AssertionError(f"不应调用工具：{name}")

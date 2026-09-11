@@ -14,10 +14,7 @@ function resolveWindowBackground(theme: AppTheme): string {
 }
 
 /** 创建隐藏的应用主窗口，页面加载成功后再由主进程显示。 */
-export function createMainWindow(
-  backendBaseUrl: string,
-  initialTheme: AppTheme,
-): BrowserWindow {
+export function createMainWindow(backendBaseUrl: string, initialTheme: AppTheme): BrowserWindow {
   const window = new BrowserWindow({
     width: 1500,
     height: 900,
@@ -33,13 +30,8 @@ export function createMainWindow(
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false,
-      ...(isDevelopmentMode()
-        ? { partition: DEVELOPMENT_SESSION_PARTITION }
-        : {}),
-      additionalArguments: [
-        `--backend-url=${backendBaseUrl}`,
-        `--app-theme=${initialTheme}`,
-      ],
+      ...(isDevelopmentMode() ? { partition: DEVELOPMENT_SESSION_PARTITION } : {}),
+      additionalArguments: [`--backend-url=${backendBaseUrl}`, `--app-theme=${initialTheme}`],
     },
   });
 
@@ -57,25 +49,15 @@ export function createMainWindow(
 }
 
 /** 加载 React 页面；严格开发模式只允许 Vite，禁止静默回退旧 dist。 */
-export function loadMainWindow(
-  window: BrowserWindow,
-  backendBaseUrl: string,
-): Promise<string> {
+export function loadMainWindow(window: BrowserWindow, backendBaseUrl: string): Promise<string> {
   return loadRendererPage(window, backendBaseUrl);
 }
 
 /** 根据开发或打包环境解析窗口图标。 */
 function resolveWindowIcon(): string {
   return isDevelopmentMode()
-    ? path.join(
-        process.cwd(),
-        "public",
-        process.platform === "win32" ? "icon.ico" : "icon.png",
-      )
-    : path.join(
-        process.resourcesPath,
-        process.platform === "win32" ? "icon.ico" : "icon.png",
-      );
+    ? path.join(process.cwd(), "public", process.platform === "win32" ? "icon.ico" : "icon.png")
+    : path.join(process.resourcesPath, process.platform === "win32" ? "icon.ico" : "icon.png");
 }
 
 /** 在最大化状态变化时通知 React 自定义标题栏。 */
@@ -96,9 +78,7 @@ function bindRendererDiagnostics(window: BrowserWindow): void {
     "did-fail-load",
     (_event, errorCode, errorDescription, validatedUrl, isMainFrame) => {
       if (!isMainFrame) return;
-      console.warn(
-        `[Electron] 页面加载失败 ${errorCode} ${errorDescription}：${validatedUrl}`,
-      );
+      console.warn(`[Electron] 页面加载失败 ${errorCode} ${errorDescription}：${validatedUrl}`);
     },
   );
   window.webContents.on("render-process-gone", (_event, details) => {
@@ -115,10 +95,7 @@ export async function showStartupError(
   message: string,
   theme: AppTheme = "dark",
 ): Promise<void> {
-  const escaped = message
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
+  const escaped = message.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
   const dark = theme === "dark";
   const background = dark ? "#111827" : "#eef1f6";
   const panel = dark ? "#1e293b" : "#ffffff";
@@ -127,8 +104,6 @@ export async function showStartupError(
   const html = `<!doctype html><html lang="zh-CN"><meta charset="utf-8">
   <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:${background};color:${text};font-family:system-ui}.card{box-sizing:border-box;width:min(760px,calc(100vw - 48px));padding:32px;border:1px solid ${border};border-radius:20px;background:${panel}}pre{max-height:52vh;overflow:auto;white-space:pre-wrap;color:#ef4444}</style>
   <body><section class="card"><h1>应用界面加载失败</h1><p>FastAPI 已启动，但 React 页面没有成功载入。请检查下面的地址和错误信息。</p><pre>${escaped}</pre></section></body></html>`;
-  await window.loadURL(
-    `data:text/html;charset=utf-8,${encodeURIComponent(html)}`,
-  );
+  await window.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
   if (!window.isVisible()) window.show();
 }

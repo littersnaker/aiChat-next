@@ -44,8 +44,7 @@ export function useComposerDrop({
   onInputChange,
   onFileDrop,
 }: UseComposerDropOptions): UseComposerDropResult {
-  const [activeDropKind, setActiveDropKind] =
-    useState<ComposerDropKind | null>(null);
+  const [activeDropKind, setActiveDropKind] = useState<ComposerDropKind | null>(null);
   const dragDepthRef = useRef(0);
   const selectedTextRef = useRef("");
 
@@ -82,12 +81,7 @@ export function useComposerDrop({
     const textarea = textareaRef.current;
     const selectionStart = textarea?.selectionStart ?? input.length;
     const selectionEnd = textarea?.selectionEnd ?? selectionStart;
-    const result = insertTextAtSelection(
-      input,
-      droppedText,
-      selectionStart,
-      selectionEnd,
-    );
+    const result = insertTextAtSelection(input, droppedText, selectionStart, selectionEnd);
     onInputChange(result.value);
     requestAnimationFrame(() => {
       textarea?.focus();

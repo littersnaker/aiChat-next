@@ -95,7 +95,6 @@ def test_effective_request_restores_previous_code_goal() -> None:
     assert "本轮补充要求" in result
 
 
-
 def test_full_auto_follow_up_keeps_write_and_run_tools() -> None:
     """验证自动任务的报错追问不会误入只读 Agent。"""
 
@@ -118,6 +117,7 @@ def test_full_auto_follow_up_keeps_write_and_run_tools() -> None:
     assert routed.mode == "code_change"
     assert {"edit", "run"} <= set(routed.tool_names)
     assert "把这个项目做成电商小程序" in routed.effective_text
+
 
 def test_commerce_analytics_is_deterministic() -> None:
     """验证市场指标使用确定性代码计算，而不是随机模型输出。"""
@@ -182,9 +182,7 @@ def test_fastapi_workspace_and_commerce(tmp_path: Path, monkeypatch) -> None:
         assert initial_theme.status_code == 200
         assert initial_theme.json()["theme"] is None
 
-        saved_theme = client.put(
-            "/api/preferences/theme", json={"theme": "dark"}
-        )
+        saved_theme = client.put("/api/preferences/theme", json={"theme": "dark"})
         assert saved_theme.status_code == 200
         assert saved_theme.json()["theme"] == "dark"
         assert client.get("/api/preferences/theme").json()["theme"] == "dark"
@@ -257,9 +255,7 @@ def test_auto_router_builds_real_fallback_chain() -> None:
     """验证 Auto 包含首选与后备模型，并保持明确的降级顺序。"""
 
     AVAILABILITY.clear()
-    credentials = LlmCredentials(
-        {"qwen": "test-qwen-key", "kimi": "test-kimi-key"}
-    )
+    credentials = LlmCredentials({"qwen": "test-qwen-key", "kimi": "test-kimi-key"})
     candidates = GATEWAY.resolve_candidates(
         "auto",
         credentials,
@@ -282,9 +278,7 @@ def test_auto_router_requires_vision_for_image_input() -> None:
     """验证带图片的请求不会被发送到纯文本默认模型。"""
 
     AVAILABILITY.clear()
-    credentials = LlmCredentials(
-        {"qwen": "test-qwen-key", "kimi": "test-kimi-key"}
-    )
+    credentials = LlmCredentials({"qwen": "test-qwen-key", "kimi": "test-kimi-key"})
     message = LlmMessage(
         "user",
         "describe",
@@ -334,9 +328,7 @@ def test_provider_endpoint_environment_override(monkeypatch) -> None:
         "https://workspace.example.test/compatible-mode/v1/",
     )
     endpoints = GATEWAY._provider_endpoints(get_provider("qwen"))
-    assert endpoints == (
-        "https://workspace.example.test/compatible-mode/v1/chat/completions",
-    )
+    assert endpoints == ("https://workspace.example.test/compatible-mode/v1/chat/completions",)
 
 
 def test_invalid_base_url_override_is_ignored(monkeypatch) -> None:
@@ -352,9 +344,7 @@ def test_invalid_base_url_override_is_ignored(monkeypatch) -> None:
 def test_invalid_request_base_url_is_ignored() -> None:
     """请求头出现非 http(s) 的 Base URL 时应忽略并回退默认端点。"""
 
-    request = _request_with_headers(
-        [(b"x-llm-base-url-qwen", b"sk-invalid-key-value")]
-    )
+    request = _request_with_headers([(b"x-llm-base-url-qwen", b"sk-invalid-key-value")])
     credentials = resolve_credentials(request)
 
     assert credentials.get_endpoint("qwen") is None
@@ -367,9 +357,7 @@ def test_builtin_qwen_is_used_when_user_does_not_configure(monkeypatch) -> None:
     monkeypatch.setattr(
         credentials_module,
         "get_builtin_value",
-        lambda variable_name: (
-            "builtin-qwen-key" if variable_name == "DASHSCOPE_API_KEY" else ""
-        ),
+        lambda variable_name: ("builtin-qwen-key" if variable_name == "DASHSCOPE_API_KEY" else ""),
     )
     credentials = resolve_credentials(_request_with_headers([]))
     assert credentials.get("qwen") == "builtin-qwen-key"
@@ -383,13 +371,9 @@ def test_user_qwen_key_overrides_builtin_fallback(monkeypatch) -> None:
     monkeypatch.setattr(
         credentials_module,
         "get_builtin_value",
-        lambda variable_name: (
-            "builtin-qwen-key" if variable_name == "DASHSCOPE_API_KEY" else ""
-        ),
+        lambda variable_name: ("builtin-qwen-key" if variable_name == "DASHSCOPE_API_KEY" else ""),
     )
-    request = _request_with_headers(
-        [(b"x-llm-key-qwen", b"user-qwen-key")]
-    )
+    request = _request_with_headers([(b"x-llm-key-qwen", b"user-qwen-key")])
     credentials = resolve_credentials(request)
     assert credentials.get("qwen") == "user-qwen-key"
     assert credentials.source("qwen") == "user"
@@ -415,9 +399,7 @@ def test_request_base_url_overrides_environment(monkeypatch) -> None:
         get_provider("qwen"),
         credentials.get_endpoint("qwen"),
     )
-    assert endpoints == (
-        "https://workspace.example.test/compatible-mode/v1/chat/completions",
-    )
+    assert endpoints == ("https://workspace.example.test/compatible-mode/v1/chat/completions",)
 
 
 async def _collect_completion(gateway: LlmGateway, credentials: LlmCredentials):

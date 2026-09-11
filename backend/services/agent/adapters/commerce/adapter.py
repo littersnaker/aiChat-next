@@ -6,10 +6,10 @@ from collections.abc import AsyncIterator
 from typing import cast
 
 from backend.schemas.commerce import CommerceRequest
+from backend.services.agent.adapters.registry import register_adapter
 from backend.services.commerce.listing import stream_listing
 from backend.services.commerce.llm import LlmConfig
 from backend.services.commerce.service import stream_research
-from backend.services.agent.adapters.registry import register_adapter
 from backend.services.llm.credentials import LlmCredentials
 from backend.services.models.router import ModelSelection
 from backend.services.runtime.contracts import RuntimeContext, RuntimeRequest

@@ -46,9 +46,7 @@ interface WorkspaceControllerOptions {
   includeImage?: boolean;
 }
 
-export function useWorkspaceController(
-  options: WorkspaceControllerOptions = {},
-) {
+export function useWorkspaceController(options: WorkspaceControllerOptions = {}) {
   const [projects, setProjects] = useState<WorkspaceProject[]>([]);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState("");
@@ -90,8 +88,7 @@ export function useWorkspaceController(
     ) => {
       if (mode === "code" && !projectId) return null;
 
-      const project =
-        projectOverride || projects.find((item) => item.id === projectId);
+      const project = projectOverride || projects.find((item) => item.id === projectId);
       const session = await requestCreateSession(mode, projectId, project);
 
       setSessions((current) => [session, ...current]);
@@ -144,11 +141,7 @@ export function useWorkspaceController(
   }, [refreshWorkspace]);
 
   const persistSession = useCallback(
-    async (
-      session: ChatSession,
-      nextMessages: Message[],
-      title = session.title,
-    ) => {
+    async (session: ChatSession, nextMessages: Message[], title = session.title) => {
       const response = await apiFetch("/api/workspace", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -221,9 +214,7 @@ export function useWorkspaceController(
     async (projectId: string) => {
       setProjects((current) =>
         current.map((project) =>
-          project.id === projectId
-            ? { ...project, indexStatus: "indexing" }
-            : project,
+          project.id === projectId ? { ...project, indexStatus: "indexing" } : project,
         ),
       );
 
@@ -237,9 +228,7 @@ export function useWorkspaceController(
         console.error(error);
         setProjects((current) =>
           current.map((project) =>
-            project.id === projectId
-              ? { ...project, indexStatus: "error" }
-              : project,
+            project.id === projectId ? { ...project, indexStatus: "error" } : project,
           ),
         );
       }
@@ -284,10 +273,7 @@ export function useWorkspaceController(
 
   /** 第二步：用选定的目录与初始化选项创建项目。 */
   const createProjectWithOptions = useCallback(
-    async (
-      rootPath: string,
-      initOptions: string[],
-    ): Promise<WorkspaceProject | null> => {
+    async (rootPath: string, initOptions: string[]): Promise<WorkspaceProject | null> => {
       try {
         const response = await apiFetch("/api/workspace", {
           method: "POST",
@@ -328,12 +314,8 @@ export function useWorkspaceController(
           throw new Error((await response.json()).error || "删除项目失败");
         }
         // 若当前活跃会话属于被删项目，切回第一个会话或新建 QA。
-        setProjects((current) =>
-          current.filter((item) => item.id !== projectId),
-        );
-        setSessions((current) =>
-          current.filter((item) => item.projectId !== projectId),
-        );
+        setProjects((current) => current.filter((item) => item.id !== projectId));
+        setSessions((current) => current.filter((item) => item.projectId !== projectId));
         await refreshWorkspace();
         return true;
       } catch (error) {

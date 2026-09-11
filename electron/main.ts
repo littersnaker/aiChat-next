@@ -14,17 +14,10 @@ import {
   Tray,
   type NativeImage,
 } from "electron";
-import {
-  readCachedTheme,
-  synchronizeThemeWithBackend,
-  type AppTheme,
-} from "./app-preferences";
+import { readCachedTheme, synchronizeThemeWithBackend, type AppTheme } from "./app-preferences";
 import { startBackend, stopBackend } from "./backend-process";
 import { migrateLegacyApplicationData } from "./data-paths";
-import {
-  clearDevelopmentRendererCache,
-  configureDevelopmentProcess,
-} from "./development-runtime";
+import { clearDevelopmentRendererCache, configureDevelopmentProcess } from "./development-runtime";
 import { registerApplicationIpc, setApplicationBackendBaseUrl } from "./ipc";
 import {
   closeStartupWindow,
@@ -90,9 +83,7 @@ function resolveTrayIcon(): NativeImage | null {
   }
 
   console.warn(
-    `[Electron] 未找到可用托盘图标，已跳过托盘功能。候选地址：\n${candidates.join(
-      "\n",
-    )}`,
+    `[Electron] 未找到可用托盘图标，已跳过托盘功能。候选地址：\n${candidates.join("\n")}`,
   );
   return null;
 }
@@ -155,10 +146,7 @@ async function bootstrap(): Promise<void> {
     });
     setApplicationBackendBaseUrl(backend.baseUrl);
 
-    activeTheme = await synchronizeThemeWithBackend(
-      backend.baseUrl,
-      activeTheme,
-    );
+    activeTheme = await synchronizeThemeWithBackend(backend.baseUrl, activeTheme);
     nativeTheme.themeSource = activeTheme;
     updateStartupWindowTheme(startupWindow, activeTheme);
     updateStartupWindow(startupWindow, {
@@ -176,8 +164,7 @@ async function bootstrap(): Promise<void> {
     try {
       await loadMainWindow(window, backend.baseUrl);
     } catch (error) {
-      const message =
-        error instanceof Error ? (error.stack ?? error.message) : String(error);
+      const message = error instanceof Error ? (error.stack ?? error.message) : String(error);
       closeStartupWindow(startupWindow);
       startupWindow = null;
       await showStartupError(window, message, activeTheme);
@@ -207,8 +194,7 @@ async function bootstrap(): Promise<void> {
 async function handleBootstrapError(error: unknown): Promise<void> {
   closeStartupWindow(startupWindow);
   startupWindow = null;
-  const message =
-    error instanceof Error ? (error.stack ?? error.message) : String(error);
+  const message = error instanceof Error ? (error.stack ?? error.message) : String(error);
   console.error("[Electron] 应用启动失败", error);
   if (mainWindow && !mainWindow.isDestroyed()) {
     await showStartupError(mainWindow, message, activeTheme);

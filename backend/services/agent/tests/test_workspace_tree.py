@@ -31,11 +31,7 @@ def test_render_workspace_tree_respects_limit(tmp_path) -> None:
         (tmp_path / f"file_{index}.ts").write_text("x", encoding="utf-8")
 
     tree = render_workspace_tree(tmp_path, limit=5)
-    lines = [
-        line
-        for line in tree.splitlines()
-        if line and not line.startswith("（")
-    ]
+    lines = [line for line in tree.splitlines() if line and not line.startswith("（")]
 
     assert len(lines) <= 5
     assert "已按调用方要求截断" in tree

@@ -99,22 +99,14 @@ export function buildCommerceCredentialHeaders(
   credentials: AuxiliaryServiceCredentials,
 ): Record<string, string> {
   const headers: Record<string, string> = {};
-  const talorDataToken = cleaned(
-    credentials.talorDataToken || credentials.serpApi,
-  );
+  const talorDataToken = cleaned(credentials.talorDataToken || credentials.serpApi);
 
   const entries: Array<[string, string | undefined]> = [
     [COMMERCE_REQUEST_HEADERS.talorDataToken, talorDataToken],
     [COMMERCE_REQUEST_HEADERS.keepaApiKey, cleaned(credentials.keepaApiKey)],
     [COMMERCE_REQUEST_HEADERS.amazonClientId, cleaned(credentials.amazonClientId)],
-    [
-      COMMERCE_REQUEST_HEADERS.amazonClientSecret,
-      cleaned(credentials.amazonClientSecret),
-    ],
-    [
-      COMMERCE_REQUEST_HEADERS.amazonRefreshToken,
-      cleaned(credentials.amazonRefreshToken),
-    ],
+    [COMMERCE_REQUEST_HEADERS.amazonClientSecret, cleaned(credentials.amazonClientSecret)],
+    [COMMERCE_REQUEST_HEADERS.amazonRefreshToken, cleaned(credentials.amazonRefreshToken)],
     [COMMERCE_REQUEST_HEADERS.tiktokClientKey, cleaned(credentials.tiktokClientKey)],
     [COMMERCE_REQUEST_HEADERS.tiktokClientSecret, cleaned(credentials.tiktokClientSecret)],
     [COMMERCE_REQUEST_HEADERS.tiktokMerchantId, cleaned(credentials.tiktokMerchantId)],
@@ -136,15 +128,11 @@ export function buildCommerceCredentialHeaders(
  * Read request-scoped Commerce credentials on the server. Environment fallbacks are resolved by
  * each provider client, so this helper never exposes packaged secrets back to the browser.
  */
-export function readCommerceCredentialsFromHeaders(
-  headers: Headers,
-): AuxiliaryServiceCredentials {
+export function readCommerceCredentialsFromHeaders(headers: Headers): AuxiliaryServiceCredentials {
   return {
     talorDataToken: cleaned(headers.get(COMMERCE_REQUEST_HEADERS.talorDataToken) || undefined),
     keepaApiKey: cleaned(headers.get(COMMERCE_REQUEST_HEADERS.keepaApiKey) || undefined),
-    amazonClientId: cleaned(
-      headers.get(COMMERCE_REQUEST_HEADERS.amazonClientId) || undefined,
-    ),
+    amazonClientId: cleaned(headers.get(COMMERCE_REQUEST_HEADERS.amazonClientId) || undefined),
     amazonClientSecret: cleaned(
       headers.get(COMMERCE_REQUEST_HEADERS.amazonClientSecret) || undefined,
     ),
@@ -152,13 +140,21 @@ export function readCommerceCredentialsFromHeaders(
       headers.get(COMMERCE_REQUEST_HEADERS.amazonRefreshToken) || undefined,
     ),
     tiktokClientKey: cleaned(headers.get(COMMERCE_REQUEST_HEADERS.tiktokClientKey) || undefined),
-    tiktokClientSecret: cleaned(headers.get(COMMERCE_REQUEST_HEADERS.tiktokClientSecret) || undefined),
+    tiktokClientSecret: cleaned(
+      headers.get(COMMERCE_REQUEST_HEADERS.tiktokClientSecret) || undefined,
+    ),
     tiktokMerchantId: cleaned(headers.get(COMMERCE_REQUEST_HEADERS.tiktokMerchantId) || undefined),
     temuAppKey: cleaned(headers.get(COMMERCE_REQUEST_HEADERS.temuAppKey) || undefined),
     temuAppSecret: cleaned(headers.get(COMMERCE_REQUEST_HEADERS.temuAppSecret) || undefined),
     temuAccessToken: cleaned(headers.get(COMMERCE_REQUEST_HEADERS.temuAccessToken) || undefined),
-    alibaba1688AppKey: cleaned(headers.get(COMMERCE_REQUEST_HEADERS.alibaba1688AppKey) || undefined),
-    alibaba1688AppSecret: cleaned(headers.get(COMMERCE_REQUEST_HEADERS.alibaba1688AppSecret) || undefined),
-    alibaba1688AccessToken: cleaned(headers.get(COMMERCE_REQUEST_HEADERS.alibaba1688AccessToken) || undefined),
+    alibaba1688AppKey: cleaned(
+      headers.get(COMMERCE_REQUEST_HEADERS.alibaba1688AppKey) || undefined,
+    ),
+    alibaba1688AppSecret: cleaned(
+      headers.get(COMMERCE_REQUEST_HEADERS.alibaba1688AppSecret) || undefined,
+    ),
+    alibaba1688AccessToken: cleaned(
+      headers.get(COMMERCE_REQUEST_HEADERS.alibaba1688AccessToken) || undefined,
+    ),
   };
 }

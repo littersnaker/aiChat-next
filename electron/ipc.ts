@@ -22,10 +22,7 @@ import {
   writeThemeToBackend,
   writeUiPreferences,
 } from "./app-preferences";
-import {
-  readSecureCredentials,
-  writeSecureCredentials,
-} from "./secure-credentials";
+import { readSecureCredentials, writeSecureCredentials } from "./secure-credentials";
 
 interface CommercePdfPayload {
   html: string;
@@ -40,9 +37,7 @@ export function setApplicationBackendBaseUrl(baseUrl: string): void {
 }
 
 /** 根据 IPC 事件找到发送消息的 BrowserWindow。 */
-function senderWindow(
-  event: IpcMainEvent | IpcMainInvokeEvent,
-): BrowserWindow | null {
+function senderWindow(event: IpcMainEvent | IpcMainInvokeEvent): BrowserWindow | null {
   return BrowserWindow.fromWebContents(event.sender);
 }
 
@@ -76,10 +71,7 @@ async function exportCommercePdf(
     : await dialog.showSaveDialog(options);
   if (saveResult.canceled || !saveResult.filePath) return { canceled: true };
 
-  const temporaryFile = path.join(
-    os.tmpdir(),
-    `multi-agent-commerce-${Date.now()}.html`,
-  );
+  const temporaryFile = path.join(os.tmpdir(), `multi-agent-commerce-${Date.now()}.html`);
   const printWindow = new BrowserWindow({
     show: false,
     webPreferences: { sandbox: true },
@@ -144,9 +136,7 @@ async function captureLocalPage(url: string): Promise<{ base64: string }> {
   try {
     await captureWindow.loadURL(url);
     // 等首屏渲染完成后再等稳定帧，避免截到加载中状态。
-    await captureWindow.webContents.executeJavaScript(
-      "document.readyState === 'complete' || true",
-    );
+    await captureWindow.webContents.executeJavaScript("document.readyState === 'complete' || true");
     await new Promise((resolve) => setTimeout(resolve, 800));
     const image = await captureWindow.webContents.capturePage();
     const buffer = image.toPNG();
@@ -160,28 +150,19 @@ async function captureLocalPage(url: string): Promise<{ base64: string }> {
 export function registerApplicationIpc(): void {
   ipcMain.on("window:minimize", (event) => senderWindow(event)?.minimize());
   ipcMain.on("window:close", (event) => senderWindow(event)?.close());
-  ipcMain.handle("window:setTheme", (_event, theme: unknown) =>
-    persistApplicationTheme(theme),
-  );
+  ipcMain.handle("window:setTheme", (_event, theme: unknown) => persistApplicationTheme(theme));
 
   // 凭证只在主进程读写固定白名单文件，Renderer 无法传入任意路径。
   ipcMain.handle("credentials:read", () => readSecureCredentials());
-  ipcMain.handle("credentials:write", (_event, input: unknown) =>
-    writeSecureCredentials(input),
-  );
+  ipcMain.handle("credentials:write", (_event, input: unknown) => writeSecureCredentials(input));
   ipcMain.handle("preferences:read", () => readUiPreferences());
-  ipcMain.handle("preferences:write", (_event, input: unknown) =>
-    writeUiPreferences(input),
-  );
+  ipcMain.handle("preferences:write", (_event, input: unknown) => writeUiPreferences(input));
   ipcMain.handle("clipboard:readText", () => clipboard.readText());
   ipcMain.handle("clipboard:writeText", (_event, text: unknown) => {
     clipboard.writeText(String(text ?? ""));
   });
 
-  ipcMain.handle(
-    "window:isMaximized",
-    (event) => senderWindow(event)?.isMaximized() ?? false,
-  );
+  ipcMain.handle("window:isMaximized", (event) => senderWindow(event)?.isMaximized() ?? false);
   ipcMain.handle("window:toggleMaximize", (event) => {
     const window = senderWindow(event);
     if (!window) return false;
@@ -199,7 +180,7 @@ export function registerApplicationIpc(): void {
     const result = parent
       ? await dialog.showOpenDialog(parent, options)
       : await dialog.showOpenDialog(options);
-    return result.canceled ? null : result.filePaths[0] ?? null;
+    return result.canceled ? null : (result.filePaths[0] ?? null);
   });
 
   ipcMain.handle("commerce:exportPdf", async (event, payload: unknown) => {

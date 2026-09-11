@@ -220,9 +220,7 @@ export default function SkillsManagerPage({
       }
       setToast({
         kind: "success",
-        message: nextEnabled
-          ? `已启用「${skill.name}」`
-          : `已停用「${skill.name}」`,
+        message: nextEnabled ? `已启用「${skill.name}」` : `已停用「${skill.name}」`,
       });
       await loadSkills();
     } catch (caught) {
@@ -253,157 +251,151 @@ export default function SkillsManagerPage({
       />
 
       <div className="mx-auto flex min-h-0 w-full max-w-[1240px] flex-1 flex-col px-6 pb-5 pt-6 lg:px-10">
-          {/* 页面头部：返回 + 标题 */}
-          <header className="mb-5 flex shrink-0 items-start justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <button
-                type="button"
-                onClick={onBack}
-                aria-label="返回工作台"
-                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-all duration-200 hover:bg-[var(--glass-hover)] active:scale-[0.94]"
-                style={{
-                  background: "var(--glass)",
-                  borderColor: "var(--border-strong)",
-                  color: "var(--accent-blue)",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14)",
-                  cursor: "pointer",
-                }}
+        {/* 页面头部：返回 + 标题 */}
+        <header className="mb-5 flex shrink-0 items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label="返回工作台"
+              className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-all duration-200 hover:bg-[var(--glass-hover)] active:scale-[0.94]"
+              style={{
+                background: "var(--glass)",
+                borderColor: "var(--border-strong)",
+                color: "var(--accent-blue)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14)",
+                cursor: "pointer",
+              }}
+            >
+              <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none">
+                <path
+                  d="M12.2 4.5 6.7 10l5.5 5.5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <div>
+              <h1
+                className="text-[22px] font-semibold tracking-[-0.02em]"
+                style={{ color: "var(--text-primary)" }}
               >
-                <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none">
-                  <path
-                    d="M12.2 4.5 6.7 10l5.5 5.5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-              <div>
-                <h1
-                  className="text-[22px] font-semibold tracking-[-0.02em]"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  Skills 管理
-                </h1>
-                <p
-                  className="mt-1 text-[12px] leading-5"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  支持 SKILL.md 直链或 GitHub 仓库批量安装；安装记录保存在本地数据库，重启后自动恢复。
-                </p>
-              </div>
+                Skills 管理
+              </h1>
+              <p className="mt-1 text-[12px] leading-5" style={{ color: "var(--text-secondary)" }}>
+                支持 SKILL.md 直链或 GitHub 仓库批量安装；安装记录保存在本地数据库，重启后自动恢复。
+              </p>
             </div>
-          </header>
+          </div>
+        </header>
 
-          {/* 安装区 */}
-          <form
-            onSubmit={(event) => void installSkill(event)}
-            className="mb-4 flex shrink-0 items-center gap-2.5 rounded-[18px] border px-4 py-3.5"
+        {/* 安装区 */}
+        <form
+          onSubmit={(event) => void installSkill(event)}
+          className="mb-4 flex shrink-0 items-center gap-2.5 rounded-[18px] border px-4 py-3.5"
+          style={{
+            background:
+              "linear-gradient(180deg, color-mix(in srgb, var(--glass) 94%, white 6%), var(--glass-soft))",
+            borderColor: "var(--border)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.1)",
+          }}
+        >
+          <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0" fill="none">
+            <path
+              d="M10 13.5V4M6.5 8 10 4l3.5 4M4.5 15h11"
+              stroke="currentColor"
+              strokeWidth="1.45"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <input
+            value={url}
+            onChange={(event) => setUrl(event.target.value)}
+            placeholder="owner/repo/路径 或 https://.../SKILL.md"
+            disabled={installing}
+            className="h-9 min-w-0 flex-1 rounded-[10px] border bg-[var(--glass-black)] px-3 text-[12px] outline-none transition-colors placeholder:text-[var(--text-tertiary)]"
             style={{
-              background:
-                "linear-gradient(180deg, color-mix(in srgb, var(--glass) 94%, white 6%), var(--glass-soft))",
               borderColor: "var(--border)",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.1)",
+              color: "var(--text-primary)",
+            }}
+          />
+          <AppleButton
+            type="submit"
+            variant="primary"
+            size="sm"
+            disabled={installing}
+            style={{ cursor: "pointer" }}
+          >
+            {installing ? "安装中…" : "安装"}
+          </AppleButton>
+        </form>
+
+        {/* 状态提示条 */}
+        {error && (
+          <div
+            className="mb-3 shrink-0 rounded-[12px] border px-3.5 py-2.5 text-[12px] leading-5"
+            style={{
+              background: "rgba(255,69,58,0.08)",
+              borderColor: "rgba(255,69,58,0.18)",
+              color: "#ff6961",
             }}
           >
-            <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0" fill="none">
-              <path
-                d="M10 13.5V4M6.5 8 10 4l3.5 4M4.5 15h11"
-                stroke="currentColor"
-                strokeWidth="1.45"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <input
-              value={url}
-              onChange={(event) => setUrl(event.target.value)}
-              placeholder="owner/repo/路径 或 https://.../SKILL.md"
-              disabled={installing}
-              className="h-9 min-w-0 flex-1 rounded-[10px] border bg-[var(--glass-black)] px-3 text-[12px] outline-none transition-colors placeholder:text-[var(--text-tertiary)]"
-              style={{
-                borderColor: "var(--border)",
-                color: "var(--text-primary)",
-              }}
-            />
-            <AppleButton
-              type="submit"
-              variant="primary"
-              size="sm"
-              disabled={installing}
-              style={{ cursor: "pointer" }}
-            >
-              {installing ? "安装中…" : "安装"}
-            </AppleButton>
-          </form>
+            {error}
+          </div>
+        )}
+        {success && !error && (
+          <div
+            className="mb-3 shrink-0 rounded-[12px] border px-3.5 py-2.5 text-[12px] leading-5"
+            style={{
+              background: "rgba(48,209,88,0.08)",
+              borderColor: "rgba(48,209,88,0.2)",
+              color: "#30d158",
+            }}
+          >
+            {success}
+          </div>
+        )}
 
-          {/* 状态提示条 */}
-          {error && (
+        {/* 统计 + 网格列表 */}
+        <div className="mb-3 flex shrink-0 items-center justify-between">
+          <span className="text-[12px] font-medium" style={{ color: "var(--text-secondary)" }}>
+            已安装 {skills.length} 个 Skill
+          </span>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+          {loading ? (
             <div
-              className="mb-3 shrink-0 rounded-[12px] border px-3.5 py-2.5 text-[12px] leading-5"
-              style={{
-                background: "rgba(255,69,58,0.08)",
-                borderColor: "rgba(255,69,58,0.18)",
-                color: "#ff6961",
-              }}
+              className="rounded-[18px] border px-4 py-12 text-center text-[12px]"
+              style={{ borderColor: "var(--border)", color: "var(--text-tertiary)" }}
             >
-              {error}
+              正在加载已安装的 Skills…
+            </div>
+          ) : skills.length === 0 ? (
+            <div
+              className="rounded-[18px] border px-4 py-12 text-center text-[12px]"
+              style={{ borderColor: "var(--border)", color: "var(--text-tertiary)" }}
+            >
+              暂无已安装的 Skills，在上方粘贴地址即可安装。
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {skills.map((skill) => (
+                <SkillCard
+                  key={skill.id}
+                  skill={skill}
+                  uninstalling={uninstallingId === skill.id}
+                  onView={setDetailTarget}
+                  onToggle={(target) => void toggleSkill(target)}
+                  onUninstall={(target) => setConfirmTarget({ skill: target })}
+                />
+              ))}
             </div>
           )}
-          {success && !error && (
-            <div
-              className="mb-3 shrink-0 rounded-[12px] border px-3.5 py-2.5 text-[12px] leading-5"
-              style={{
-                background: "rgba(48,209,88,0.08)",
-                borderColor: "rgba(48,209,88,0.2)",
-                color: "#30d158",
-              }}
-            >
-              {success}
-            </div>
-          )}
-
-          {/* 统计 + 网格列表 */}
-          <div className="mb-3 flex shrink-0 items-center justify-between">
-            <span
-              className="text-[12px] font-medium"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              已安装 {skills.length} 个 Skill
-            </span>
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-            {loading ? (
-              <div
-                className="rounded-[18px] border px-4 py-12 text-center text-[12px]"
-                style={{ borderColor: "var(--border)", color: "var(--text-tertiary)" }}
-              >
-                正在加载已安装的 Skills…
-              </div>
-            ) : skills.length === 0 ? (
-              <div
-                className="rounded-[18px] border px-4 py-12 text-center text-[12px]"
-                style={{ borderColor: "var(--border)", color: "var(--text-tertiary)" }}
-              >
-                暂无已安装的 Skills，在上方粘贴地址即可安装。
-              </div>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {skills.map((skill) => (
-                  <SkillCard
-                    key={skill.id}
-                    skill={skill}
-                    uninstalling={uninstallingId === skill.id}
-                    onView={setDetailTarget}
-                    onToggle={(target) => void toggleSkill(target)}
-                    onUninstall={(target) => setConfirmTarget({ skill: target })}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+        </div>
       </div>
 
       {confirmTarget && (

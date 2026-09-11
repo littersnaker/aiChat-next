@@ -217,7 +217,9 @@ def normalize_observation(
         "price": price,
         "currency": marketplace.currency if price is not None else None,
         "rating": _first_number(item, ("rating", "stars", "score")),
-        "reviewCount": _first_number(item, ("reviews", "review_count", "reviews_count", "ratings", "rating_count")),
+        "reviewCount": _first_number(
+            item, ("reviews", "review_count", "reviews_count", "ratings", "rating_count")
+        ),
         "merchant": merchant,
         "provider": "talordata-market",
     }
@@ -261,7 +263,9 @@ async def _request_endpoint(
         payload = {"message": response.text[:800]}
     if response.is_error:
         message = payload.get("message") if isinstance(payload, dict) else None
-        error = RuntimeError(f"TalorData 请求失败（HTTP {response.status_code}）{f'：{message}' if message else ''}")
+        error = RuntimeError(
+            f"TalorData 请求失败（HTTP {response.status_code}）{f'：{message}' if message else ''}"
+        )
         error.status_code = response.status_code
         raise error
     return payload, latency_ms

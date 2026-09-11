@@ -1,13 +1,7 @@
 // 模块说明：在 Renderer 中转换 LLM/数据源凭证，并兼容旧 localStorage。
-import {
-  LLM_PROVIDER_CATALOG,
-  LLM_PROVIDER_IDS,
-} from "./llm/registry/providers";
+import { LLM_PROVIDER_CATALOG, LLM_PROVIDER_IDS } from "./llm/registry/providers";
 import type { LlmCredentials, LlmEndpointOverrides } from "./llm/types";
-import {
-  COMMERCE_STORAGE_KEYS,
-  type AuxiliaryServiceCredentials,
-} from "./service-credentials";
+import { COMMERCE_STORAGE_KEYS, type AuxiliaryServiceCredentials } from "./service-credentials";
 
 export type PersistedCredentialStore = Record<string, string>;
 
@@ -36,9 +30,7 @@ export function readLegacyLocalCredentialStore(): PersistedCredentialStore {
 }
 
 /** 把平面持久化记录转换成业务 Hook 使用的三个强类型对象。 */
-export function credentialStoreToSnapshot(
-  store: PersistedCredentialStore,
-): CredentialSnapshot {
+export function credentialStoreToSnapshot(store: PersistedCredentialStore): CredentialSnapshot {
   const llm: LlmCredentials = {};
   const endpoints: LlmEndpointOverrides = {};
   for (const provider of LLM_PROVIDER_CATALOG) {
@@ -52,8 +44,7 @@ export function credentialStoreToSnapshot(
   // v5-v7 曾把 TalorData Token 写入 SERPAPI_API_KEY，升级时继续兼容读取。
   const services: AuxiliaryServiceCredentials = {
     talorDataToken:
-      store[COMMERCE_STORAGE_KEYS.talorDataToken] ||
-      store[COMMERCE_STORAGE_KEYS.legacySerpApi],
+      store[COMMERCE_STORAGE_KEYS.talorDataToken] || store[COMMERCE_STORAGE_KEYS.legacySerpApi],
     keepaApiKey: store[COMMERCE_STORAGE_KEYS.keepaApiKey],
     amazonClientId: store[COMMERCE_STORAGE_KEYS.amazonClientId],
     amazonClientSecret: store[COMMERCE_STORAGE_KEYS.amazonClientSecret],
@@ -66,8 +57,7 @@ export function credentialStoreToSnapshot(
     temuAccessToken: store[COMMERCE_STORAGE_KEYS.temuAccessToken],
     alibaba1688AppKey: store[COMMERCE_STORAGE_KEYS.alibaba1688AppKey],
     alibaba1688AppSecret: store[COMMERCE_STORAGE_KEYS.alibaba1688AppSecret],
-    alibaba1688AccessToken:
-      store[COMMERCE_STORAGE_KEYS.alibaba1688AccessToken],
+    alibaba1688AccessToken: store[COMMERCE_STORAGE_KEYS.alibaba1688AccessToken],
   };
   return { llm, endpoints, services };
 }
@@ -80,9 +70,7 @@ export function snapshotToCredentialStore(
 ): PersistedCredentialStore {
   const result: PersistedCredentialStore = {};
   for (const providerId of LLM_PROVIDER_IDS) {
-    const provider = LLM_PROVIDER_CATALOG.find(
-      (item) => item.id === providerId,
-    );
+    const provider = LLM_PROVIDER_CATALOG.find((item) => item.id === providerId);
     const value = llm[providerId]?.trim();
     if (provider && value) result[provider.environmentKey] = value;
     const endpoint = endpoints[providerId]?.trim();
@@ -118,9 +106,7 @@ export function snapshotToCredentialStore(
  * 保留 localStorage 作为纯浏览器开发模式后备，同时删除用户已清空的字段。
  * Electron 运行时的主存储是主进程凭证文件，不再依赖页面 Origin。
  */
-export function writeLegacyLocalCredentialStore(
-  store: PersistedCredentialStore,
-): void {
+export function writeLegacyLocalCredentialStore(store: PersistedCredentialStore): void {
   if (typeof window === "undefined") return;
   const allowedKeys = [
     ...LLM_PROVIDER_CATALOG.flatMap((provider) => [

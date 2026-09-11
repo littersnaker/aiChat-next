@@ -11,19 +11,13 @@ from backend.services.agent.shared.work_models import WorkItem
 def _load_commerce_terms() -> tuple[str, ...]:
     """从配置读取电商领域触发词，避免业务词写死在代码里。"""
 
-    return tuple(
-        str(item)
-        for item in plan_optimizer_rules().get("commerceTerms") or ()
-    )
+    return tuple(str(item) for item in plan_optimizer_rules().get("commerceTerms") or ())
 
 
 def _load_broad_terms() -> tuple[str, ...]:
     """从配置读取宽泛任务触发词。"""
 
-    return tuple(
-        str(item)
-        for item in plan_optimizer_rules().get("broadTerms") or ()
-    )
+    return tuple(str(item) for item in plan_optimizer_rules().get("broadTerms") or ())
 
 
 _COMMERCE_TERMS = _load_commerce_terms()
@@ -53,12 +47,8 @@ def _load_domain_rules() -> tuple[_DomainRule, ...]:
                 key=str(entry.get("key") or ""),
                 title=str(entry.get("title") or ""),
                 terms=tuple(str(item) for item in entry.get("terms") or ()),
-                path_terms=tuple(
-                    str(item) for item in entry.get("pathTerms") or ()
-                ),
-                acceptance=tuple(
-                    str(item) for item in entry.get("acceptance") or ()
-                ),
+                path_terms=tuple(str(item) for item in entry.get("pathTerms") or ()),
+                acceptance=tuple(str(item) for item in entry.get("acceptance") or ()),
             )
         )
     return tuple(rules)
@@ -101,9 +91,7 @@ def optimize_work_granularity(
                 dependencies.extend(candidate.id for candidate in replacement)
             else:
                 dependencies.append(dependency)
-        item.dependencies = list(
-            dict.fromkeys(value for value in dependencies if value != item.id)
-        )
+        item.dependencies = list(dict.fromkeys(value for value in dependencies if value != item.id))
     return optimized
 
 
@@ -120,9 +108,7 @@ def _split_work(
 
     if work.execution_type not in {"agent", "coding"}:
         return [work]
-    text = " ".join(
-        [work.title, work.objective, *work.acceptance_criteria]
-    ).lower()
+    text = " ".join([work.title, work.objective, *work.acceptance_criteria]).lower()
     matched = [rule for rule in _DOMAIN_RULES if any(term in text for term in rule.terms)]
     if len(matched) < 3 or len(work.target_files) < 10:
         return [work]

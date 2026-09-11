@@ -29,9 +29,7 @@ def split_oversized_works(works: list[WorkItem]) -> list[WorkItem]:
     replacement_map: dict[str, list[str]] = {}
 
     for work in works:
-        targets = list(
-            dict.fromkeys(path for path in work.target_files if path.strip())
-        )
+        targets = list(dict.fromkeys(path for path in work.target_files if path.strip()))
         if len(targets) <= MAX_WORK_TARGET_FILES:
             result.append(work)
             continue
@@ -69,9 +67,7 @@ def split_oversized_works(works: list[WorkItem]) -> list[WorkItem]:
                 else:
                     dependencies.append(dependency)
             item.dependencies = list(
-                dict.fromkeys(
-                    value for value in dependencies if value != item.id
-                )
+                dict.fromkeys(value for value in dependencies if value != item.id)
             )
     return result
 
@@ -140,9 +136,7 @@ def split_works_by_size(
                 )
             )
         replacement_map[work.id] = sub_ids
-        notes.append(
-            f"{work.id} 按文件体积拆分为 {len(chunks)} 个独立 Work"
-        )
+        notes.append(f"{work.id} 按文件体积拆分为 {len(chunks)} 个独立 Work")
 
     if replacement_map:
         for item in result:
@@ -173,13 +167,7 @@ def _chunk_targets(
     current_size = 0
     for path in targets:
         size = _estimated_chars(root, path)
-        if (
-            current
-            and (
-                len(current) + 1 > max_files
-                or current_size + size > max_chars
-            )
-        ):
+        if current and (len(current) + 1 > max_files or current_size + size > max_chars):
             chunks.append(current)
             current = []
             current_size = 0

@@ -41,8 +41,5 @@ export function useChatCheckpointBinding() {
     }),
     [],
   );
-  return useMemo(
-    () => ({ capture, finalize, replyOptions }),
-    [capture, finalize, replyOptions],
-  );
+  return useMemo(() => ({ capture, finalize, replyOptions }), [capture, finalize, replyOptions]);
 }

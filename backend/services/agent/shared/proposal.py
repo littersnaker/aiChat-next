@@ -56,7 +56,9 @@ def _extract_json(text: str) -> dict[str, Any]:
     return value
 
 
-def _validate_proposal(root: Path, raw: dict[str, Any], usage: LlmUsage, model_name: str) -> ChangeProposal:
+def _validate_proposal(
+    root: Path, raw: dict[str, Any], usage: LlmUsage, model_name: str
+) -> ChangeProposal:
     """校验模型提案中的路径与文本大小；不再设置 8 文件硬限制。"""
 
     raw_files = raw.get("files")
@@ -81,9 +83,7 @@ def _validate_proposal(root: Path, raw: dict[str, Any], usage: LlmUsage, model_n
             target.suffix.lower() in LINE_LIMITED_SUFFIXES
             and len(content.splitlines()) > MAXIMUM_SOURCE_LINES
         ):
-            raise ValueError(
-                f"文件 {relative_path} 超过 {MAXIMUM_SOURCE_LINES} 行，请先拆分模块"
-            )
+            raise ValueError(f"文件 {relative_path} 超过 {MAXIMUM_SOURCE_LINES} 行，请先拆分模块")
         seen.add(relative_path)
         files.append(ProposedFile(relative_path, content, reason, target.exists()))
 

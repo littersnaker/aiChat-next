@@ -9,7 +9,6 @@
 from __future__ import annotations
 
 import logging
-from typing import TypeVar
 
 from pydantic import BaseModel
 
@@ -19,8 +18,6 @@ from backend.services.llm.gateway import GATEWAY
 from backend.services.llm.types import LlmMessage
 
 LOGGER = logging.getLogger(__name__)
-
-T = TypeVar("T", bound=BaseModel)
 
 
 class CommerceCategoryAnalysis(BaseModel):
@@ -79,13 +76,10 @@ class LlmConfig:
     def available(self) -> bool:
         """至少配置了一个厂商 Key 才认为可用。"""
 
-        return bool(
-            self.credentials is not None
-            and any((self.credentials.values or {}).values())
-        )
+        return bool(self.credentials is not None and any((self.credentials.values or {}).values()))
 
 
-async def try_complete_json(
+async def try_complete_json[T](
     llm: LlmConfig | None,
     *,
     system_prompt: str,

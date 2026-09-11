@@ -105,9 +105,7 @@ function buildStartupHtml(theme: AppTheme): string {
 }
 
 /** 创建并立即显示启动加载窗口。 */
-export async function createStartupWindow(
-  theme: AppTheme,
-): Promise<BrowserWindow> {
+export async function createStartupWindow(theme: AppTheme): Promise<BrowserWindow> {
   const window = new BrowserWindow({
     width: 460,
     height: 310,
@@ -151,10 +149,7 @@ export function updateStartupWindow(
 }
 
 /** SQLite 主题迁移完成后立即更新仍在显示的加载页。 */
-export function updateStartupWindowTheme(
-  window: BrowserWindow | null,
-  theme: AppTheme,
-): void {
+export function updateStartupWindowTheme(window: BrowserWindow | null, theme: AppTheme): void {
   if (!window || window.isDestroyed() || window.webContents.isDestroyed()) return;
 
   void window.webContents

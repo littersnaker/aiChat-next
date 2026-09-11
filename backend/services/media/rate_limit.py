@@ -12,9 +12,7 @@ import asyncio
 import os
 import time
 
-MIN_MEDIA_INTERVAL_SECONDS = float(
-    os.getenv("MEDIA_MIN_INTERVAL", "2.5")
-)
+MIN_MEDIA_INTERVAL_SECONDS = float(os.getenv("MEDIA_MIN_INTERVAL", "2.5"))
 
 _lock = asyncio.Lock()
 _last_request_at = 0.0

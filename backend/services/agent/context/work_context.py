@@ -81,7 +81,5 @@ class WorkContext:
             recent_actions=[str(item) for item in value.get("recentActions", [])],
             failure_summary=dict(value.get("failureSummary", {})),
             artifact_refs=[str(item) for item in value.get("artifactRefs", [])],
-            token_usage={
-                str(k): int(v) for k, v in dict(value.get("tokenUsage", {})).items()
-            },
+            token_usage={str(k): int(v) for k, v in dict(value.get("tokenUsage", {})).items()},
         )

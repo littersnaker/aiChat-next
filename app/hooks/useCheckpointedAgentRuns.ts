@@ -115,20 +115,16 @@ export function useCheckpointedAgentRuns(options: UseCheckpointedAgentRunsOption
         return;
       }
       if (kind === "media") {
-        await options.media.submit(
-          request.input,
-          request.composerMode as MediaMode,
-          {
-            checkpointId,
-            resumeExistingRun: resume,
-            attachmentOverride: request.attachments[0] || null,
-            modelOverride: request.selectedModel,
-            typographyPolicyOverride: request.typographyPolicy,
-            imageEditFidelityOverride: request.imageEditFidelity,
-            enableQualityGuardOverride: request.enableQualityGuard,
-            onCheckpointFinish,
-          },
-        );
+        await options.media.submit(request.input, request.composerMode as MediaMode, {
+          checkpointId,
+          resumeExistingRun: resume,
+          attachmentOverride: request.attachments[0] || null,
+          modelOverride: request.selectedModel,
+          typographyPolicyOverride: request.typographyPolicy,
+          imageEditFidelityOverride: request.imageEditFidelity,
+          enableQualityGuardOverride: request.enableQualityGuard,
+          onCheckpointFinish,
+        });
         return;
       }
       await options.commerce.submitPrompt(request.input, {
@@ -192,10 +188,7 @@ export function useCheckpointedAgentRuns(options: UseCheckpointedAgentRunsOption
 
   const resume = useCallback(
     async (checkpoint: AgentCheckpoint) => {
-      const request = buildCheckpointResumeRequest(
-        checkpoint.request,
-        options.selectedModel,
-      );
+      const request = buildCheckpointResumeRequest(checkpoint.request, options.selectedModel);
       // 同时更新 SQLite 中的请求快照。若本次又中断，下次恢复仍会沿用
       // 用户刚刚切换的新模型，而不会退回已经没额度的旧模型。
       await checkpoints.update(checkpoint.id, "running", "", request);

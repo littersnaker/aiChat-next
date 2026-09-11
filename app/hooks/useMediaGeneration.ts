@@ -13,10 +13,7 @@ import type {
 } from "../constants/page-constants";
 import { apiFetch } from "../lib/api-client";
 import { toMessageAttachment } from "../constants/page-constants";
-import {
-  buildLlmRequestHeaders,
-  buildMediaAttachmentPayload,
-} from "../lib/llm/client-request";
+import { buildLlmRequestHeaders, buildMediaAttachmentPayload } from "../lib/llm/client-request";
 import type { LlmCredentials, LlmEndpointOverrides } from "../lib/llm/types";
 import type { TokenInfo } from "../types/workspace";
 import type { CheckpointFinishResult } from "../types/checkpoints";
@@ -27,11 +24,7 @@ interface UseMediaGenerationOptions {
   messages: Message[];
   setMessages: Dispatch<SetStateAction<Message[]>>;
   setSessions: Dispatch<SetStateAction<ChatSession[]>>;
-  persistSession: (
-    session: ChatSession,
-    nextMessages: Message[],
-    title?: string,
-  ) => Promise<void>;
+  persistSession: (session: ChatSession, nextMessages: Message[], title?: string) => Promise<void>;
   apiKeys: LlmCredentials;
   endpointOverrides: LlmEndpointOverrides;
   selectedModel: string;
@@ -65,18 +58,11 @@ export interface MediaRunOptions {
   typographyPolicyOverride?: TypographyPolicy;
   imageEditFidelityOverride?: ImageEditFidelity;
   enableQualityGuardOverride?: boolean;
-  onCheckpointFinish?: (
-    result: CheckpointFinishResult,
-  ) => void | Promise<void>;
+  onCheckpointFinish?: (result: CheckpointFinishResult) => void | Promise<void>;
 }
 
 function requiresAttachment(mode: MediaMode): boolean {
-  return [
-    "image-edit",
-    "image-to-video",
-    "reference-to-video",
-    "video-edit",
-  ].includes(mode);
+  return ["image-edit", "image-to-video", "reference-to-video", "video-edit"].includes(mode);
 }
 
 function maxAttachmentSizeBytes(mode: MediaMode): number | null {
@@ -102,9 +88,7 @@ function validateAttachmentForMode(
   }
 
   if (
-    (mode === "image-edit" ||
-      mode === "image-to-video" ||
-      mode === "reference-to-video") &&
+    (mode === "image-edit" || mode === "image-to-video" || mode === "reference-to-video") &&
     !attachment.type.startsWith("image/")
   ) {
     return "当前模式需要上传图片素材。";
@@ -210,18 +194,12 @@ export function useMediaGeneration({
   }, [stopProgressTimer]);
 
   const replaceSessionMessages = useCallback(
-    async (
-      session: ChatSession,
-      nextMessages: Message[],
-      title: string,
-    ): Promise<void> => {
+    async (session: ChatSession, nextMessages: Message[], title: string): Promise<void> => {
       const nextSession = { ...session, title, messages: nextMessages };
 
       setMessages(nextMessages);
       setSessions((current) =>
-        current.map((item) =>
-          item.id === session.id ? nextSession : item,
-        ),
+        current.map((item) => (item.id === session.id ? nextSession : item)),
       );
       await persistSession(session, nextMessages, title);
     },
@@ -236,45 +214,37 @@ export function useMediaGeneration({
     (mode: MediaMode) => {
       stopProgressTimer();
       progressRef.current = 18;
-      progressTimerRef.current = window.setInterval(() => {
-        const increment = mode.includes("video") ? 3 : 6;
-        progressRef.current = Math.min(88, progressRef.current + increment);
-        const currentProgress = progressRef.current;
-        agents.updateMediaProgress(
-          currentProgress,
-          currentProgress < 40
-            ? "正在提交百炼媒体任务"
-            : currentProgress < 72
-              ? "模型正在生成内容"
-              : mode === "image-edit" && enableQualityGuard
-                ? "正在检查重影、重复元素和无关改动"
-                : "正在下载并整理生成结果",
-        );
-      }, mode.includes("video") ? 2500 : 1200);
+      progressTimerRef.current = window.setInterval(
+        () => {
+          const increment = mode.includes("video") ? 3 : 6;
+          progressRef.current = Math.min(88, progressRef.current + increment);
+          const currentProgress = progressRef.current;
+          agents.updateMediaProgress(
+            currentProgress,
+            currentProgress < 40
+              ? "正在提交百炼媒体任务"
+              : currentProgress < 72
+                ? "模型正在生成内容"
+                : mode === "image-edit" && enableQualityGuard
+                  ? "正在检查重影、重复元素和无关改动"
+                  : "正在下载并整理生成结果",
+          );
+        },
+        mode.includes("video") ? 2500 : 1200,
+      );
     },
     [agents, enableQualityGuard, stopProgressTimer],
   );
 
   const submit = useCallback(
-    async (
-      promptText: string,
-      mode: MediaMode,
-      options: MediaRunOptions = {},
-    ) => {
-      if (
-        !activeSession ||
-        activeSession.mode !== "qa" ||
-        isGenerating ||
-        isParsingFile
-      ) {
+    async (promptText: string, mode: MediaMode, options: MediaRunOptions = {}) => {
+      if (!activeSession || activeSession.mode !== "qa" || isGenerating || isParsingFile) {
         return;
       }
 
       const prompt = promptText.trim();
       const effectiveAttachment =
-        options.attachmentOverride === undefined
-          ? attachedFile
-          : options.attachmentOverride;
+        options.attachmentOverride === undefined ? attachedFile : options.attachmentOverride;
       if (!prompt && !effectiveAttachment) return;
 
       const attachmentError = validateAttachmentForMode(mode, effectiveAttachment);
@@ -305,9 +275,7 @@ export function useMediaGeneration({
       const resumeExistingRun = options.resumeExistingRun === true;
       const lastMessage = messages[messages.length - 1];
       const baseMessages =
-        resumeExistingRun && lastMessage?.role === "assistant"
-          ? messages.slice(0, -1)
-          : messages;
+        resumeExistingRun && lastMessage?.role === "assistant" ? messages.slice(0, -1) : messages;
       const optimisticHistory: Message[] = [
         ...baseMessages,
         ...(resumeExistingRun ? [] : [userMessage]),
@@ -325,9 +293,7 @@ export function useMediaGeneration({
 
       setMessages(optimisticHistory);
       setSessions((current) =>
-        current.map((session) =>
-          session.id === activeSession.id ? optimisticSession : session,
-        ),
+        current.map((session) => (session.id === activeSession.id ? optimisticSession : session)),
       );
       clearAfterSubmit();
 
@@ -345,21 +311,14 @@ export function useMediaGeneration({
       abortRef.current = controller;
       let checkpointResult: CheckpointFinishResult = { status: "completed" };
       const requestModel = options.modelOverride || selectedModel;
-      const requestTypographyPolicy =
-        options.typographyPolicyOverride || typographyPolicy;
-      const requestImageEditFidelity =
-        options.imageEditFidelityOverride || imageEditFidelity;
-      const requestQualityGuard =
-        options.enableQualityGuardOverride ?? enableQualityGuard;
+      const requestTypographyPolicy = options.typographyPolicyOverride || typographyPolicy;
+      const requestImageEditFidelity = options.imageEditFidelityOverride || imageEditFidelity;
+      const requestQualityGuard = options.enableQualityGuardOverride ?? enableQualityGuard;
 
       try {
         const response = await apiFetch("/api/media/generate", {
           method: "POST",
-          headers: buildLlmRequestHeaders(
-            apiKeys,
-            requestModel,
-            endpointOverrides,
-          ),
+          headers: buildLlmRequestHeaders(apiKeys, requestModel, endpointOverrides),
           body: JSON.stringify({
             prompt: visiblePrompt,
             mode,

@@ -104,9 +104,10 @@ class ReasoningState:
     def render_summary(self) -> str:
         """生成供下一轮 Worker 使用的紧凑结构化状态摘要。"""
 
-        decisions = "\n".join(
-            f"- {item.decision}：{item.reason}" for item in self.decisions[-6:]
-        ) or "- 暂无已确认决策"
+        decisions = (
+            "\n".join(f"- {item.decision}：{item.reason}" for item in self.decisions[-6:])
+            or "- 暂无已确认决策"
+        )
         risks = "\n".join(f"- {item}" for item in self.risks[-6:]) or "- 暂无已知风险"
         return (
             f"推理级别：{self.level}（预算 {self.token_budget} tokens）\n"

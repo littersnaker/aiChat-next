@@ -171,9 +171,7 @@ async def _try_batch_write(
         return None, "disabled"
     targets = list(
         dict.fromkeys(
-            path
-            for path in (targets_override or work.target_files)
-            if path and path.strip()
+            path for path in (targets_override or work.target_files) if path and path.strip()
         )
     )
     if not targets:
@@ -193,8 +191,7 @@ async def _try_batch_write(
 - 每个 operation 都必须带 reason；
 - 输出必须能被 json.loads 解析。"""
     files_text = "\n\n".join(
-        f"--- FILE: {path} ---\n{content}"
-        for path, content in _split_read_content(read.content)
+        f"--- FILE: {path} ---\n{content}" for path, content in _split_read_content(read.content)
     )
     work_payload = {
         "id": work.id,
@@ -243,16 +240,12 @@ async def _try_batch_write(
     except ValueError:
         return None, "model_skipped"
     if action.action != "edit":
-        state.append_transcript(
-            "BATCH WRITE SKIPPED: 模型未返回批量 edit 动作，转入常规循环。"
-        )
+        state.append_transcript("BATCH WRITE SKIPPED: 模型未返回批量 edit 动作，转入常规循环。")
         return None, "model_skipped"
     if not action.operations:
         # 批量直写提示词允许“内容已满足验收标准的文件可以不包含 operation”，
         # 此时空 operations 表示无需修改，直接成功收尾，避免被判协议错误。
-        state.append_transcript(
-            "BATCH WRITE COMPLETED: 目标文件已满足验收标准，无需修改。"
-        )
+        state.append_transcript("BATCH WRITE COMPLETED: 目标文件已满足验收标准，无需修改。")
         await checkpoint()
         return (
             WorkExecutionResult(
@@ -281,13 +274,8 @@ async def _try_batch_write(
             "agentId": f"modify_worker:{work.id}",
             "slot": slot,
             "status": "running",
-            "detail": (
-                f"{work.id}：正在写入 "
-                f"{len(action.operations)} 个目标文件"
-            ),
-            "currentFiles": sorted(
-                {operation.path for operation in action.operations}
-            ),
+            "detail": (f"{work.id}：正在写入 " f"{len(action.operations)} 个目标文件"),
+            "currentFiles": sorted({operation.path for operation in action.operations}),
         },
     )
     paths = {operation.path for operation in action.operations}
@@ -297,11 +285,7 @@ async def _try_batch_write(
             owner=work.id,
             priority=work.priority,
         ):
-            expected = {
-                path: read.versions[path]
-                for path in paths
-                if path in read.versions
-            }
+            expected = {path: read.versions[path] for path in paths if path in read.versions}
             edit_result = cast(
                 EditBatchResult,
                 await execute_code_tool(
@@ -317,9 +301,7 @@ async def _try_batch_write(
                 ),
             )
     except Exception as exc:
-        state.append_transcript(
-            f"BATCH WRITE FAILED: {exc}\n转入常规循环重试。"
-        )
+        state.append_transcript(f"BATCH WRITE FAILED: {exc}\n转入常规循环重试。")
         return None, "write_failed"
     for path in edit_result.changed_files:
         if path not in state.changed_files:
@@ -335,22 +317,22 @@ async def _try_batch_write(
             "agentId": f"merge_agent:{work.id}",
             "slot": slot,
             "status": "completed",
-            "detail": (
-                f"{work.id}：一次性批量写入 "
-                f"{len(edit_result.changed_files)} 个文件"
-            ),
+            "detail": (f"{work.id}：一次性批量写入 " f"{len(edit_result.changed_files)} 个文件"),
             "currentFiles": list(edit_result.changed_files),
             "toolName": "apply_file_change",
         },
     )
     await checkpoint()
-    return WorkExecutionResult(
-        work_id=work.id,
-        succeeded=True,
-        summary=f"已一次性写入 {len(edit_result.changed_files)} 个目标文件。",
-        error="",
-        state=state,
-    ), ""
+    return (
+        WorkExecutionResult(
+            work_id=work.id,
+            succeeded=True,
+            summary=f"已一次性写入 {len(edit_result.changed_files)} 个目标文件。",
+            error="",
+            state=state,
+        ),
+        "",
+    )
 
 
 _REVIEW_SYSTEM = """你是写入结果审查 Agent。目标文件已经一次性写入完成，写入后的文件内容已在输入中。

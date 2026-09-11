@@ -50,9 +50,7 @@ function createRendererCandidates(backendBaseUrl: string): RendererCandidate[] {
     return [{ label: "FastAPI 静态前端", url: backendUrl, waitForServer: false }];
   }
 
-  const viteUrl = normalizeUrl(
-    process.env.VITE_DEV_SERVER_URL || "http://127.0.0.1:5173",
-  );
+  const viteUrl = normalizeUrl(process.env.VITE_DEV_SERVER_URL || "http://127.0.0.1:5173");
   const candidates: RendererCandidate[] = [
     {
       label: "Vite 热更新页面",
@@ -130,9 +128,7 @@ function probeHttpServer(url: string): Promise<ServerProbeResult> {
 async function waitUntilReachable(url: string): Promise<ServerProbeResult> {
   const configured = Number(process.env.VITE_STARTUP_WAIT_MS);
   const waitMilliseconds =
-    Number.isFinite(configured) && configured >= 0
-      ? configured
-      : DEVELOPMENT_SERVER_WAIT_MS;
+    Number.isFinite(configured) && configured >= 0 ? configured : DEVELOPMENT_SERVER_WAIT_MS;
   const deadline = Date.now() + waitMilliseconds;
   let latestResult: ServerProbeResult = {
     reachable: false,
@@ -148,9 +144,7 @@ async function waitUntilReachable(url: string): Promise<ServerProbeResult> {
 }
 
 /** 读取 React 根节点当前状态。 */
-async function readRendererDocumentState(
-  window: BrowserWindow,
-): Promise<RendererDocumentState> {
+async function readRendererDocumentState(window: BrowserWindow): Promise<RendererDocumentState> {
   return window.webContents.executeJavaScript(
     `(() => {
       const root = document.getElementById("root");
@@ -165,9 +159,7 @@ async function readRendererDocumentState(
 }
 
 /** 等待 React 完成首次渲染，避免较慢电脑在固定 400ms 后被误判失败。 */
-async function waitForRendererDocument(
-  window: BrowserWindow,
-): Promise<RendererDocumentState> {
+async function waitForRendererDocument(window: BrowserWindow): Promise<RendererDocumentState> {
   const deadline = Date.now() + REACT_RENDER_WAIT_MS;
   let state: RendererDocumentState = {
     hasRoot: false,
@@ -196,16 +188,12 @@ export async function loadRendererPage(
       if (!probe.reachable) {
         // HTTP 预检只用于诊断，不能再次成为阻断页面加载的单点故障。Chromium 自己仍会
         // 尝试导航；这样即使 Node HTTP 在特殊代理环境中探测失败，也不会误报 Vite 未启动。
-        failures.push(
-          `${candidate.label} HTTP 预检未通过：${probe.detail}`,
-        );
+        failures.push(`${candidate.label} HTTP 预检未通过：${probe.detail}`);
         console.warn(
           `[Electron] ${candidate.label} HTTP 预检未通过，将继续尝试 Chromium 导航：${probe.detail}`,
         );
       } else {
-        console.info(
-          `[Electron] ${candidate.label} HTTP 预检通过：${probe.detail}`,
-        );
+        console.info(`[Electron] ${candidate.label} HTTP 预检通过：${probe.detail}`);
       }
     }
 
@@ -213,9 +201,7 @@ export async function loadRendererPage(
       await window.loadURL(candidate.url);
       const documentState = await waitForRendererDocument(window);
       if (!documentState.hasRoot || documentState.childCount === 0) {
-        throw new Error(
-          `页面未完成 React 渲染（title=${documentState.title || "无"}）`,
-        );
+        throw new Error(`页面未完成 React 渲染（title=${documentState.title || "无"}）`);
       }
       console.info(`[Electron] 已加载 ${candidate.label}：${candidate.url}`);
       return candidate.url;
@@ -230,10 +216,6 @@ export async function loadRendererPage(
     ? "开发模式禁止自动回退旧 dist。请确认 pnpm dev 中的 VITE 进程仍在运行。"
     : "请检查打包后的 frontend 资源。";
   throw new Error(
-    [
-      "React 页面加载失败。",
-      developmentHint,
-      ...failures.map((item) => `- ${item}`),
-    ].join("\n"),
+    ["React 页面加载失败。", developmentHint, ...failures.map((item) => `- ${item}`)].join("\n"),
   );
 }

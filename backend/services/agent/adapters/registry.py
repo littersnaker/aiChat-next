@@ -7,7 +7,8 @@
 
 from __future__ import annotations
 
-from typing import Callable, TypeVar, cast
+from collections.abc import Callable
+from typing import TypeVar, cast
 
 from backend.services.agent.adapters.base import BaseAgent
 

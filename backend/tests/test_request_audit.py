@@ -95,9 +95,7 @@ def test_effective_audit_merges_context_and_explicit() -> None:
         http_request_id="req_http1",
     )
     try:
-        merged = request_audit.effective_audit(
-            {"agentRole": "task_planner", "projectId": "p1"}
-        )
+        merged = request_audit.effective_audit({"agentRole": "task_planner", "projectId": "p1"})
     finally:
         request_audit.reset_audit_context(token)
     assert merged["agentId"] == "coding"
@@ -224,9 +222,7 @@ async def test_http_middleware_records_request_and_echoes_request_id(
                 "headers": [(b"content-type", b"application/json")],
             }
         )
-        await send(
-            {"type": "http.response.body", "body": json.dumps({"ok": True}).encode()}
-        )
+        await send({"type": "http.response.body", "body": json.dumps({"ok": True}).encode()})
 
     middleware = request_audit.RequestAuditMiddleware(app)
 
@@ -308,8 +304,6 @@ def test_cli_query(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys) -> N
         duration_ms=1,
         request={"model": "a"},
     )
-    exit_code = request_audit.main(
-        ["query", "--request-id", "llm_cli_1", "--dir", str(audit_dir)]
-    )
+    exit_code = request_audit.main(["query", "--request-id", "llm_cli_1", "--dir", str(audit_dir)])
     assert exit_code == 0
     assert "llm_cli_1" in capsys.readouterr().out

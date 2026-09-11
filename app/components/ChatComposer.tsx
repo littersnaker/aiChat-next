@@ -77,20 +77,14 @@ export function ChatComposer({
   const isMediaComposer = mode === "qa" && composerMode !== "chat";
   const submitDisabled =
     disabled ||
-    (mode === "commerce"
-      ? !input.trim()
-      : !input.trim() && attachedFiles.length === 0) ||
-    (isMediaComposer &&
-      requiresAttachment(composerMode) &&
-      attachedFiles.length === 0);
+    (mode === "commerce" ? !input.trim() : !input.trim() && attachedFiles.length === 0) ||
+    (isMediaComposer && requiresAttachment(composerMode) && attachedFiles.length === 0);
 
   const resolveIngestionOptions = useCallback(
     () => ({
       strategy: isMediaComposer ? ("replace" as const) : ("append" as const),
       maxFiles: isMediaComposer ? 1 : 32,
-      maxTotalBytes: isMediaComposer
-        ? 512 * 1024 * 1024
-        : 64 * 1024 * 1024,
+      maxTotalBytes: isMediaComposer ? 512 * 1024 * 1024 : 64 * 1024 * 1024,
     }),
     [isMediaComposer],
   );
@@ -168,20 +162,14 @@ export function ChatComposer({
                   onClick={() => onComposerModeChange(tab.value)}
                   className="rounded-[11px] px-3 py-2 text-left transition-all"
                   style={{
-                    background: active
-                      ? "var(--selection-bg-strong)"
-                      : "transparent",
-                    color: active
-                      ? "var(--selection-text)"
-                      : "var(--text-tertiary)",
+                    background: active ? "var(--selection-bg-strong)" : "transparent",
+                    color: active ? "var(--selection-text)" : "var(--text-tertiary)",
                     boxShadow: active ? "var(--selection-shadow)" : "none",
                   }}
                   title={tab.description}
                 >
                   <div className="text-[11px] font-semibold">{tab.label}</div>
-                  <div className="mt-0.5 text-[9px] opacity-70">
-                    {tab.description}
-                  </div>
+                  <div className="mt-0.5 text-[9px] opacity-70">{tab.description}</div>
                 </button>
               );
             })}
@@ -214,8 +202,7 @@ export function ChatComposer({
         </div>
       )}
 
-      {mode === "qa" &&
-        (composerMode === "text-to-image" || composerMode === "image-edit") && (
+      {mode === "qa" && (composerMode === "text-to-image" || composerMode === "image-edit") && (
         <div
           className="mb-2 flex flex-wrap items-center gap-2 rounded-[14px] border px-3 py-2"
           style={{
@@ -223,9 +210,7 @@ export function ChatComposer({
             borderColor: "var(--border)",
           }}
         >
-          <span className="text-[10px] font-medium text-[var(--text-tertiary)]">
-            图片文字策略
-          </span>
+          <span className="text-[10px] font-medium text-[var(--text-tertiary)]">图片文字策略</span>
           {TYPOGRAPHY_OPTIONS.map((option) => {
             const selected = typographyPolicy === option.value;
             return (
@@ -246,7 +231,8 @@ export function ChatComposer({
             );
           })}
           <span className="w-full text-[9px] leading-4 text-[var(--text-quaternary)]">
-            AI 生成图中的文字已经是像素，CSS 无法修正歪字。商业图建议先生成无字底图，再使用真实字体叠加。
+            AI 生成图中的文字已经是像素，CSS
+            无法修正歪字。商业图建议先生成无字底图，再使用真实字体叠加。
           </span>
         </div>
       )}
@@ -260,9 +246,7 @@ export function ChatComposer({
           }}
         >
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-medium text-[var(--text-tertiary)]">
-              编辑保真
-            </span>
+            <span className="text-[10px] font-medium text-[var(--text-tertiary)]">编辑保真</span>
             {IMAGE_EDIT_FIDELITY_OPTIONS.map((option) => {
               const selected = imageEditFidelity === option.value;
               return (
@@ -272,15 +256,9 @@ export function ChatComposer({
                   onClick={() => onImageEditFidelityChange(option.value)}
                   className="rounded-full border px-2.5 py-1 text-[10px] transition-colors"
                   style={{
-                    background: selected
-                      ? "var(--selection-bg)"
-                      : "transparent",
-                    borderColor: selected
-                      ? "var(--selection-border)"
-                      : "var(--border)",
-                    color: selected
-                      ? "var(--selection-text)"
-                      : "var(--text-tertiary)",
+                    background: selected ? "var(--selection-bg)" : "transparent",
+                    borderColor: selected ? "var(--selection-border)" : "var(--border)",
+                    color: selected ? "var(--selection-text)" : "var(--text-tertiary)",
                   }}
                   title={option.description}
                 >
@@ -294,9 +272,7 @@ export function ChatComposer({
             <input
               type="checkbox"
               checked={enableQualityGuard && imageEditFidelity !== "creative"}
-              onChange={(event) =>
-                onEnableQualityGuardChange(event.target.checked)
-              }
+              onChange={(event) => onEnableQualityGuardChange(event.target.checked)}
               disabled={imageEditFidelity === "creative"}
               className="mt-0.5 h-3.5 w-3.5 accent-[#0a84ff] disabled:opacity-40"
             />
@@ -309,7 +285,8 @@ export function ChatComposer({
           </label>
 
           <div className="mt-1.5 text-[9px] leading-4 text-[var(--text-quaternary)]">
-            UI 截图、商品图、按钮/标题文字替换请使用“精准修改”。模型仍属于生成式编辑，无法保证像素级完全不变。
+            UI
+            截图、商品图、按钮/标题文字替换请使用“精准修改”。模型仍属于生成式编辑，无法保证像素级完全不变。
           </div>
         </div>
       )}
@@ -333,8 +310,7 @@ export function ChatComposer({
             ? "color-mix(in srgb, var(--composer-bg) 82%, var(--accent-blue) 18%)"
             : "var(--composer-bg)",
           borderColor: isDragActive ? "var(--accent-blue)" : "var(--border)",
-          boxShadow:
-            "var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.07)",
+          boxShadow: "var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.07)",
           backdropFilter: "blur(30px) saturate(145%)",
           WebkitBackdropFilter: "blur(30px) saturate(145%)",
         }}
@@ -345,9 +321,7 @@ export function ChatComposer({
       >
         {isDragActive && (
           <div className="pointer-events-none absolute inset-1 z-10 flex items-center justify-center rounded-[18px] border border-dashed border-[var(--accent-blue)] bg-[color-mix(in_srgb,var(--composer-bg)_82%,transparent)] text-[11px] font-semibold text-[var(--accent-blue)] backdrop-blur-sm">
-            {activeDropKind === "text"
-              ? "松开以插入文字"
-              : "松开以添加图片、文件或文件夹"}
+            {activeDropKind === "text" ? "松开以插入文字" : "松开以添加图片、文件或文件夹"}
           </div>
         )}
         <TextareaAutosize
@@ -373,10 +347,7 @@ export function ChatComposer({
         />
 
         {mode === "qa" && composerMode !== "chat" && (
-          <div
-            className="px-2.5 pb-2 text-[10px]"
-            style={{ color: "var(--text-tertiary)" }}
-          >
+          <div className="px-2.5 pb-2 text-[10px]" style={{ color: "var(--text-tertiary)" }}>
             选择模式和模型后直接生成；图片结果会保存到会话并支持下载。
           </div>
         )}
@@ -437,7 +408,11 @@ export function ChatComposer({
               type="button"
               onClick={isStreaming ? onStop : onSubmit}
               disabled={!isStreaming && submitDisabled}
-              title={isStreaming ? "停止生成" : resolveSubmitLabel(mode, composerMode, commerceWorkflowMode)}
+              title={
+                isStreaming
+                  ? "停止生成"
+                  : resolveSubmitLabel(mode, composerMode, commerceWorkflowMode)
+              }
               className={`flex h-9 w-9 items-center justify-center rounded-full text-white transition-all ${
                 isStreaming
                   ? "animate-stop-breathe hover:scale-[1.06]"

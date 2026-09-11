@@ -95,9 +95,7 @@ async def test_update_missing_draft_returns_false(db) -> None:
         )
         is False
     )
-    assert (
-        await update_listing_draft_status("draft_missing", "confirmed") is False
-    )
+    assert await update_listing_draft_status("draft_missing", "confirmed") is False
 
 
 @pytest.mark.asyncio

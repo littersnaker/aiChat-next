@@ -62,11 +62,7 @@ export default function SkillCard({
   /** 是否真正生效：已启用且至少绑定一个 Agent。 */
   const isEnabled = Boolean(skill.enabled && skill.agentIds?.length);
   /** 徽标三态：已启用 / 未绑定 Agent / 未启用。 */
-  const badgeState = isEnabled
-    ? "enabled"
-    : isSwitchedOn
-      ? "unbound"
-      : "disabled";
+  const badgeState = isEnabled ? "enabled" : isSwitchedOn ? "unbound" : "disabled";
 
   return (
     <article
@@ -190,10 +186,7 @@ export default function SkillCard({
         >
           {skill.sourceUrl || "本地来源"}
         </p>
-        <p
-          className="mt-0.5 text-[11px]"
-          style={{ color: "var(--text-tertiary)" }}
-        >
+        <p className="mt-0.5 text-[11px]" style={{ color: "var(--text-tertiary)" }}>
           安装于 {formatDate(skill.installedAt)}
           {typeof skill.hitCount === "number" && skill.hitCount > 0
             ? ` · 已使用 ${skill.hitCount} 次`

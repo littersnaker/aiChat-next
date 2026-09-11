@@ -40,20 +40,16 @@ def read_data_source_status() -> dict[str, object]:
                 and credentials.get("amazon_client_secret")
                 and credentials.get("amazon_refresh_token")
             ),
-            "fingerprint": secret_fingerprint(
-                credentials.get("amazon_refresh_token")
-            ),
+            "fingerprint": secret_fingerprint(credentials.get("amazon_refresh_token")),
         },
         "tiktok": {
             "configured": bool(
-                credentials.get("tiktok_client_key")
-                and credentials.get("tiktok_client_secret")
+                credentials.get("tiktok_client_key") and credentials.get("tiktok_client_secret")
             )
         },
         "temu": {
             "configured": bool(
-                credentials.get("temu_app_key")
-                and credentials.get("temu_app_secret")
+                credentials.get("temu_app_key") and credentials.get("temu_app_secret")
             )
         },
         "1688": {

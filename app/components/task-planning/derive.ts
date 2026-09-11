@@ -1,8 +1,5 @@
 // 模块说明：负责 derive 用户界面组件。
-import type {
-  AgentLifecycleEventPayload,
-  WorkListSnapshotPayload,
-} from "../../types/workspace";
+import type { AgentLifecycleEventPayload, WorkListSnapshotPayload } from "../../types/workspace";
 import type { ToolActivity } from "../AssistantMessageRow";
 import type { AgentInstance } from "../AgentPanel";
 import type {
@@ -12,23 +9,15 @@ import type {
   PlanningSummary,
 } from "./types";
 
-function matchesActivity(
-  activity: ToolActivity,
-  definition: PlanningStageDefinition,
-): boolean {
+function matchesActivity(activity: ToolActivity, definition: PlanningStageDefinition): boolean {
   // Commerce 进度事件携带稳定 stageId 时优先精确匹配，不再依赖中文文案猜测。
-  if (
-    activity.stageId &&
-    definition.activityStageIds?.includes(activity.stageId)
-  ) {
+  if (activity.stageId && definition.activityStageIds?.includes(activity.stageId)) {
     return true;
   }
 
   // 旧会话、媒体任务和 Code Agent 继续使用兼容性的文案关键字匹配。
   const normalized = activity.label.toLocaleLowerCase();
-  return definition.activityKeys.some((key) =>
-    normalized.includes(key.toLocaleLowerCase()),
-  );
+  return definition.activityKeys.some((key) => normalized.includes(key.toLocaleLowerCase()));
 }
 
 function resolveDirectStatus(
@@ -36,12 +25,8 @@ function resolveDirectStatus(
   agents: AgentInstance[],
   activities: ToolActivity[],
 ): PlanningStageStatus {
-  const relatedAgents = agents.filter((agent) =>
-    definition.agentTypes.includes(agent.type),
-  );
-  const relatedActivities = activities.filter((activity) =>
-    matchesActivity(activity, definition),
-  );
+  const relatedAgents = agents.filter((agent) => definition.agentTypes.includes(agent.type));
+  const relatedActivities = activities.filter((activity) => matchesActivity(activity, definition));
 
   if (
     relatedAgents.some((agent) => agent.status === "error") ||
@@ -50,9 +35,7 @@ function resolveDirectStatus(
     return "error";
   }
   if (
-    relatedAgents.some((agent) =>
-      ["running", "thinking"].includes(agent.status),
-    ) ||
+    relatedAgents.some((agent) => ["running", "thinking"].includes(agent.status)) ||
     relatedActivities.some((activity) => activity.status === "running")
   ) {
     return "active";
@@ -83,8 +66,7 @@ function normalizeFallbackStatuses(
   if (!isStreaming) return directStatuses;
 
   const activeIndex = directStatuses.reduce(
-    (latest, status, index) =>
-      status === "active" || status === "error" ? index : latest,
+    (latest, status, index) => (status === "active" || status === "error" ? index : latest),
     -1,
   );
 
@@ -121,10 +103,7 @@ function compareLifecycleEvents(
 ): number {
   const leftTime = Date.parse(left.createdAt || "");
   const rightTime = Date.parse(right.createdAt || "");
-  const timeDiff =
-    Number.isNaN(leftTime) || Number.isNaN(rightTime)
-      ? 0
-      : leftTime - rightTime;
+  const timeDiff = Number.isNaN(leftTime) || Number.isNaN(rightTime) ? 0 : leftTime - rightTime;
 
   if (timeDiff !== 0) return timeDiff;
   return (left.sequence || 0) - (right.sequence || 0);
@@ -134,9 +113,7 @@ function findLifecycleStageIndex(
   definitions: PlanningStageDefinition[],
   event: AgentLifecycleEventPayload,
 ): number {
-  return definitions.findIndex((definition) =>
-    definition.lifecycleRoles?.includes(event.role),
-  );
+  return definitions.findIndex((definition) => definition.lifecycleRoles?.includes(event.role));
 }
 
 function lifecycleStatusToPlanningStatus(
@@ -148,18 +125,12 @@ function lifecycleStatusToPlanningStatus(
   [...events].sort(compareLifecycleEvents).forEach((event) => {
     latestByAgent.set(event.agentId, event);
   });
-  const statuses = Array.from(latestByAgent.values()).map((event) =>
-    event.status.toUpperCase(),
-  );
+  const statuses = Array.from(latestByAgent.values()).map((event) => event.status.toUpperCase());
 
   if (statuses.some((status) => ["FAILED", "ERROR"].includes(status))) {
     return "error";
   }
-  if (
-    statuses.some(
-      (status) => !["COMPLETED", "FAILED", "ERROR"].includes(status),
-    )
-  ) {
+  if (statuses.some((status) => !["COMPLETED", "FAILED", "ERROR"].includes(status))) {
     return "active";
   }
   return "completed";
@@ -204,25 +175,16 @@ function buildLifecycleStages(
     const detail =
       index === currentStageIndex && latestStageEvent
         ? `${
-            latestStageEvent.iteration > 0
-              ? `第 ${latestStageEvent.iteration + 1} 轮返工 · `
-              : ""
+            latestStageEvent.iteration > 0 ? `第 ${latestStageEvent.iteration + 1} 轮返工 · ` : ""
           }${latestStageEvent.detail}`
         : definition.description;
 
     return {
       ...definition,
       status,
-      progress:
-        status === "completed" || status === "error"
-          ? 100
-          : status === "active"
-            ? 58
-            : 0,
+      progress: status === "completed" || status === "error" ? 100 : status === "active" ? 58 : 0,
       detail,
-      activityCount: activities.filter((activity) =>
-        matchesActivity(activity, definition),
-      ).length,
+      activityCount: activities.filter((activity) => matchesActivity(activity, definition)).length,
       iteration,
     };
   });
@@ -243,8 +205,7 @@ function resolveProgress(
   if (!relatedProgress.length) return 52;
 
   const average =
-    relatedProgress.reduce((total, value) => total + value, 0) /
-    relatedProgress.length;
+    relatedProgress.reduce((total, value) => total + value, 0) / relatedProgress.length;
   return Math.max(12, Math.min(96, Math.round(average)));
 }
 
@@ -294,9 +255,7 @@ function isSuccessfulTerminalRun(
   const hasFailure =
     agents.some((agent) => agent.status === "error") ||
     activities.some((activity) => activity.status === "error") ||
-    lifecycleEvents.some((event) =>
-      ["FAILED", "ERROR"].includes(event.status.toUpperCase()),
-    );
+    lifecycleEvents.some((event) => ["FAILED", "ERROR"].includes(event.status.toUpperCase()));
 
   return hasRunEvidence && !hasRunningWork && !hasFailure;
 }
@@ -368,41 +327,22 @@ export function buildPlanningStages(
     ...definition,
     status: statuses[index],
     progress: resolveProgress(statuses[index], definition, agents),
-    detail: resolveDetail(
-      definition,
-      statuses[index],
-      agents,
-      activities,
-      agentStatus,
-    ),
-    activityCount: activities.filter((activity) =>
-      matchesActivity(activity, definition),
-    ).length,
+    detail: resolveDetail(definition, statuses[index], agents, activities, agentStatus),
+    activityCount: activities.filter((activity) => matchesActivity(activity, definition)).length,
     iteration: 0,
   }));
 
-  return finalizeSuccessfulStages(
-    fallbackStages,
-    agents,
-    activities,
-    lifecycleEvents,
-    isStreaming,
-  );
+  return finalizeSuccessfulStages(fallbackStages, agents, activities, lifecycleEvents, isStreaming);
 }
 
-export function buildPlanningSummary(
-  stages: PlanningStageView[],
-): PlanningSummary {
+export function buildPlanningSummary(stages: PlanningStageView[]): PlanningSummary {
   return {
     active: stages.find((stage) => stage.status === "active"),
-    completed: stages.filter((stage) =>
-      ["completed", "skipped"].includes(stage.status),
-    ).length,
+    completed: stages.filter((stage) => ["completed", "skipped"].includes(stage.status)).length,
     skipped: stages.filter((stage) => stage.status === "skipped").length,
     failed: stages.some((stage) => stage.status === "error"),
     overallProgress: Math.round(
-      stages.reduce((total, stage) => total + stage.progress, 0) /
-        Math.max(stages.length, 1),
+      stages.reduce((total, stage) => total + stage.progress, 0) / Math.max(stages.length, 1),
     ),
   };
 }
@@ -426,8 +366,6 @@ export function buildWorkListProgress(snapshot: WorkListSnapshotPayload | null) 
     runningItems,
     activeWorkIds: snapshot.scheduler?.activeWorkIds || runningItems.map((item) => item.id),
     maxParallel: snapshot.scheduler?.maxParallel || 1,
-    overallProgress: Math.round(
-      (finished / Math.max(snapshot.items.length, 1)) * 100,
-    ),
+    overallProgress: Math.round((finished / Math.max(snapshot.items.length, 1)) * 100),
   };
 }

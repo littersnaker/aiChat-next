@@ -51,18 +51,14 @@ function TopicChips({ topics }: { topics: string[] }) {
   );
 }
 
-function ReviewSample({
-  sample,
-}: {
-  sample: CommerceReviewAnalysis["samples"][number];
-}) {
-  const stars = sample.rating ? "★".repeat(Math.max(1, Math.min(5, Math.round(sample.rating)))) : "—";
+function ReviewSample({ sample }: { sample: CommerceReviewAnalysis["samples"][number] }) {
+  const stars = sample.rating
+    ? "★".repeat(Math.max(1, Math.min(5, Math.round(sample.rating))))
+    : "—";
   return (
     <div className="rounded-[10px] border border-[var(--border)] bg-[var(--glass-soft)] px-3 py-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[9px] font-semibold text-[var(--text-primary)]">
-          {stars}
-        </span>
+        <span className="text-[9px] font-semibold text-[var(--text-primary)]">{stars}</span>
         <span className="truncate text-[9px] text-[var(--text-quaternary)]">
           {sample.verifiedPurchase ? "已验证购买" : "未验证"} · {sample.date || "日期未知"}
         </span>
@@ -81,11 +77,7 @@ function ReviewSample({
   );
 }
 
-export function ReviewAnalysisBlock({
-  analyses,
-}: {
-  analyses: CommerceReviewAnalysis[];
-}) {
+export function ReviewAnalysisBlock({ analyses }: { analyses: CommerceReviewAnalysis[] }) {
   const [expanded, setExpanded] = useState<string | null>(analyses[0]?.asin ?? null);
   if (!analyses.length) return null;
 

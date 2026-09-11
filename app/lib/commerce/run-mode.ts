@@ -1,9 +1,5 @@
 // 模块说明：负责 run mode 核心服务与领域逻辑。
-import type {
-  CommerceResearchReport,
-  CommerceRunMode,
-  CommerceSourceReport,
-} from "./types";
+import type { CommerceResearchReport, CommerceRunMode, CommerceSourceReport } from "./types";
 
 export interface CommerceRunModeMeta {
   label: string;
@@ -15,26 +11,21 @@ const MODE_META: Record<CommerceRunMode, CommerceRunModeMeta> = {
   full: {
     label: "完整研究模式",
     shortLabel: "完整研究",
-    description:
-      "已取得公开市场数据，并至少取得一个真实增强来源，可进行多源交叉分析。",
+    description: "已取得公开市场数据，并至少取得一个真实增强来源，可进行多源交叉分析。",
   },
   "market-intelligence": {
     label: "基础市场洞察模式",
     shortLabel: "市场洞察",
-    description:
-      "已取得真实公开市场或单一平台数据，但增强数据不足；报告只解释当前可验证字段。",
+    description: "已取得真实公开市场或单一平台数据，但增强数据不足；报告只解释当前可验证字段。",
   },
   demo: {
     label: "无真实数据演示模式",
     shortLabel: "演示模式",
-    description:
-      "没有取得真实外部数据，系统使用明确标记的模拟样本展示完整流程，不能用于商业决策。",
+    description: "没有取得真实外部数据，系统使用明确标记的模拟样本展示完整流程，不能用于商业决策。",
   },
 };
 
-export function getCommerceRunModeMeta(
-  mode: CommerceRunMode,
-): CommerceRunModeMeta {
+export function getCommerceRunModeMeta(mode: CommerceRunMode): CommerceRunModeMeta {
   return MODE_META[mode];
 }
 
@@ -63,14 +54,10 @@ export function inferCommerceRunMode(
       (source.status === "collected" || source.status === "partial"),
   );
 
-  return hasCoreMarketData && hasEnhancementData
-    ? "full"
-    : "market-intelligence";
+  return hasCoreMarketData && hasEnhancementData ? "full" : "market-intelligence";
 }
 
 /** 历史 v2/v3 报告没有 runMode 时，统一回退到基础市场洞察模式。 */
-export function resolveCommerceReportRunMode(
-  report: CommerceResearchReport,
-): CommerceRunMode {
+export function resolveCommerceReportRunMode(report: CommerceResearchReport): CommerceRunMode {
   return report.runMode || "market-intelligence";
 }

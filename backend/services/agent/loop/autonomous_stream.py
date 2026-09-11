@@ -157,14 +157,10 @@ async def stream_prepared_autonomous(
                         tool_name=str(payload.get("toolName") or "") or None,
                         agent_id=str(payload.get("agentId") or "") or None,
                         slot=(
-                            int(payload.get("slot"))
-                            if payload.get("slot") is not None
-                            else None
+                            int(payload.get("slot")) if payload.get("slot") is not None else None
                         ),
                         current_files=[
-                            str(path)
-                            for path in (payload.get("currentFiles") or [])
-                            if path
+                            str(path) for path in (payload.get("currentFiles") or []) if path
                         ],
                     ),
                 }

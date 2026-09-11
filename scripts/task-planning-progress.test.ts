@@ -57,10 +57,7 @@ assert.equal(buildPlanningSummary(idleStages).overallProgress, 0);
 
 const completedStages = buildPlanningStages(
   definitions,
-  [
-    makeAgent("orchestrator", "completed", 100),
-    makeAgent("terminal", "queued", 0),
-  ],
+  [makeAgent("orchestrator", "completed", 100), makeAgent("terminal", "queued", 0)],
   [],
   false,
 );
@@ -68,11 +65,7 @@ const completedSummary = buildPlanningSummary(completedStages);
 assert.equal(completedSummary.overallProgress, 100);
 assert.equal(completedSummary.completed, definitions.length);
 assert.ok(completedSummary.skipped > 0);
-assert.ok(
-  completedStages.every((stage) =>
-    ["completed", "skipped"].includes(stage.status),
-  ),
-);
+assert.ok(completedStages.every((stage) => ["completed", "skipped"].includes(stage.status)));
 
 const waitingStages = buildPlanningStages(
   definitions,

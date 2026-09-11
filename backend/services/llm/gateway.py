@@ -98,11 +98,7 @@ async def _record_step_metric(
         return
     agent = audit_info if isinstance(audit_info, dict) else {}
     # effective_audit 返回 camelCase 键（agentId/sessionId/parentRequestId）。
-    work_id = str(
-        agent.get("parentRequestId")
-        or agent.get("parent_request_id")
-        or ""
-    )
+    work_id = str(agent.get("parentRequestId") or agent.get("parent_request_id") or "")
     session_id = str(agent.get("sessionId") or agent.get("session_id") or "")
     try:
         from backend.services.quality.step_metrics import record_step_metric
@@ -114,9 +110,11 @@ async def _record_step_metric(
             provider=provider,
             model=model,
             ttft_ms=ttft_ms,
-            tok_per_sec=usage.completion / max(0.001, total_ms / 1000)
-            if usage.completion and total_ms
-            else None,
+            tok_per_sec=(
+                usage.completion / max(0.001, total_ms / 1000)
+                if usage.completion and total_ms
+                else None
+            ),
             prompt_tokens=usage.prompt,
             completion_tokens=usage.completion,
             cached_tokens=usage.cached_tokens,
@@ -163,9 +161,7 @@ class LlmGateway:
                 raise ValueError(f"未识别的模型：{requested}，请重新选择模型。")
             provider = get_provider(selected.provider)
             if not credentials.get(selected.provider):
-                raise ValueError(
-                    f"已选择 {selected.name}，但未配置 {provider.name} API Key。"
-                )
+                raise ValueError(f"已选择 {selected.name}，但未配置 {provider.name} API Key。")
             missing = required.difference(selected.capabilities)
             if missing:
                 capability = "图像输入" if "vision" in missing else "当前任务"
@@ -190,13 +186,9 @@ class LlmGateway:
         if candidates:
             return candidates
 
-        configured_names = [
-            provider.name for provider in PROVIDERS if credentials.get(provider.id)
-        ]
+        configured_names = [provider.name for provider in PROVIDERS if credentials.get(provider.id)]
         if configured_names and requires_vision:
-            raise ValueError(
-                "已配置的模型均不支持图像输入，请配置或选择支持 Vision 的模型。"
-            )
+            raise ValueError("已配置的模型均不支持图像输入，请配置或选择支持 Vision 的模型。")
         raise ValueError("没有可用 API Key，请在右上角设置中配置至少一个模型供应商。")
 
     async def stream(
@@ -225,9 +217,7 @@ class LlmGateway:
         try:
             request_payload["candidates"] = [
                 {"model": model.model, "provider": model.provider}
-                for model in self.resolve_candidates(
-                    preferred_model_id, credentials, messages
-                )
+                for model in self.resolve_candidates(preferred_model_id, credentials, messages)
             ]
         except Exception as exc:
             request_payload["candidatesError"] = str(exc)
@@ -276,12 +266,16 @@ class LlmGateway:
         await _record_step_metric(
             request_id=request_id,
             audit_info=audit_info,
-            provider=request_payload.get("candidates", [{}])[0].get("provider", "")
-            if request_payload.get("candidates")
-            else "",
-            model=request_payload.get("candidates", [{}])[0].get("model", "")
-            if request_payload.get("candidates")
-            else "",
+            provider=(
+                request_payload.get("candidates", [{}])[0].get("provider", "")
+                if request_payload.get("candidates")
+                else ""
+            ),
+            model=(
+                request_payload.get("candidates", [{}])[0].get("model", "")
+                if request_payload.get("candidates")
+                else ""
+            ),
             usage=last_usage,
             ttft_ms=ttft_ms,
             total_ms=request_audit.duration_ms(started),
@@ -385,9 +379,7 @@ class LlmGateway:
         try:
             request_payload["candidates"] = [
                 {"model": model.model, "provider": model.provider}
-                for model in self.resolve_candidates(
-                    preferred_model_id, credentials, messages
-                )
+                for model in self.resolve_candidates(preferred_model_id, credentials, messages)
             ]
         except Exception as exc:
             request_payload["candidatesError"] = str(exc)
@@ -523,9 +515,7 @@ class LlmGateway:
                     first = tool_calls_map[tool_calls_order[0]]
                     result = first["arguments"].strip()
                 else:
-                    result = "".join(text_parts).strip() or "".join(
-                        reasoning_parts
-                    ).strip()
+                    result = "".join(text_parts).strip() or "".join(reasoning_parts).strip()
                 # Moonshot 等兼容端点的流式响应可能不返回 usage。此处使用
                 # 本地估算补齐统计，保证 Token Budget 与前端用量始终可用。
                 usage = ensure_usage(usage, messages=messages, output_text=result)
@@ -648,9 +638,7 @@ class LlmGateway:
                 break
             except ProviderRequestError as exc:
                 last_error = exc
-                can_try_region = (
-                    exc.status_code is None or exc.status_code in {401, 403, 404}
-                )
+                can_try_region = exc.status_code is None or exc.status_code in {401, 403, 404}
                 if not can_try_region or endpoint == endpoints[-1]:
                     raise
         if last_error is not None:
@@ -781,10 +769,7 @@ class LlmGateway:
                 can_try_region = (
                     not emitted
                     and index < len(endpoints) - 1
-                    and (
-                        exc.status_code is None
-                        or exc.status_code in {401, 403, 404}
-                    )
+                    and (exc.status_code is None or exc.status_code in {401, 403, 404})
                 )
                 if not can_try_region:
                     raise
@@ -800,7 +785,6 @@ class LlmGateway:
             f"{provider.name} 未配置可用接口地址",
             scope="provider",
         )
-
 
     def _request_temperature(
         self,
@@ -837,17 +821,9 @@ class LlmGateway:
         """
 
         environment_key = provider.endpoint_environment_key
-        environment_override = (
-            os.getenv(environment_key, "").strip() if environment_key else ""
-        )
-        builtin_override = (
-            get_builtin_value(environment_key) if environment_key else ""
-        )
-        override = (
-            (request_override or "").strip()
-            or environment_override
-            or builtin_override
-        )
+        environment_override = os.getenv(environment_key, "").strip() if environment_key else ""
+        builtin_override = get_builtin_value(environment_key) if environment_key else ""
+        override = (request_override or "").strip() or environment_override or builtin_override
         if override:
             if not override.startswith(("https://", "http://")):
                 # 常见配置错误：把 API Key 填进了 Base URL 字段/环境变量。
@@ -873,7 +849,6 @@ class LlmGateway:
             return normalized
         return f"{normalized}/chat/completions"
 
-
     def _route_group(self, model: ModelDefinition) -> tuple[str, str]:
         """返回端点级熔断分组，避免一个自定义地址拖累同供应商其他地址。"""
 
@@ -885,8 +860,7 @@ class LlmGateway:
         if not failures:
             return "Auto Router 没有找到可用模型。"
         details = "；".join(
-            f"{item.provider_name}/{item.model_name}: {item.detail}"
-            for item in failures
+            f"{item.provider_name}/{item.model_name}: {item.detail}" for item in failures
         )
         has_provider_failure = any(item.scope == "provider" for item in failures)
         guidance = (

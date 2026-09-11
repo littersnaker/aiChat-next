@@ -23,7 +23,9 @@ class TestWorkRouter:
     def test_route_agent_coding(self):
         """验证 test route agent coding 场景的输入、执行结果与兼容行为。"""
         router = WorkRouter()
-        work = WorkItem(id="W001", title="添加用户接口", objective="添加用户接口", execution_type="agent")
+        work = WorkItem(
+            id="W001", title="添加用户接口", objective="添加用户接口", execution_type="agent"
+        )
         result = router.route(work)
         assert result.handler_type == WorkRouter.HANDLER_CODING
 

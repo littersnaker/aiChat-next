@@ -94,9 +94,7 @@ def validate_workspace_integration(
             "已接入统一 Data Source，但未在接入文件中识别到以下页面状态："
             + ", ".join(missing_states)
         )
-    checks.append(
-        "真实业务页面已调用统一 Data Source：" + ", ".join(relative_files[:10])
-    )
+    checks.append("真实业务页面已调用统一 Data Source：" + ", ".join(relative_files[:10]))
     return FactoryValidation(
         True,
         warnings=tuple(warnings),
@@ -123,9 +121,7 @@ def _find_integration_files(
             content = path.read_text("utf-8")
         except (OSError, UnicodeDecodeError):
             continue
-        if DATA_SOURCE_IMPORT_PATTERN.search(content) and DATA_SOURCE_CALL_PATTERN.search(
-            content
-        ):
+        if DATA_SOURCE_IMPORT_PATTERN.search(content) and DATA_SOURCE_CALL_PATTERN.search(content):
             matches.append((path, content))
 
     # 使用稳定路径顺序，确保测试和工具观察在不同系统中保持一致。

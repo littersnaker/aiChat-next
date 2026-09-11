@@ -136,10 +136,13 @@ def _json_text(value: object, *, compact: bool = False) -> str:
     """把对象编码成稳定 UTF-8 JSON；大型机器文件使用紧凑格式控制行数。"""
 
     if compact:
-        return json.dumps(
-            value,
-            ensure_ascii=False,
-            separators=(",", ":"),
-            sort_keys=False,
-        ) + "\n"
+        return (
+            json.dumps(
+                value,
+                ensure_ascii=False,
+                separators=(",", ":"),
+                sort_keys=False,
+            )
+            + "\n"
+        )
     return json.dumps(value, ensure_ascii=False, indent=2, sort_keys=False) + "\n"

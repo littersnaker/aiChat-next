@@ -8,6 +8,8 @@ from pydantic import BaseModel, Field
 from backend.services.runtime.bootstrap import RUNTIME
 from backend.services.skills.installer import (
     install_skill as install_skill_service,
+)
+from backend.services.skills.installer import (
     list_installed_skills,
     uninstall_skill,
     update_skill_config,

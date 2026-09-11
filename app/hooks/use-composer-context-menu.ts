@@ -5,10 +5,7 @@ import { useCallback, useRef, useState } from "react";
 import type { ContextMenuItem } from "../components/context-menu";
 import { readClipboard, writeClipboard } from "../lib/clipboard";
 
-export function useComposerContextMenu(
-  input: string,
-  onInputChange: (value: string) => void,
-) {
+export function useComposerContextMenu(input: string, onInputChange: (value: string) => void) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
 

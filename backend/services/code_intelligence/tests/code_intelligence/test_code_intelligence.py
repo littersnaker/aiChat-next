@@ -11,10 +11,7 @@ def test_code_intelligence_reports_symbols_calls_and_impact(tmp_path: Path) -> N
     package = tmp_path / "pkg"
     package.mkdir()
     (package / "core.py").write_text(
-        '"""核心。"""\n\n'
-        "def run() -> None:\n"
-        '    """运行。"""\n\n'
-        "    print('ok')\n",
+        '"""核心。"""\n\n' "def run() -> None:\n" '    """运行。"""\n\n' "    print('ok')\n",
         "utf-8",
     )
     (tmp_path / "consumer.py").write_text(

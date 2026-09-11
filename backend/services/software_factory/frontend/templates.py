@@ -344,14 +344,10 @@ def _contract_imports(blueprint: FactoryBlueprint) -> str:
     """返回 API 客户端使用的去重实体类型列表。"""
 
     names = {
-        endpoint.response_entity
-        for endpoint in blueprint.endpoints
-        if endpoint.response_entity
+        endpoint.response_entity for endpoint in blueprint.endpoints if endpoint.response_entity
     }
     names.update(
-        endpoint.request_entity
-        for endpoint in blueprint.endpoints
-        if endpoint.request_entity
+        endpoint.request_entity for endpoint in blueprint.endpoints if endpoint.request_entity
     )
     return ", ".join(sorted(names))
 
@@ -375,7 +371,7 @@ def _render_api_method(endpoint: Any) -> str:
     return (
         f"async {endpoint.operation_id}({parameter_text}): Promise<{response_type}> {{\n"
         f"  return request<{response_type}>({path_literal}, "
-        f"{{ method: \"{endpoint.method}\"{body_option} }});\n"
+        f'{{ method: "{endpoint.method}"{body_option} }});\n'
         "},"
     )
 

@@ -100,7 +100,9 @@ def _sku_entity() -> EntitySpec:
             _field("price", "number", "当前销售价格", example=299.0),
             _field("originalPrice", "number", "划线价格", required=False, example=359.0),
             _field("stock", "integer", "可售库存", example=88),
-            _field("imageUrl", "string", "规格图片", required=False, example="/images/products/001.jpg"),
+            _field(
+                "imageUrl", "string", "规格图片", required=False, example="/images/products/001.jpg"
+            ),
         ),
     )
 
@@ -119,7 +121,9 @@ def _product_entity() -> EntitySpec:
             _field("price", "number", "商品起售价", example=299.0),
             _field("originalPrice", "number", "商品划线价", required=False, example=359.0),
             _field("coverUrl", "string", "主图地址", example="/images/products/001-cover.jpg"),
-            _field("imageUrls", "string_array", "详情轮播图片", example=["/images/products/001-a.jpg"]),
+            _field(
+                "imageUrls", "string_array", "详情轮播图片", example=["/images/products/001-a.jpg"]
+            ),
             _field("salesCount", "integer", "展示销量", example=1268),
             _field("rating", "number", "商品评分", example=4.8),
             _field("tags", "string_array", "商品标签", example=["柔软", "通勤"]),
@@ -193,7 +197,13 @@ def _coupon_entity() -> EntitySpec:
         (
             _field("id", "string", "优惠券 ID", example="coupon-001"),
             _field("name", "string", "优惠券名称", example="新客立减 30 元"),
-            _field("discountType", "string", "优惠类型", example="fixed", enum_values=("fixed", "percent")),
+            _field(
+                "discountType",
+                "string",
+                "优惠类型",
+                example="fixed",
+                enum_values=("fixed", "percent"),
+            ),
             _field("discountValue", "number", "优惠数值", example=30.0),
             _field("minimumAmount", "number", "最低使用金额", example=199.0),
             _field("expiresAt", "datetime", "过期时间", example="2026-12-31T23:59:59Z"),
@@ -233,7 +243,13 @@ def _order_entity() -> EntitySpec:
             _field("addressId", "string", "收货地址 ID", example="address-001"),
             _field("itemIds", "string_array", "订单明细 ID", example=["order-item-001"]),
             _field("couponId", "string", "优惠券 ID", required=False, example="coupon-001"),
-            _field("status", "string", "订单状态", example="pending_payment", enum_values=("pending_payment", "paid", "shipped", "completed", "cancelled")),
+            _field(
+                "status",
+                "string",
+                "订单状态",
+                example="pending_payment",
+                enum_values=("pending_payment", "paid", "shipped", "completed", "cancelled"),
+            ),
             _field("goodsAmount", "number", "商品总额", example=299.0),
             _field("discountAmount", "number", "优惠金额", example=30.0),
             _field("payAmount", "number", "应付金额", example=269.0),
@@ -249,7 +265,9 @@ def _checkout_request_entity() -> EntitySpec:
         "CheckoutRequest",
         "由购物车创建订单时提交的请求体。",
         (
-            _field("cartItemIds", "string_array", "参与结算的购物车条目", example=["cart-item-001"]),
+            _field(
+                "cartItemIds", "string_array", "参与结算的购物车条目", example=["cart-item-001"]
+            ),
             _field("addressId", "string", "收货地址 ID", example="address-001"),
             _field("couponId", "string", "优惠券 ID", required=False, example="coupon-001"),
             _field("remark", "string", "订单备注", required=False, example="请勿放快递柜"),
@@ -261,18 +279,51 @@ def _commerce_endpoints() -> tuple[EndpointSpec, ...]:
     """返回电商 MVP 前后端共享的 API 列表。"""
 
     return (
-        EndpointSpec("GET", "/categories", "listCategories", "查询商品分类", "Category", collection_response=True),
-        EndpointSpec("GET", "/products", "listProducts", "查询商品列表", "Product", collection_response=True),
+        EndpointSpec(
+            "GET",
+            "/categories",
+            "listCategories",
+            "查询商品分类",
+            "Category",
+            collection_response=True,
+        ),
+        EndpointSpec(
+            "GET", "/products", "listProducts", "查询商品列表", "Product", collection_response=True
+        ),
         EndpointSpec("GET", "/products/{productId}", "getProduct", "查询商品详情", "Product"),
         EndpointSpec("GET", "/skus", "listSkus", "查询 SKU 列表", "Sku", collection_response=True),
         EndpointSpec("GET", "/cart", "getCart", "查询购物车", "CartItem", collection_response=True),
-        EndpointSpec("POST", "/cart", "addCartItem", "加入购物车", "CartItem", request_entity="CartItem"),
-        EndpointSpec("PATCH", "/cart/{cartItemId}", "updateCartItem", "修改购物车数量", "CartItem", request_entity="CartItem"),
-        EndpointSpec("DELETE", "/cart/{cartItemId}", "removeCartItem", "移除购物车商品", "CartItem"),
+        EndpointSpec(
+            "POST", "/cart", "addCartItem", "加入购物车", "CartItem", request_entity="CartItem"
+        ),
+        EndpointSpec(
+            "PATCH",
+            "/cart/{cartItemId}",
+            "updateCartItem",
+            "修改购物车数量",
+            "CartItem",
+            request_entity="CartItem",
+        ),
+        EndpointSpec(
+            "DELETE", "/cart/{cartItemId}", "removeCartItem", "移除购物车商品", "CartItem"
+        ),
         EndpointSpec("GET", "/users/me", "getCurrentUser", "查询当前用户", "User"),
-        EndpointSpec("GET", "/addresses", "listAddresses", "查询收货地址", "Address", collection_response=True),
-        EndpointSpec("GET", "/coupons", "listCoupons", "查询可用优惠券", "Coupon", collection_response=True),
-        EndpointSpec("GET", "/orders", "listOrders", "查询订单列表", "Order", collection_response=True),
+        EndpointSpec(
+            "GET",
+            "/addresses",
+            "listAddresses",
+            "查询收货地址",
+            "Address",
+            collection_response=True,
+        ),
+        EndpointSpec(
+            "GET", "/coupons", "listCoupons", "查询可用优惠券", "Coupon", collection_response=True
+        ),
+        EndpointSpec(
+            "GET", "/orders", "listOrders", "查询订单列表", "Order", collection_response=True
+        ),
         EndpointSpec("GET", "/orders/{orderId}", "getOrder", "查询订单详情", "Order"),
-        EndpointSpec("POST", "/orders", "createOrder", "创建订单", "Order", request_entity="CheckoutRequest"),
+        EndpointSpec(
+            "POST", "/orders", "createOrder", "创建订单", "Order", request_entity="CheckoutRequest"
+        ),
     )

@@ -67,15 +67,31 @@ def _validate(draft: dict[str, Any], keywords: list[dict[str, Any]]) -> dict[str
 
     issues: list[dict[str, Any]] = []
     if len(draft["title"]) > 75:
-        issues.append({"field": "title", "severity": "error", "code": "TITLE_TOO_LONG", "message": "标题超过 75 个字符。"})
+        issues.append(
+            {
+                "field": "title",
+                "severity": "error",
+                "code": "TITLE_TOO_LONG",
+                "message": "标题超过 75 个字符。",
+            }
+        )
     if len(draft["bulletPoints"]) < 3:
-        issues.append({"field": "bulletPoints", "severity": "warning", "code": "TOO_FEW_BULLETS", "message": "建议至少提供 3 条五点描述。"})
-    issues.append({
-        "field": "facts",
-        "severity": "warning",
-        "code": "FACT_CONFIRMATION_REQUIRED",
-        "message": "模拟 ERP 字段和商品事实必须由人工确认后才能发布。",
-    })
+        issues.append(
+            {
+                "field": "bulletPoints",
+                "severity": "warning",
+                "code": "TOO_FEW_BULLETS",
+                "message": "建议至少提供 3 条五点描述。",
+            }
+        )
+    issues.append(
+        {
+            "field": "facts",
+            "severity": "warning",
+            "code": "FACT_CONFIRMATION_REQUIRED",
+            "message": "模拟 ERP 字段和商品事实必须由人工确认后才能发布。",
+        }
+    )
     full_text = " ".join([draft["title"], *draft["bulletPoints"], draft["searchTerms"]]).lower()
     covered = [item["phrase"] for item in keywords if item["normalized"] in full_text]
     missing = [item["phrase"] for item in keywords if item["normalized"] not in full_text]
@@ -130,7 +146,9 @@ async def stream_listing(
                 yield _progress("intent", 8, "正在理解商品 Brief、目标站点和事实边界…")
                 yield _progress("category", 22, "已识别类目词和站点语言。")
             elif node == "collect":
-                yield _progress("collect", 35, "当前迁移版使用离线 Demo，不调用 Seller Central 写入接口。")
+                yield _progress(
+                    "collect", 35, "当前迁移版使用离线 Demo，不调用 Seller Central 写入接口。"
+                )
                 yield _progress("erp", 50, "已构建模拟 ERP 档案，并标记所有待确认事实。")
             elif node == "keywords":
                 yield _progress("keywords", 66, "已完成核心词、属性词和后台搜索词分配。")

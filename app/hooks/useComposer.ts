@@ -47,10 +47,7 @@ function selectCandidatesWithinLimits(
 
   return {
     selected,
-    omittedByCount: Math.max(
-      0,
-      candidates.length - selected.length - omittedBySize,
-    ),
+    omittedByCount: Math.max(0, candidates.length - selected.length - omittedBySize),
     omittedBySize,
   };
 }
@@ -66,9 +63,7 @@ function attachmentFingerprint(attachment: AttachedFile): string {
 
 function candidateFingerprint(candidate: AttachmentCandidate): string {
   return [
-    candidate.relativePath ||
-      candidate.file.webkitRelativePath ||
-      candidate.file.name,
+    candidate.relativePath || candidate.file.webkitRelativePath || candidate.file.name,
     candidate.file.size,
     candidate.file.lastModified,
     candidate.file.type || "application/octet-stream",
@@ -97,9 +92,7 @@ function deduplicateCandidates(
   return { unique, duplicateCount };
 }
 
-function deduplicateAttachments(
-  attachments: readonly AttachedFile[],
-): AttachedFile[] {
+function deduplicateAttachments(attachments: readonly AttachedFile[]): AttachedFile[] {
   const seen = new Set<string>();
   return attachments.filter((attachment) => {
     const fingerprint = attachmentFingerprint(attachment);
@@ -126,23 +119,14 @@ export function useComposer() {
       const strategy = options.strategy || "append";
       const maxFiles = Math.max(
         1,
-        Math.min(
-          options.maxFiles || MAX_COMPOSER_ATTACHMENTS,
-          MAX_COMPOSER_ATTACHMENTS,
-        ),
+        Math.min(options.maxFiles || MAX_COMPOSER_ATTACHMENTS, MAX_COMPOSER_ATTACHMENTS),
       );
       const maxTotalBytes = Math.max(
         1,
-        Math.min(
-          options.maxTotalBytes || DEFAULT_MAX_BATCH_BYTES,
-          MAX_BATCH_BYTES,
-        ),
+        Math.min(options.maxTotalBytes || DEFAULT_MAX_BATCH_BYTES, MAX_BATCH_BYTES),
       );
       const existingAttachments = strategy === "append" ? attachedFiles : [];
-      const deduplicated = deduplicateCandidates(
-        candidates,
-        existingAttachments,
-      );
+      const deduplicated = deduplicateCandidates(candidates, existingAttachments);
       const currentFileCount = existingAttachments.length;
       const currentByteCount = existingAttachments.reduce(
         (total, attachment) => total + (attachment.size || 0),
@@ -173,13 +157,9 @@ export function useComposer() {
       setAttachmentError("");
 
       try {
-        const settled = await Promise.allSettled(
-          selectedCandidates.map(parseAttachmentCandidate),
-        );
+        const settled = await Promise.allSettled(selectedCandidates.map(parseAttachmentCandidate));
         const parsed = settled.flatMap((result) =>
-          result.status === "fulfilled"
-            ? [normalizeAttachedFile(result.value)]
-            : [],
+          result.status === "fulfilled" ? [normalizeAttachedFile(result.value)] : [],
         );
         const failedCount = settled.length - parsed.length;
 
@@ -200,9 +180,7 @@ export function useComposer() {
             deduplicated.duplicateCount > 0
               ? `${deduplicated.duplicateCount} 个重复文件已忽略`
               : "",
-            selection.omittedByCount > 0
-              ? `${selection.omittedByCount} 个文件超过数量上限`
-              : "",
+            selection.omittedByCount > 0 ? `${selection.omittedByCount} 个文件超过数量上限` : "",
             selection.omittedBySize > 0
               ? [
                   `${selection.omittedBySize} 个文件超过总大小上限`,
@@ -220,9 +198,7 @@ export function useComposer() {
   );
 
   const removeAttachedFile = useCallback((attachmentId: string) => {
-    setAttachedFiles((current) =>
-      current.filter((attachment) => attachment.id !== attachmentId),
-    );
+    setAttachedFiles((current) => current.filter((attachment) => attachment.id !== attachmentId));
   }, []);
 
   const clearAfterSubmit = useCallback(() => {

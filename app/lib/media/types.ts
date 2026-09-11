@@ -17,10 +17,7 @@ export interface MediaModelDefinition {
   modes: readonly MediaMode[];
   outputKind: "image" | "video";
   protocol:
-    | "qwen-image-sync"
-    | "dashscope-video-async"
-    | "volcengine-image"
-    | "volcengine-video-async";
+    "qwen-image-sync" | "dashscope-video-async" | "volcengine-image" | "volcengine-video-async";
 }
 
 export interface MediaAttachmentInput {

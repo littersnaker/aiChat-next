@@ -123,12 +123,7 @@ export const MODE_TABS: ReadonlyArray<{
 ];
 
 export function requiresAttachment(mode: MediaMode): boolean {
-  return [
-    "image-edit",
-    "image-to-video",
-    "reference-to-video",
-    "video-edit",
-  ].includes(mode);
+  return ["image-edit", "image-to-video", "reference-to-video", "video-edit"].includes(mode);
 }
 
 export function resolveAccept(composerMode: ComposerMode): string {

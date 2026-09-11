@@ -120,10 +120,7 @@ def _worker_prompt(
         sdk_block = SDK_BLOCK.strip()
     mcp_block = ""
     if mcp_tools:
-        lines = [
-            f"- {tool.get('llmName')}：{tool.get('description') or ''}"
-            for tool in mcp_tools
-        ]
+        lines = [f"- {tool.get('llmName')}：{tool.get('description') or ''}" for tool in mcp_tools]
         mcp_block = (
             "可用 MCP 工具（对外部系统有副作用）：\n"
             + "\n".join(lines)

@@ -64,9 +64,7 @@ def test_sdk_block_injected_when_enabled(monkeypatch) -> None:
     from backend.services.agent.shared.work_models import WorkItem
 
     work = WorkItem(id="W001", title="t", objective="o")
-    harness = build_project_harness(
-        root=Path("."), request_text="测试任务", runtime_context=""
-    )
+    harness = build_project_harness(root=Path("."), request_text="测试任务", runtime_context="")
     prompt = _worker_prompt(work=work, harness=harness, execution_mode="full_auto")
     assert "tools.read" in prompt
     assert "run_code SDK" in prompt

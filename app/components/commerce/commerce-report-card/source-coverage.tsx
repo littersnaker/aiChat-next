@@ -6,7 +6,9 @@
 import { resolveCommerceReportRunMode } from "../../../lib/commerce/run-mode";
 import type { CommerceMarketMetrics, CommerceResearchReport } from "../../../lib/commerce/types";
 import { formatCompact, formatPrice } from "./metric-widgets";
-export function sourceStatusLabel(status: CommerceResearchReport["sources"][number]["status"]): string {
+export function sourceStatusLabel(
+  status: CommerceResearchReport["sources"][number]["status"],
+): string {
   if (status === "collected") return "已获取";
   if (status === "partial") return "部分获取";
   if (status === "unconfigured") return "未配置";
@@ -34,9 +36,7 @@ export function sourceAttemptedRouteLabel(
   if (sourceRouteLabel(source)) return undefined;
   const routes = source.attemptedRoutes || source.amazonAttemptedRoutes || [];
   if (!routes.length) return undefined;
-  return routes
-    .map((route) => (route === "api" ? "API" : "爬虫"))
-    .join(" → ");
+  return routes.map((route) => (route === "api" ? "API" : "爬虫")).join(" → ");
 }
 
 export function SourceCoverage({ report }: { report: CommerceResearchReport }) {
@@ -58,8 +58,7 @@ export function SourceCoverage({ report }: { report: CommerceResearchReport }) {
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {report.sources.map((source) => {
           const isDemoSource = source.status === "demo";
-          const ok =
-            source.status === "collected" || source.status === "partial";
+          const ok = source.status === "collected" || source.status === "partial";
           const routeLabel = sourceRouteLabel(source);
           const attemptedRouteLabel = sourceAttemptedRouteLabel(source);
           return (
@@ -80,9 +79,7 @@ export function SourceCoverage({ report }: { report: CommerceResearchReport }) {
                       style={{
                         color: routeLabel === "API" ? "#30d158" : "#ff9f0a",
                         background:
-                          routeLabel === "API"
-                            ? "rgba(48,209,88,0.10)"
-                            : "rgba(255,159,10,0.10)",
+                          routeLabel === "API" ? "rgba(48,209,88,0.10)" : "rgba(255,159,10,0.10)",
                       }}
                     >
                       {routeLabel}
@@ -139,7 +136,11 @@ export function SourceCoverage({ report }: { report: CommerceResearchReport }) {
           <div
             key={`${source.id}-detail`}
             className="rounded-[11px] border px-3 py-2 text-[9px] leading-4"
-            style={{ background: "var(--glass)", borderColor: "var(--border)", color: "var(--text-tertiary)" }}
+            style={{
+              background: "var(--glass)",
+              borderColor: "var(--border)",
+              color: "var(--text-tertiary)",
+            }}
           >
             <span className="font-semibold text-[var(--text-secondary)]">
               {source.label}
@@ -147,7 +148,8 @@ export function SourceCoverage({ report }: { report: CommerceResearchReport }) {
                 ? `（${sourceRouteLabel(source)}）`
                 : sourceAttemptedRouteLabel(source)
                   ? `（已尝试 ${sourceAttemptedRouteLabel(source)}）`
-                  : ""}：
+                  : ""}
+              ：
             </span>
             {source.error ? `未分析 · ${source.error}` : source.summary}
           </div>
@@ -157,11 +159,7 @@ export function SourceCoverage({ report }: { report: CommerceResearchReport }) {
   );
 }
 
-export function PlatformComparison({
-  metrics,
-}: {
-  metrics: CommerceMarketMetrics;
-}) {
+export function PlatformComparison({ metrics }: { metrics: CommerceMarketMetrics }) {
   const comparisons = metrics.platformComparisons || [];
   if (comparisons.length < 2) return null;
 

@@ -20,9 +20,7 @@ DEFAULT_TIMEOUT = httpx.Timeout(30.0, connect=15.0)
 def _sign_params(app_secret: str, params: dict[str, str]) -> str:
     """按 TOP param2 协议生成签名（MD5(appSecret + 排序后参数串)）。"""
 
-    sorted_params = "&".join(
-        f"{key}={params[key]}" for key in sorted(params)
-    )
+    sorted_params = "&".join(f"{key}={params[key]}" for key in sorted(params))
     return hashlib.md5((app_secret + sorted_params).encode("utf-8")).hexdigest().upper()
 
 
@@ -41,12 +39,7 @@ def _normalize(item: dict[str, Any], query: str, index: int) -> dict[str, Any] |
         return None
     price = item.get("priceInfo") or {}
     try:
-        price_value = float(
-            price.get("price")
-            or price.get("sellPrice")
-            or item.get("price")
-            or 0
-        )
+        price_value = float(price.get("price") or price.get("sellPrice") or item.get("price") or 0)
     except (TypeError, ValueError):
         price_value = 0.0
     return {

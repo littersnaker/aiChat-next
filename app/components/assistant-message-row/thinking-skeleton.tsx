@@ -30,10 +30,7 @@ export function ThinkingSkeleton({ statusText }: { statusText?: string }) {
             style={{ background: COLORS.blue }}
           />
         </span>
-        <span
-          className="text-[12px] font-medium"
-          style={{ color: COLORS.textMuted }}
-        >
+        <span className="text-[12px] font-medium" style={{ color: COLORS.textMuted }}>
           {statusText || "正在分析请求…"}
         </span>
       </div>

@@ -51,7 +51,9 @@ def db(monkeypatch, tmp_path) -> object:
 
 
 def test_parse_review_output_with_markdown_fence() -> None:
-    text = '```json\n{"facts": [{"content": "Taro 适配需改 designWidth", "confidence": "high"}]}\n```'
+    text = (
+        '```json\n{"facts": [{"content": "Taro 适配需改 designWidth", "confidence": "high"}]}\n```'
+    )
     output = parse_review_output(text)
     assert output.facts[0].content == "Taro 适配需改 designWidth"
 
@@ -234,9 +236,7 @@ async def test_review_settings_roundtrip(db) -> None:
 
 @pytest.mark.asyncio
 async def test_review_settings_accepts_bare_model_name(db) -> None:
-    saved = await write_review_settings(
-        ReviewSettings(model_id="deepseek-v4-flash", enabled=True)
-    )
+    saved = await write_review_settings(ReviewSettings(model_id="deepseek-v4-flash", enabled=True))
     assert saved.model_id == "deepseek:deepseek-v4-flash"
     data = saved.to_json()
     assert data["modelId"] == "deepseek-v4-flash"
@@ -246,9 +246,7 @@ async def test_review_settings_accepts_bare_model_name(db) -> None:
 async def test_bare_model_name_prefers_native_provider(db) -> None:
     """deepseek-v4-pro 裸名应解析到 DeepSeek 原生厂商，而非百炼托管。"""
 
-    saved = await write_review_settings(
-        ReviewSettings(model_id="deepseek-v4-pro", enabled=True)
-    )
+    saved = await write_review_settings(ReviewSettings(model_id="deepseek-v4-pro", enabled=True))
     assert saved.model_id == "deepseek:deepseek-v4-pro"
 
 

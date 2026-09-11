@@ -145,8 +145,7 @@ async def resolve_pending_command(request_id: str, *, approved: bool) -> None:
 
     async with open_database() as connection:
         await connection.execute(
-            "UPDATE pending_commands SET status = ?, updated_at = ? "
-            "WHERE request_id = ?",
+            "UPDATE pending_commands SET status = ?, updated_at = ? " "WHERE request_id = ?",
             ("approved" if approved else "rejected", utc_now_iso(), request_id),
         )
 

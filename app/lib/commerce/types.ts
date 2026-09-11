@@ -8,15 +8,7 @@
  * - 报告会明确标记每个来源是否拿到数据，绝不会因为付费 API 未配置而中断主流程。
  */
 
-export type CommerceMarketplaceCode =
-  | "US"
-  | "CA"
-  | "UK"
-  | "DE"
-  | "FR"
-  | "IT"
-  | "ES"
-  | "JP";
+export type CommerceMarketplaceCode = "US" | "CA" | "UK" | "DE" | "FR" | "IT" | "ES" | "JP";
 
 export type CommerceDataProviderKind =
   | "talordata-market"
@@ -38,20 +30,10 @@ export type CommerceDataProviderKind =
   | "demo-market";
 
 export type CommerceMarketSourceId =
-  | "market-search"
-  | "amazon"
-  | "keepa"
-  | "tiktok-shop"
-  | "temu"
-  | "1688";
+  "market-search" | "amazon" | "keepa" | "tiktok-shop" | "temu" | "1688";
 
 export type CommerceSourceStatus =
-  | "collected"
-  | "partial"
-  | "unconfigured"
-  | "empty"
-  | "error"
-  | "demo";
+  "collected" | "partial" | "unconfigured" | "empty" | "error" | "demo";
 
 export type CommerceDataQuality = "high" | "medium" | "low" | "unavailable";
 
@@ -76,10 +58,7 @@ export type CommerceAmazonDataRoute = CommercePlatformDataRoute;
  * - market-intelligence：至少取得一组真实数据，但增强来源不足；
  * - demo：所有真实来源都不可用时，用明确标记的模拟数据走完整产品流程。
  */
-export type CommerceRunMode =
-  | "full"
-  | "market-intelligence"
-  | "demo";
+export type CommerceRunMode = "full" | "market-intelligence" | "demo";
 
 export interface CommerceCategoryResolution {
   categoryName: string;

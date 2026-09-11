@@ -57,7 +57,11 @@ def _find_skill_yaml(name_or_id: str) -> Path | None:
                 continue
             raw_id = str(raw.get("id") or raw.get("name") or "").strip().lower()
             raw_name = str(raw.get("name") or "").strip().lower()
-            if raw_id == identifier or raw_name == identifier or raw_name == name_or_id.strip().lower():
+            if (
+                raw_id == identifier
+                or raw_name == identifier
+                or raw_name == name_or_id.strip().lower()
+            ):
                 return path
     return None
 
@@ -176,9 +180,7 @@ def apply_skill_updates(skill_updates: list[dict[str, Any]]) -> list[dict[str, A
         diff_summary = str(update.get("diff_summary") or "").strip()
         evidence = str(update.get("evidence") or "")
         if not name or not diff_summary:
-            results.append(
-                {"name": name or "unknown", "action": action, "status": "skipped"}
-            )
+            results.append({"name": name or "unknown", "action": action, "status": "skipped"})
             continue
         if action == "patch":
             results.append(

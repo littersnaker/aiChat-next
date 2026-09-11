@@ -3,11 +3,7 @@
 
 import { useCallback } from "react";
 import { createIdleAgents } from "../../components/AgentPanel";
-import type {
-  AgentInstance,
-  AgentKind,
-  AgentStatus,
-} from "../../components/AgentPanel";
+import type { AgentInstance, AgentKind, AgentStatus } from "../../components/AgentPanel";
 import type {
   AgentEventPayload,
   AgentLifecycleEventPayload,
@@ -42,9 +38,7 @@ const LIFECYCLE_ROLE_TO_AGENT: Record<string, AgentKind> = {
   final_report_agent: "orchestrator",
 };
 
-function lifecycleToAgentStatus(
-  status: string,
-): { status: AgentStatus; progress: number } {
+function lifecycleToAgentStatus(status: string): { status: AgentStatus; progress: number } {
   const normalized = status.toUpperCase();
   const terminalStatus = {
     COMPLETED: { status: "completed", progress: 100 },
@@ -56,11 +50,7 @@ function lifecycleToAgentStatus(
   if (normalized in terminalStatus) {
     return terminalStatus[normalized as keyof typeof terminalStatus];
   }
-  if (
-    normalized === "PLANNING" ||
-    normalized === "REVIEWING" ||
-    normalized === "REFLECTING"
-  ) {
+  if (normalized === "PLANNING" || normalized === "REVIEWING" || normalized === "REFLECTING") {
     return { status: "thinking", progress: 46 };
   }
   if (normalized === "READY_TO_MERGE") return { status: "running", progress: 88 };
@@ -77,9 +67,7 @@ export function useGeneralAgentActions(setAgents: AgentStateSetter) {
     (kind: AgentKind, patch: Partial<Omit<AgentInstance, "id" | "type">>) => {
       setAgents((current) =>
         current.map((agent) =>
-          agent.type === kind
-            ? { ...agent, ...patch, updatedAt: Date.now() }
-            : agent,
+          agent.type === kind ? { ...agent, ...patch, updatedAt: Date.now() } : agent,
         ),
       );
     },
@@ -100,10 +88,7 @@ export function useGeneralAgentActions(setAgents: AgentStateSetter) {
               updatedAt: now,
             };
           }
-          if (
-            agent.type !== "orchestrator" &&
-            ["running", "thinking"].includes(agent.status)
-          ) {
+          if (agent.type !== "orchestrator" && ["running", "thinking"].includes(agent.status)) {
             return {
               ...agent,
               status: "completed" as const,
@@ -128,11 +113,7 @@ export function useGeneralAgentActions(setAgents: AgentStateSetter) {
   );
 
   const applyAgentEvent = useCallback(
-    (
-      eventType: StreamPacketType | undefined,
-      payload?: AgentEventPayload,
-      fallbackText = "",
-    ) => {
+    (eventType: StreamPacketType | undefined, payload?: AgentEventPayload, fallbackText = "") => {
       if (!payload && !fallbackText) return;
       const kind = normalizeAgentKind(payload?.type || payload?.id);
       const task = payload?.currentTask || payload?.task || fallbackText;
@@ -149,8 +130,7 @@ export function useGeneralAgentActions(setAgents: AgentStateSetter) {
         0,
         Math.min(
           100,
-          payload?.progress ??
-            (status === "completed" || status === "error" ? 100 : 48),
+          payload?.progress ?? (status === "completed" || status === "error" ? 100 : 48),
         ),
       );
       setAgents((current) =>
@@ -191,15 +171,12 @@ export function useGeneralAgentActions(setAgents: AgentStateSetter) {
               status: "queued" as const,
               progress: 0,
               currentTask:
-                agent.type === "terminal"
-                  ? "等待返工合并后重新验证"
-                  : "等待返工验证完成后重新审查",
+                agent.type === "terminal" ? "等待返工合并后重新验证" : "等待返工验证完成后重新审查",
               updatedAt: now,
             };
           }
           if (agent.type === kind) {
-            const isActive =
-              mapped.status === "running" || mapped.status === "thinking";
+            const isActive = mapped.status === "running" || mapped.status === "thinking";
             return {
               ...agent,
               status: mapped.status,

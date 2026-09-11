@@ -2,11 +2,7 @@
 import type { LlmProviderId } from "./types";
 
 export type MediaMode = "text-to-image" | "text-to-video" | "image-edit";
-export type MediaProtocol =
-  | ""
-  | "qwen-image-sync"
-  | "volcengine-image"
-  | "volcengine-video-async";
+export type MediaProtocol = "" | "qwen-image-sync" | "volcengine-image" | "volcengine-video-async";
 export type MediaOutputKind = "" | "image" | "video";
 
 export interface CustomModelInput {
@@ -25,8 +21,7 @@ export interface CustomModelInput {
   mediaOutputKind: MediaOutputKind;
 }
 
-export interface CustomModelRecord
-  extends Omit<CustomModelInput, "baseUrl"> {
+export interface CustomModelRecord extends Omit<CustomModelInput, "baseUrl"> {
   id: string;
   /** SQLite 中允许为空，服务端 JSON 会返回 null。 */
   baseUrl: string | null;

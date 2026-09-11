@@ -67,9 +67,7 @@ export function useMediaAgentActions(setAgents: AgentStateSetter) {
               ...agent,
               status: completed ? ("completed" as const) : ("running" as const),
               progress: completed ? 100 : Math.max(agent.progress, safeProgress),
-              currentTask: completed
-                ? "媒体内容已生成，正在交给 Reviewer 检查"
-                : task,
+              currentTask: completed ? "媒体内容已生成，正在交给 Reviewer 检查" : task,
               updatedAt: now,
             };
           }
@@ -78,9 +76,7 @@ export function useMediaAgentActions(setAgents: AgentStateSetter) {
               ...agent,
               status: "running" as const,
               progress: Math.max(agent.progress, Math.min(86, safeProgress - 8)),
-              currentTask: task.includes("检查")
-                ? task
-                : "正在检查重影、重复元素和无关改动",
+              currentTask: task.includes("检查") ? task : "正在检查重影、重复元素和无关改动",
               updatedAt: now,
             };
           }

@@ -183,16 +183,12 @@ class WorkWorkerState:
             iterations=int(value.get("iterations") or 0),
             factory_validations={
                 str(path): bool(passed)
-                for path, passed in dict(
-                    value.get("factoryValidations") or {}
-                ).items()
+                for path, passed in dict(value.get("factoryValidations") or {}).items()
             },
             work_context=dict(value.get("workContext") or {}),
             reasoning_state=dict(value.get("reasoningState") or {}),
             reasoning_memory=[
-                dict(item)
-                for item in value.get("reasoningMemory", [])
-                if isinstance(item, dict)
+                dict(item) for item in value.get("reasoningMemory", []) if isinstance(item, dict)
             ],
             failure_summary=dict(value.get("failureSummary") or {}),
             token_budget=dict(value.get("tokenBudget") or {}),
@@ -201,13 +197,9 @@ class WorkWorkerState:
             regression_baseline=dict(value.get("regressionBaseline") or {}),
             quality=dict(value.get("quality") or {}),
             action_history=[str(item) for item in value.get("actionHistory", [])],
-            context_action_history=[
-                str(item) for item in value.get("contextActionHistory", [])
-            ],
+            context_action_history=[str(item) for item in value.get("contextActionHistory", [])],
             context_actions=int(value.get("contextActions") or 0),
-            post_write_context_actions=int(
-                value.get("postWriteContextActions") or 0
-            ),
+            post_write_context_actions=int(value.get("postWriteContextActions") or 0),
             write_actions=int(value.get("writeActions") or 0),
             guard_rejections=int(value.get("guardRejections") or 0),
             last_progress_iteration=int(value.get("lastProgressIteration") or 0),

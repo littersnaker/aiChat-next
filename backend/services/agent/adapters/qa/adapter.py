@@ -5,13 +5,13 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 
 from backend.schemas.chat import ChatRequest
+from backend.services.agent.adapters.registry import register_adapter
 from backend.services.glm46v import (
     enrich_runtime_context_with_glm46v,
     has_image_attachments,
     strip_image_attachments,
 )
 from backend.services.glm46v.client import GLM46VError
-from backend.services.agent.adapters.registry import register_adapter
 from backend.services.llm.credentials import LlmCredentials
 from backend.services.models.router import ModelSelection
 from backend.services.qa import stream_qa_agent

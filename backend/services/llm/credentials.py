@@ -135,9 +135,7 @@ def public_provider_status() -> dict[str, dict[str, object]]:
     for provider in PROVIDERS:
         has_environment_key = bool(_environment_key(provider.id))
         builtin_variable = BUILTIN_VARIABLES.get(provider.id)
-        has_builtin_fallback = bool(
-            builtin_variable and has_builtin_value(builtin_variable)
-        )
+        has_builtin_fallback = bool(builtin_variable and has_builtin_value(builtin_variable))
         status[provider.id] = {
             "name": provider.name,
             "environmentKey": provider.environment_key,
@@ -147,9 +145,7 @@ def public_provider_status() -> dict[str, dict[str, object]]:
             "defaultCredentialSource": (
                 "environment"
                 if has_environment_key
-                else "builtin"
-                if has_builtin_fallback
-                else None
+                else "builtin" if has_builtin_fallback else None
             ),
         }
     return status

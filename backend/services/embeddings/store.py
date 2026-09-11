@@ -7,8 +7,8 @@
 
 from __future__ import annotations
 
-import logging
 import hashlib
+import logging
 import re
 from dataclasses import dataclass
 from typing import Any
@@ -204,9 +204,7 @@ async def count_scope_chunks(scope: str) -> int:
     return int(row["count"]) if row else 0
 
 
-async def get_document_by_source(
-    scope: str, source_path: str
-) -> dict[str, Any] | None:
+async def get_document_by_source(scope: str, source_path: str) -> dict[str, Any] | None:
     """按作用域+来源路径读取文档记录（增量索引对比用）。"""
 
     async with open_database() as connection:

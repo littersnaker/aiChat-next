@@ -92,9 +92,9 @@ def test_checkpoint_crud_survives_restart(tmp_path: Path, monkeypatch) -> None:
         restored = latest.json()["checkpoint"]
         assert restored["id"] == checkpoint_id
         assert restored["state"]["codeLoop"]["nextIteration"] == 17
-        assert restarted_client.delete(
-            f"/api/checkpoints/{checkpoint_id}"
-        ).json() == {"deleted": True}
+        assert restarted_client.delete(f"/api/checkpoints/{checkpoint_id}").json() == {
+            "deleted": True
+        }
 
 
 def test_checkpoint_api_accepts_all_agent_kinds(tmp_path: Path, monkeypatch) -> None:
@@ -162,9 +162,7 @@ def test_code_checkpoint_preserves_successful_work_and_commands() -> None:
     assert restored_ledger.get("W001").status == "succeeded"  # type: ignore[union-attr]
     assert restored_ledger.get("W001").changed_files == ["a.py"]  # type: ignore[union-attr]
     assert restored_ledger.get("W002").status == "failed"  # type: ignore[union-attr]
-    assert restored_command == CommandResult(
-        "python -m pytest", 1, "1 failed", False, ""
-    )
+    assert restored_command == CommandResult("python -m pytest", 1, "1 failed", False, "")
 
 
 def test_edit_action_has_no_artificial_file_count_limit(tmp_path: Path) -> None:
@@ -209,9 +207,7 @@ async def test_code_loop_checkpoints_after_safe_actions(
                 "action": "edit",
                 "workId": "W001",
                 "summary": "写入文件",
-                "operations": [
-                    {"type": "write", "path": "a.py", "content": "A = 1\n"}
-                ],
+                "operations": [{"type": "write", "path": "a.py", "content": "A = 1\n"}],
             },
             {"action": "complete_work", "workId": "W001", "summary": "完成"},
             {"action": "finish", "summary": "任务完成", "tests": []},
@@ -263,6 +259,5 @@ async def test_code_loop_checkpoints_after_safe_actions(
 
     assert any("a.py" in snapshot["changed"] for snapshot in snapshots)
     assert any(
-        snapshot["ledger"]["succeeded"] == 1  # type: ignore[index]
-        for snapshot in snapshots
+        snapshot["ledger"]["succeeded"] == 1 for snapshot in snapshots  # type: ignore[index]
     )

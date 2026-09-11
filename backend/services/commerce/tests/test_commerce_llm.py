@@ -119,12 +119,18 @@ async def test_research_uses_llm_category_and_insights(monkeypatch) -> None:
 
     class FakeInsights:
         def __init__(self) -> None:
-            self.source = {"summary": "市场信号总结", "opportunities": [], "risks": [], "actions": []}
+            self.source = {
+                "summary": "市场信号总结",
+                "opportunities": [],
+                "risks": [],
+                "actions": [],
+            }
 
         def model_dump(self) -> dict[str, object]:
             return self.source
 
     graph = langgraph_module.build_research_graph(_request(), {}, llm=_llm())
+
     # insights 也走 try_complete_json：改为按 schema 参数区分
     async def fake_any(*_args, schema_cls=None, **_kwargs):
         if schema_cls is CommerceCategoryAnalysis:

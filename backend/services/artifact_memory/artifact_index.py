@@ -170,13 +170,9 @@ class ArtifactIndex:
     def _rebuild_indexes(self) -> None:
         """根据主记录重建哈希与路径索引，避免更新后残留旧键。"""
 
-        self._hash_index = {
-            item.hash: item.id for item in self._records.values() if item.hash
-        }
+        self._hash_index = {item.hash: item.id for item in self._records.values() if item.hash}
         self._path_index = {
-            item.path.replace("\\", "/"): item.id
-            for item in self._records.values()
-            if item.path
+            item.path.replace("\\", "/"): item.id for item in self._records.values() if item.path
         }
 
 

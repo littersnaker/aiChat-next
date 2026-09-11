@@ -15,11 +15,7 @@ const CJK_SEQUENCE_PATTERN = /[\u3400-\u4dbf\u4e00-\u9fff]+/gu;
  * 统一文本格式，降低全角、大小写和空白差异对检索的影响。
  */
 export function normalizeRagText(value: string): string {
-  return value
-    .normalize("NFKC")
-    .toLocaleLowerCase()
-    .replace(/\s+/gu, " ")
-    .trim();
+  return value.normalize("NFKC").toLocaleLowerCase().replace(/\s+/gu, " ").trim();
 }
 
 /**
@@ -61,9 +57,7 @@ export function tokenizeForRag(value: string): string[] {
 /**
  * 统计 token 在一个切片中的出现次数。
  */
-export function buildTermFrequency(
-  tokens: readonly string[],
-): ReadonlyMap<string, number> {
+export function buildTermFrequency(tokens: readonly string[]): ReadonlyMap<string, number> {
   const frequency = new Map<string, number>();
 
   for (const token of tokens) {

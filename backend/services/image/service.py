@@ -16,7 +16,7 @@ from pathlib import Path
 
 from backend.services.glm46v.client import GLM46VClient, GLM46VSettings, ImageInput
 from backend.services.image.excel import write_recognition_excel
-from backend.services.image.locate import TagBox, locate_tags
+from backend.services.image.locate import TagBox, absolutize_columns, locate_tags
 from backend.services.image.models import (
     ImageRecognitionFailure,
     RecognitionOutcome,
@@ -29,7 +29,6 @@ from backend.services.image.recognition import (
     recognize_image_segments,
     recognize_tag_batches,
 )
-from backend.services.image.locate import absolutize_columns
 from backend.services.image.structuring import structure_rows
 from backend.services.llm.credentials import LlmCredentials
 from backend.utils.sse import sse_packet
@@ -193,20 +192,14 @@ async def stream_image_recognition(
     prepared: list[tuple[str, ImageInput, bytes]] = []
     for attachment in attachments:
         name = _attachment_values(attachment, "name") or "attachment.jpg"
-        mime_type = _attachment_values(
-            attachment, "mime_type", "mimeType", "type"
-        ) or "image/png"
+        mime_type = _attachment_values(attachment, "mime_type", "mimeType", "type") or "image/png"
         data = _attachment_values(attachment, "data_url", "dataUrl", "data")
         if not data:
-            outcome.failures.append(
-                ImageRecognitionFailure(name, "图片没有可用的 Base64 数据")
-            )
+            outcome.failures.append(ImageRecognitionFailure(name, "图片没有可用的 Base64 数据"))
             continue
         original_bytes = _decode_attachment_bytes(data)
         if not original_bytes:
-            outcome.failures.append(
-                ImageRecognitionFailure(name, "图片 Base64 数据无法解码")
-            )
+            outcome.failures.append(ImageRecognitionFailure(name, "图片 Base64 数据无法解码"))
             continue
         try:
             image = preprocess_image(
@@ -217,9 +210,7 @@ async def stream_image_recognition(
             )
         except Exception as exc:  # noqa: BLE001 - 单张预处理失败降级。
             LOGGER.warning("照片 %s 预处理失败：%s", name, exc)
-            outcome.failures.append(
-                ImageRecognitionFailure(name, f"预处理失败：{exc}")
-            )
+            outcome.failures.append(ImageRecognitionFailure(name, f"预处理失败：{exc}"))
             continue
         prepared.append((name, image, original_bytes))
 
@@ -301,9 +292,7 @@ async def stream_image_recognition(
             )
         else:
             rows.extend(photo_rows)
-            summaries.append(
-                f"{name}：整图识别 {_recognized_count(photo_rows)} 个图纸编号"
-            )
+            summaries.append(f"{name}：整图识别 {_recognized_count(photo_rows)} 个图纸编号")
 
     outcome.failures.extend(failures)
     outcome.rows = rows

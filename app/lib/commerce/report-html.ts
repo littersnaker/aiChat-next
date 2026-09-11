@@ -1,8 +1,5 @@
 // 模块说明：负责 report html 核心服务与领域逻辑。
-import {
-  getCommerceRunModeMeta,
-  resolveCommerceReportRunMode,
-} from "./run-mode";
+import { getCommerceRunModeMeta, resolveCommerceReportRunMode } from "./run-mode";
 import type {
   CommerceMarketMetrics,
   CommerceMarketObservation,
@@ -96,7 +93,8 @@ function renderProductRows(products: CommerceProductSignal[]): string {
 function renderObservationRows(observations: CommerceMarketObservation[]): string {
   return observations
     .slice(0, 24)
-    .map((item) => `
+    .map(
+      (item) => `
       <tr>
         <td>${escapeHtml(item.resultType)}</td>
         <td>
@@ -106,14 +104,12 @@ function renderObservationRows(observations: CommerceMarketObservation[]): strin
         <td>${escapeHtml(formatPrice(item.price, item.currency))}</td>
         <td>${item.rating ?? "-"}</td>
         <td>${formatCompact(item.reviewCount)}</td>
-      </tr>`)
+      </tr>`,
+    )
     .join("");
 }
 
-
-function renderPlatformComparisonRows(
-  metrics: CommerceMarketMetrics,
-): string {
+function renderPlatformComparisonRows(metrics: CommerceMarketMetrics): string {
   return (metrics.platformComparisons || [])
     .map(
       (item) => `<tr>
@@ -128,9 +124,7 @@ function renderPlatformComparisonRows(
     .join("");
 }
 
-function sourceStatusLabel(
-  status: CommerceResearchReport["sources"][number]["status"],
-): string {
+function sourceStatusLabel(status: CommerceResearchReport["sources"][number]["status"]): string {
   if (status === "collected") return "已获取";
   if (status === "partial") return "部分获取";
   if (status === "unconfigured") return "未配置";
@@ -139,9 +133,7 @@ function sourceStatusLabel(
   return "获取失败";
 }
 
-function sourceDisplayLabel(
-  source: CommerceResearchReport["sources"][number],
-): string {
+function sourceDisplayLabel(source: CommerceResearchReport["sources"][number]): string {
   const route = source.dataRoute || source.amazonDataRoute;
   if (route === "api") return `${source.label}（API）`;
   if (route === "crawler") {
@@ -283,14 +275,18 @@ export function buildCommerceReportHtml(report: CommerceResearchReport): string 
   </section>
 
 
-  ${(report.metrics.platformComparisons || []).length >= 2 && !isDemo ? `<section class="section">
+  ${
+    (report.metrics.platformComparisons || []).length >= 2 && !isDemo
+      ? `<section class="section">
     <h2>跨平台公开样本对比</h2>
     <table>
       <thead><tr><th>Platform</th><th>Samples</th><th>Median Price</th><th>Median Rating</th><th>Median Reviews</th><th>Price Coverage</th></tr></thead>
       <tbody>${renderPlatformComparisonRows(report.metrics)}</tbody>
     </table>
     <div class="notice">各平台按自身币种独立统计；样本数不代表市场份额，价格未做自动汇率换算。</div>
-  </section>` : ""}
+  </section>`
+      : ""
+  }
 
   <section class="section">
     <h2>数据源覆盖</h2>
@@ -300,22 +296,30 @@ export function buildCommerceReportHtml(report: CommerceResearchReport): string 
     </table>
   </section>
 
-  ${(report.observations || []).length ? `<section class="section">
+  ${
+    (report.observations || []).length
+      ? `<section class="section">
     <h2>公开市场观察</h2>
     <table>
       <thead><tr><th>Type</th><th>Result</th><th>Price</th><th>Rating</th><th>Reviews</th></tr></thead>
       <tbody>${renderObservationRows(report.observations || [])}</tbody>
     </table>
     <div class="notice">${isDemo ? "当前为模拟 SERP / Shopping 结果，仅用于展示报告结构。" : "公开 SERP / Shopping 结果用于市场情报初筛，不等同于平台真实销量、GMV 或市场份额。"}</div>
-  </section>` : ""}
+  </section>`
+      : ""
+  }
 
-  ${report.products.length ? `<section class="section">
+  ${
+    report.products.length
+      ? `<section class="section">
     <h2>${isDemo ? "演示商品样本" : "平台商品增强样本"}</h2>
     <table>
       <thead><tr><th>Product</th><th>Price</th><th>Rating</th><th>Reviews</th><th>Rank</th><th>Demand Signal</th></tr></thead>
       <tbody>${renderProductRows(report.products)}</tbody>
     </table>
-  </section>` : ""}
+  </section>`
+      : ""
+  }
 
   <section class="notice">
     <strong>数据来源与限制</strong><br />
@@ -330,11 +334,12 @@ export function buildCommerceReportHtml(report: CommerceResearchReport): string 
 }
 
 export function buildCommercePdfFileName(report: CommerceResearchReport): string {
-  const safeCategory = report.category.categoryName
-    .replace(/[\\/:*?"<>|]/gu, "-")
-    .replace(/\s+/gu, " ")
-    .trim()
-    .slice(0, 40) || "跨境市场情报";
+  const safeCategory =
+    report.category.categoryName
+      .replace(/[\\/:*?"<>|]/gu, "-")
+      .replace(/\s+/gu, " ")
+      .trim()
+      .slice(0, 40) || "跨境市场情报";
   const date = report.generatedAt.slice(0, 10);
   return `${safeCategory}-${report.marketplace}-${date}.pdf`;
 }

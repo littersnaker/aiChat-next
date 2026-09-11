@@ -68,9 +68,7 @@ def build_layers(rows: list[SheetRecognition]) -> list[dict[str, object]]:
         layer_rows = layers_map[layer]
         max_stack = max(item.stack for item in layer_rows)
         max_position = max(item.position for item in layer_rows)
-        cells: list[list[dict[str, str] | None]] = [
-            [None] * max_position for _ in range(max_stack)
-        ]
+        cells: list[list[dict[str, str] | None]] = [[None] * max_position for _ in range(max_stack)]
         for item in layer_rows:
             cells[item.stack - 1][item.position - 1] = {
                 "sheetNo": item.sheet_no,
@@ -100,9 +98,7 @@ def backfill_empty_slots(rows: list[SheetRecognition]) -> list[SheetRecognition]
     max_backfill_col = 40
     by_layer: dict[int, dict[int, set[int]]] = {}
     for item in rows:
-        by_layer.setdefault(item.layer, {}).setdefault(item.stack, set()).add(
-            item.position
-        )
+        by_layer.setdefault(item.layer, {}).setdefault(item.stack, set()).add(item.position)
     result = list(rows)
     for layer, stacks in by_layer.items():
         for stack, positions in stacks.items():

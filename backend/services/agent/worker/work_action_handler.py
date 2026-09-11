@@ -142,16 +142,11 @@ class WorkActionHandler:
         )
         if result.get("approvalNeeded"):
             self._env.state.append_transcript(
-                f"ACTION mcp {action.tool} 需要用户审批，已跳过；"
-                "请用户通过 MCP 面板确认后重试。"
+                f"ACTION mcp {action.tool} 需要用户审批，已跳过；" "请用户通过 MCP 面板确认后重试。"
             )
         else:
-            text = str(
-                result.get("content") or result.get("error") or "（工具无返回）"
-            )
-            self._env.state.append_transcript(
-                f"ACTION mcp {action.tool}\nOBSERVATION:\n{text}"
-            )
+            text = str(result.get("content") or result.get("error") or "（工具无返回）")
+            self._env.state.append_transcript(f"ACTION mcp {action.tool}\nOBSERVATION:\n{text}")
         await self._env.checkpoint()
         return WorkActionOutcome("continue")
 
@@ -180,8 +175,7 @@ class WorkActionHandler:
         await self._lifecycle(
             role="modify_worker",
             detail=(
-                f"{self._env.work.id} · {self._env.work.title}："
-                f"读取 {len(action.paths)} 个文件"
+                f"{self._env.work.id} · {self._env.work.title}：" f"读取 {len(action.paths)} 个文件"
             ),
             tool_name="read_file_from_disk",
             files=list(action.paths),
@@ -251,10 +245,7 @@ class WorkActionHandler:
 
         await self._lifecycle(
             role="code_intelligence",
-            detail=(
-                f"{self._env.work.id} · {self._env.work.title}："
-                "分析代码结构与影响范围"
-            ),
+            detail=(f"{self._env.work.id} · {self._env.work.title}：" "分析代码结构与影响范围"),
             tool_name="code_intelligence",
             files=list(action.paths),
         )
@@ -330,9 +321,7 @@ class WorkActionHandler:
             if action.factory_mode == "validate":
                 # 最终验收结果写入 Checkpoint，避免恢复后模型绕过已失败的页面接入校验。
                 output_root = action.factory_output_root.strip()
-                self._env.state.factory_validations[output_root] = bool(
-                    result.get("ok")
-                )
+                self._env.state.factory_validations[output_root] = bool(result.get("ok"))
         observation = json.dumps(result, ensure_ascii=False, indent=2, default=str)
         self._env.state.append_transcript(
             f"ACTION factory mode={action.factory_mode}\nOBSERVATION:\n{observation}"
@@ -366,10 +355,7 @@ class WorkActionHandler:
             await self._lifecycle(
                 role="software_factory",
                 status="completed",
-                detail=(
-                    f"{self._env.work.id}：已复用现有契约/Mock 产物，"
-                    "跳过重新生成"
-                ),
+                detail=(f"{self._env.work.id}：已复用现有契约/Mock 产物，" "跳过重新生成"),
                 tool_name="software_factory.validate",
             )
             return WorkActionOutcome("continue", progress_made=False)
@@ -419,9 +405,7 @@ class WorkActionHandler:
         ]
         if oversized:
             executable = [
-                operation
-                for operation in action.operations
-                if operation not in oversized
+                operation for operation in action.operations if operation not in oversized
             ]
             if not executable:
                 # 全部 operation 都是超长 replace，无可执行内容，整批拒绝。
@@ -457,8 +441,7 @@ class WorkActionHandler:
         await self._lifecycle(
             role="modify_worker",
             detail=(
-                f"{self._env.work.id} · {self._env.work.title}："
-                f"等待并写入 {len(paths)} 个文件"
+                f"{self._env.work.id} · {self._env.work.title}：" f"等待并写入 {len(paths)} 个文件"
             ),
             tool_name="apply_file_change",
             files=sorted(paths),
@@ -490,15 +473,11 @@ class WorkActionHandler:
             error_text = str(exc)
             if "内容已变化" in error_text:
                 self._env.state.append_transcript(
-                    f"EDIT RETRY REQUIRED: {exc}\n"
-                    "请先 read 冲突文件，再基于最新内容重新 edit。"
+                    f"EDIT RETRY REQUIRED: {exc}\n" "请先 read 冲突文件，再基于最新内容重新 edit。"
                 )
                 await self._lifecycle(
                     role="modify_worker",
-                    detail=(
-                        f"{self._env.work.id} 检测到并行文件更新，"
-                        "正在读取最新版本后重试"
-                    ),
+                    detail=(f"{self._env.work.id} 检测到并行文件更新，" "正在读取最新版本后重试"),
                     tool_name="read_file_from_disk",
                 )
                 await self._env.checkpoint()
@@ -524,10 +503,7 @@ class WorkActionHandler:
             role="merge_agent",
             agent_id=f"merge_agent:{self._env.work.id}",
             status="completed",
-            detail=(
-                f"{self._env.work.id} 已串行合并 "
-                f"{len(edit_result.changed_files)} 个文件"
-            ),
+            detail=(f"{self._env.work.id} 已串行合并 " f"{len(edit_result.changed_files)} 个文件"),
             tool_name="apply_file_change",
             files=list(edit_result.changed_files),
         )
@@ -545,10 +521,7 @@ class WorkActionHandler:
         if self._env.execution_mode != "full_auto":
             # 自动编辑模式默认跳过终端命令；安装/初始化类命令在审批门开启时
             # 允许走审批流程（用户确认后执行），其余命令保持跳过。
-            if not (
-                command_approval_enabled()
-                and requires_user_approval(action.command)
-            ):
+            if not (command_approval_enabled() and requires_user_approval(action.command)):
                 self._env.state.append_transcript(
                     f"ACTION run skipped: {action.command}\n自动编辑模式不执行命令。"
                 )
@@ -575,9 +548,7 @@ class WorkActionHandler:
                     self._env.state.append_transcript(command_observation(blocked))
                     await self._env.checkpoint()
                     return WorkActionOutcome("continue")
-                decision = await consume_pending_command(
-                    self._env.work.id, action.command
-                )
+                decision = await consume_pending_command(self._env.work.id, action.command)
                 if decision is None:
                     return await self._request_command_approval(action.command)
                 if decision == "rejected":
@@ -706,9 +677,7 @@ class WorkActionHandler:
         """执行模型写的 Python 程序（批量工具调用），只有 print/return 回上下文。"""
 
         if self._env.execution_mode != "full_auto":
-            self._env.state.append_transcript(
-                "ACTION run_code skipped: 自动编辑模式不执行代码。"
-            )
+            self._env.state.append_transcript("ACTION run_code skipped: 自动编辑模式不执行代码。")
             await self._env.checkpoint()
             return WorkActionOutcome("continue")
 
@@ -810,15 +779,9 @@ class WorkActionHandler:
 
         from backend.services.agent.shared.domain_rules import complete_work_rules
 
-        searchable = " ".join(
-            [self._env.work.title, self._env.work.objective]
-        ).lower()
+        searchable = " ".join([self._env.work.title, self._env.work.objective]).lower()
         terms = tuple(
-            str(item)
-            for item in complete_work_rules().get(
-                "factoryValidationIntentTerms"
-            )
-            or ()
+            str(item) for item in complete_work_rules().get("factoryValidationIntentTerms") or ()
         )
         return any(term in searchable for term in terms)
 

@@ -55,33 +55,25 @@ def _validate_blueprint(
     known_entities = set(entity_names)
     for entity in blueprint.entities:
         field_names = [field.name for field in entity.fields]
-        repeated_fields = [
-            name for name, count in Counter(field_names).items() if count > 1
-        ]
+        repeated_fields = [name for name, count in Counter(field_names).items() if count > 1]
         if repeated_fields:
-            errors.append(
-                f"实体 {entity.name} 字段重复：{', '.join(repeated_fields)}"
-            )
+            errors.append(f"实体 {entity.name} 字段重复：{', '.join(repeated_fields)}")
         if "id" not in field_names and entity.name != "CheckoutRequest":
             errors.append(f"实体 {entity.name} 缺少 id 字段")
 
     operation_ids = [endpoint.operation_id for endpoint in blueprint.endpoints]
-    repeated_operations = [
-        name for name, count in Counter(operation_ids).items() if count > 1
-    ]
+    repeated_operations = [name for name, count in Counter(operation_ids).items() if count > 1]
     if repeated_operations:
         errors.append(f"API operationId 重复：{', '.join(repeated_operations)}")
 
     for endpoint in blueprint.endpoints:
         if endpoint.response_entity not in known_entities:
             errors.append(
-                f"接口 {endpoint.operation_id} 引用了未知响应实体 "
-                f"{endpoint.response_entity}"
+                f"接口 {endpoint.operation_id} 引用了未知响应实体 " f"{endpoint.response_entity}"
             )
         if endpoint.request_entity and endpoint.request_entity not in known_entities:
             errors.append(
-                f"接口 {endpoint.operation_id} 引用了未知请求实体 "
-                f"{endpoint.request_entity}"
+                f"接口 {endpoint.operation_id} 引用了未知请求实体 " f"{endpoint.request_entity}"
             )
     checks.append("领域实体、字段和 API 引用完整性")
 
@@ -113,8 +105,7 @@ def _validate_mock_payload(
             missing_fields = sorted(required_fields - set(item))
             if missing_fields:
                 errors.append(
-                    f"Mock {collection_name}[{index}] 缺少必填字段："
-                    f"{', '.join(missing_fields)}"
+                    f"Mock {collection_name}[{index}] 缺少必填字段：" f"{', '.join(missing_fields)}"
                 )
 
     _validate_commerce_relations(mock_payload, errors, warnings)
@@ -129,18 +120,10 @@ def _validate_commerce_relations(
     """校验商品、SKU、购物车和订单之间的引用关系。"""
 
     products = {
-        item.get("id"): item
-        for item in payload.get("products", [])
-        if isinstance(item, dict)
+        item.get("id"): item for item in payload.get("products", []) if isinstance(item, dict)
     }
-    skus = {
-        item.get("id"): item
-        for item in payload.get("skus", [])
-        if isinstance(item, dict)
-    }
-    cart_items = [
-        item for item in payload.get("cartItems", []) if isinstance(item, dict)
-    ]
+    skus = {item.get("id"): item for item in payload.get("skus", []) if isinstance(item, dict)}
+    cart_items = [item for item in payload.get("cartItems", []) if isinstance(item, dict)]
 
     for sku_id, sku in skus.items():
         if sku.get("productId") not in products:
@@ -175,9 +158,7 @@ def _validate_artifact_contents(
         suffix = _suffix(artifact.path)
         line_count = len(artifact.content.splitlines())
         if suffix in SOURCE_SUFFIXES and line_count > MAXIMUM_SOURCE_LINES:
-            errors.append(
-                f"生成源码 {artifact.path} 有 {line_count} 行，超过 500 行限制"
-            )
+            errors.append(f"生成源码 {artifact.path} 有 {line_count} 行，超过 500 行限制")
         if suffix == ".json":
             try:
                 json.loads(artifact.content)

@@ -24,9 +24,7 @@ async def _column_names(connection, table: str) -> set[str]:
 
 async def _applied_versions() -> list[str]:
     async with open_database() as connection:
-        cursor = await connection.execute(
-            "SELECT version FROM schema_migrations ORDER BY version"
-        )
+        cursor = await connection.execute("SELECT version FROM schema_migrations ORDER BY version")
         rows = await cursor.fetchall()
     return [str(row["version"]) for row in rows]
 
@@ -38,9 +36,7 @@ def _isolated_db(monkeypatch, tmp_path) -> None:
     get_settings.cache_clear()
 
 
-def test_apply_migrations_adds_listing_drafts_updated_at(
-    monkeypatch, tmp_path
-) -> None:
+def test_apply_migrations_adds_listing_drafts_updated_at(monkeypatch, tmp_path) -> None:
     """全新库：基线建表后迁移应补齐 updated_at 列。"""
 
     _isolated_db(monkeypatch, tmp_path)

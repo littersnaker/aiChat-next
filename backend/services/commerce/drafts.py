@@ -175,12 +175,8 @@ async def list_listing_drafts(
                 "status": str(row["status"]),
                 "notes": str(row["notes"]),
                 "createdAt": str(row["created_at"]),
-                "confirmedAt": (
-                    str(row["confirmed_at"]) if row["confirmed_at"] else None
-                ),
-                "updatedAt": (
-                    str(row["updated_at"]) if row["updated_at"] else None
-                ),
+                "confirmedAt": (str(row["confirmed_at"]) if row["confirmed_at"] else None),
+                "updatedAt": (str(row["updated_at"]) if row["updated_at"] else None),
             }
         )
     return result

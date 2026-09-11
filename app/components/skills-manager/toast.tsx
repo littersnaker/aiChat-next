@@ -41,13 +41,9 @@ export default function Toast({ toast, onDismiss }: ToastProps) {
       aria-live="polite"
       className="fixed bottom-6 right-6 z-[320] flex max-w-[420px] items-start gap-2.5 rounded-[14px] border px-4 py-3"
       style={{
-        background:
-          "color-mix(in srgb, var(--glass-strong) 96%, transparent)",
-        borderColor: isSuccess
-          ? "rgba(48,209,88,0.28)"
-          : "rgba(255,69,58,0.28)",
-        boxShadow:
-          "0 20px 60px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.14)",
+        background: "color-mix(in srgb, var(--glass-strong) 96%, transparent)",
+        borderColor: isSuccess ? "rgba(48,209,88,0.28)" : "rgba(255,69,58,0.28)",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.14)",
         backdropFilter: "blur(24px) saturate(150%)",
         WebkitBackdropFilter: "blur(24px) saturate(150%)",
         animation: "skill-toast-in 0.28s var(--ease-apple)",
@@ -57,10 +53,7 @@ export default function Toast({ toast, onDismiss }: ToastProps) {
         className="mt-[3px] h-2 w-2 shrink-0 rounded-full"
         style={{ background: accent, boxShadow: `0 0 10px ${accent}` }}
       />
-      <span
-        className="text-[12px] leading-5"
-        style={{ color: "var(--text-primary)" }}
-      >
+      <span className="text-[12px] leading-5" style={{ color: "var(--text-primary)" }}>
         {toast.message}
       </span>
     </div>

@@ -54,14 +54,10 @@ def _normalize_model_id(model_id: str) -> str:
     # 裸模型名：全量匹配，多厂商同名时优先"原生厂商"
     # （模型名前缀与 provider 一致），避免 deepseek-v4-pro 被解析成百炼托管版本。
     matches = [
-        model
-        for model in _all_catalog_models()
-        if model.model == value or model.id == value
+        model for model in _all_catalog_models() if model.model == value or model.id == value
     ]
     if not matches:
-        raise ValueError(
-            f"未知的复盘模型：{value}（请填模型名，如 deepseek-v4-flash）"
-        )
+        raise ValueError(f"未知的复盘模型：{value}（请填模型名，如 deepseek-v4-flash）")
     resolved = next(
         (model for model in matches if model.provider == value.split("-")[0]),
         matches[0],

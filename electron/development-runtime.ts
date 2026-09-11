@@ -16,10 +16,7 @@ export function configureDevelopmentProcess(): void {
   if (app.isPackaged) return;
 
   app.setName(DEVELOPMENT_APP_NAME);
-  app.setPath(
-    "userData",
-    path.join(app.getPath("appData"), DEVELOPMENT_USER_DATA_DIRECTORY),
-  );
+  app.setPath("userData", path.join(app.getPath("appData"), DEVELOPMENT_USER_DATA_DIRECTORY));
   app.commandLine.appendSwitch("disable-http-cache");
   app.commandLine.appendSwitch("disable-gpu-shader-disk-cache");
 }
@@ -28,10 +25,7 @@ export function configureDevelopmentProcess(): void {
 export async function clearDevelopmentRendererCache(): Promise<void> {
   if (app.isPackaged) return;
 
-  const developmentSession = session.fromPartition(
-    DEVELOPMENT_SESSION_PARTITION,
-    { cache: false },
-  );
+  const developmentSession = session.fromPartition(DEVELOPMENT_SESSION_PARTITION, { cache: false });
   await Promise.all([
     session.defaultSession.clearCache(),
     developmentSession.clearCache(),

@@ -86,10 +86,10 @@ def _build_prompt(body: MediaGenerateBody) -> str:
 def _extract_image_urls(payload: dict[str, Any]) -> list[str]:
     """从 DashScope 多模态响应中提取图片地址。"""
 
-    choices = ((payload.get("output") or {}).get("choices") or [])
+    choices = (payload.get("output") or {}).get("choices") or []
     urls: list[str] = []
     for choice in choices:
-        content = (((choice or {}).get("message") or {}).get("content") or [])
+        content = ((choice or {}).get("message") or {}).get("content") or []
         for item in content:
             value = (item or {}).get("image")
             if isinstance(value, str) and value:
@@ -151,9 +151,7 @@ async def generate_image(
     parameters: dict[str, Any] = {
         "n": 1,
         "negative_prompt": (
-            f"{base_negative}，{body.negative_prompt}"
-            if body.negative_prompt
-            else base_negative
+            f"{base_negative}，{body.negative_prompt}" if body.negative_prompt else base_negative
         ),
         "prompt_extend": body.image_edit_fidelity != "precise",
         "watermark": False,
@@ -180,9 +178,7 @@ async def generate_image(
         urls = _extract_image_urls(payload)
         if not urls:
             raise ValueError("图片任务完成，但响应中没有图片地址")
-        attachments = [
-            await _download_image(client, url, index) for index, url in enumerate(urls)
-        ]
+        attachments = [await _download_image(client, url, index) for index, url in enumerate(urls)]
 
     image_count = int((payload.get("usage") or {}).get("image_count") or len(attachments))
     return {
@@ -278,13 +274,17 @@ async def _build_video_input(
     if not attachment:
         raise ValueError("当前视频模式必须先上传素材")
     if body.mode == "image-to-video":
-        return {"prompt": prompt, "media": [{"type": "first_frame", "url": _attachment_data_url(attachment)}]}
+        return {
+            "prompt": prompt,
+            "media": [{"type": "first_frame", "url": _attachment_data_url(attachment)}],
+        }
     if body.mode == "reference-to-video":
-        return {"prompt": prompt, "media": [{"type": "reference_image", "url": _attachment_data_url(attachment)}]}
+        return {
+            "prompt": prompt,
+            "media": [{"type": "reference_image", "url": _attachment_data_url(attachment)}],
+        }
     if body.mode == "video-edit":
-        temporary_url = await _upload_video(
-            client, attachment, model_name, api_key, api_base
-        )
+        temporary_url = await _upload_video(client, attachment, model_name, api_key, api_base)
         return {"prompt": prompt, "media": [{"type": "video", "url": temporary_url}]}
     raise ValueError(f"不支持的视频模式：{body.mode}")
 
@@ -324,7 +324,7 @@ async def generate_video(
             json={"model": model["model"], "input": input_payload, "parameters": parameters},
         )
         submitted = await _read_json(response)
-        task_id = ((submitted.get("output") or {}).get("task_id"))
+        task_id = (submitted.get("output") or {}).get("task_id")
         if not task_id:
             raise ValueError("视频任务提交成功，但没有返回 task_id")
 
@@ -343,7 +343,9 @@ async def generate_video(
                 video_url = str(output.get("video_url") or "")
                 if not video_url:
                     for item in output.get("results") or []:
-                        video_url = str((item or {}).get("video_url") or (item or {}).get("url") or "")
+                        video_url = str(
+                            (item or {}).get("video_url") or (item or {}).get("url") or ""
+                        )
                         if video_url:
                             break
                 break

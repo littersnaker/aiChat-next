@@ -118,8 +118,7 @@ class TaskDagExecutor:
             try:
                 # 只传入已经完成的依赖结果副本，防止节点意外修改 Executor 内部状态。
                 dependency_results = {
-                    dependency: completed_results[dependency]
-                    for dependency in node.dependencies
+                    dependency: completed_results[dependency] for dependency in node.dependencies
                 }
                 value = await node.handler(dependency_results)
                 return _NodeOutcome(node.id, value, attempt)
@@ -172,9 +171,7 @@ class TaskDagExecutor:
             ]
             if invalid_dependencies:
                 # 依赖 ID 与节点 ID 使用同一套规范，避免拓扑校验通过后在执行阶段读取失败。
-                raise ValueError(
-                    f"Task DAG 节点 {node.id} 的依赖 ID 不能为空或包含首尾空格"
-                )
+                raise ValueError(f"Task DAG 节点 {node.id} 的依赖 ID 不能为空或包含首尾空格")
             if identifier in node_map:
                 raise ValueError(f"Task DAG 节点 ID 重复：{identifier}")
             node_map[identifier] = node
@@ -187,9 +184,7 @@ class TaskDagExecutor:
                 raise ValueError(f"Task DAG 节点不能依赖自身：{node.id}")
 
         # 使用 Kahn 算法进行静态拓扑检查；处理副本，不修改节点配置。
-        remaining_dependencies = {
-            node.id: set(node.dependencies) for node in node_map.values()
-        }
+        remaining_dependencies = {node.id: set(node.dependencies) for node in node_map.values()}
         resolved: set[str] = set()
         while len(resolved) < len(node_map):
             ready = {

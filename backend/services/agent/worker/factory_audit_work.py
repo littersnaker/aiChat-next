@@ -38,8 +38,7 @@ MAX_AUDIT_FILE_CHARS = 4_000
 MAX_AUDIT_FILE_BYTES = 200_000
 
 _OUT_OF_SCOPE_TERMS = tuple(
-    str(item)
-    for item in factory_audit_rules().get("outOfScopeTerms") or ()
+    str(item) for item in factory_audit_rules().get("outOfScopeTerms") or ()
 )
 _PATH_PATTERN = re.compile(r"[\w./\\-]+\.(?:ts|tsx|js|jsx|vue|py)")
 
@@ -62,12 +61,9 @@ def _classify_validation_errors(
         lowered = text.lower()
         referenced_paths = _PATH_PATTERN.findall(lowered)
         points_outside = any(
-            path and not path.strip("/").startswith(normalized_root)
-            for path in referenced_paths
+            path and not path.strip("/").startswith(normalized_root) for path in referenced_paths
         )
-        if points_outside or any(
-            term in text for term in _OUT_OF_SCOPE_TERMS
-        ):
+        if points_outside or any(term in text for term in _OUT_OF_SCOPE_TERMS):
             out_of_scope.append(text)
         else:
             in_scope.append(text)
@@ -187,9 +183,7 @@ def _parse_verdict(text: str, output_root: str) -> dict[str, Any]:
         for operation in operations:
             normalized = operation.path.strip("/").replace("\\", "/")
             if not normalized.startswith(output_root.strip("/")):
-                raise ValueError(
-                    f"补丁路径 {operation.path} 超出数据层目录 {output_root}"
-                )
+                raise ValueError(f"补丁路径 {operation.path} 超出数据层目录 {output_root}")
     return {
         "verdict": verdict,
         "reason": str(raw.get("reason") or "")[:500],
@@ -409,9 +403,7 @@ async def execute_factory_audit_work(
     return WorkExecutionResult(
         work_id=work.id,
         succeeded=True,
-        summary=(
-            f"已补齐 {len(edit_result.changed_files)} 个数据层文件并通过一致性校验"
-        ),
+        summary=(f"已补齐 {len(edit_result.changed_files)} 个数据层文件并通过一致性校验"),
         error="",
         state=state,
     )

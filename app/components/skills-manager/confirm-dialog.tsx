@@ -57,8 +57,7 @@ export default function ConfirmDialog({
           background:
             "linear-gradient(180deg, color-mix(in srgb, var(--glass-solid) 98%, transparent), color-mix(in srgb, var(--glass-strong) 96%, transparent))",
           borderColor: "var(--border-strong)",
-          boxShadow:
-            "0 30px 90px rgba(15,23,42,0.35), inset 0 1px 0 rgba(255,255,255,0.28)",
+          boxShadow: "0 30px 90px rgba(15,23,42,0.35), inset 0 1px 0 rgba(255,255,255,0.28)",
           backdropFilter: "blur(36px) saturate(155%)",
           WebkitBackdropFilter: "blur(36px) saturate(155%)",
         }}
@@ -70,10 +69,7 @@ export default function ConfirmDialog({
         >
           {title}
         </h3>
-        <p
-          className="mt-2 text-[12px] leading-5"
-          style={{ color: "var(--text-secondary)" }}
-        >
+        <p className="mt-2 text-[12px] leading-5" style={{ color: "var(--text-secondary)" }}>
           {message}
         </p>
         <div className="mt-5 flex justify-end gap-2.5">

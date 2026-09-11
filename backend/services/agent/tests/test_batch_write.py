@@ -192,9 +192,7 @@ async def test_batch_write_empty_operations_marks_satisfied(
 
 
 @pytest.mark.asyncio
-async def test_write_then_review_completes_generation_work(
-    tmp_path, monkeypatch
-) -> None:
+async def test_write_then_review_completes_generation_work(tmp_path, monkeypatch) -> None:
     """生成类 Work：批量直写未配合时，分块写入 + 单次审查直接完成，不进多轮循环。"""
 
     calls = 0
@@ -263,9 +261,7 @@ async def test_write_then_review_completes_generation_work(
 
 
 @pytest.mark.asyncio
-async def test_write_then_review_cannot_fix_goes_to_planner(
-    tmp_path, monkeypatch
-) -> None:
+async def test_write_then_review_cannot_fix_goes_to_planner(tmp_path, monkeypatch) -> None:
     """审查判定任务不可行时，以 guard 失败交回 Planner，而不是继续烧 token。"""
 
     calls = 0

@@ -70,12 +70,10 @@ class ModelDefinition:
     is_custom: bool = False
 
 
-def _load_providers() -> (
-    tuple[
-        tuple[ProviderDefinition, ...],
-        dict[ProviderId, tuple[str, ...]],
-    ]
-):
+def _load_providers() -> tuple[
+    tuple[ProviderDefinition, ...],
+    dict[ProviderId, tuple[str, ...]],
+]:
     """从 providers.json 加载供应商及其环境变量别名。"""
 
     payload = _read_config("providers.json")
@@ -101,10 +99,7 @@ def _load_providers() -> (
                 fallback_endpoints=tuple(
                     str(item) for item in (entry.get("fallbackEndpoints") or [])
                 ),
-                endpoint_environment_key=str(
-                    entry.get("endpointEnvironmentKey") or ""
-                )
-                or None,
+                endpoint_environment_key=str(entry.get("endpointEnvironmentKey") or "") or None,
             )
         )
     return tuple(providers), env_keys
@@ -132,22 +127,13 @@ def _create_model(raw: dict[str, object]) -> ModelDefinition:
     )
 
 
-def _load_chat_models() -> (
-    tuple[tuple[ModelDefinition, ...], dict[str, str], str]
-):
+def _load_chat_models() -> tuple[tuple[ModelDefinition, ...], dict[str, str], str]:
     """从 chat-models.json 加载聊天模型、别名与默认模型 ID。"""
 
     payload = _read_config("chat-models.json")
     raw_models = payload.get("models") or []
-    models = tuple(
-        _create_model(raw)
-        for raw in raw_models
-        if isinstance(raw, dict)
-    )
-    aliases = {
-        str(key): str(value)
-        for key, value in dict(payload.get("aliases") or {}).items()
-    }
+    models = tuple(_create_model(raw) for raw in raw_models if isinstance(raw, dict))
+    aliases = {str(key): str(value) for key, value in dict(payload.get("aliases") or {}).items()}
     default_id = str(payload.get("defaultModelId") or "")
     return models, aliases, default_id
 
@@ -181,9 +167,7 @@ def models_for_provider(provider_id: ProviderId) -> tuple[ModelDefinition, ...]:
     """返回指定供应商的全部聊天模型。"""
 
     return tuple(
-        model
-        for model in MODELS
-        if model.provider == provider_id and model.chat_compatible
+        model for model in MODELS if model.provider == provider_id and model.chat_compatible
     )
 
 

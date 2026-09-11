@@ -94,11 +94,15 @@ async def start_dev_server(
     env = os.environ.copy()
     env.update({"CI": "1", "NO_COLOR": "1"})
     # Vite/Webpack 都支持 --port 指定端口；npm 传参走 -- 分隔。
-    command = [*command, "--", "--port", str(target_port)] if command[0] == "npm" else [
-        *command,
-        "--port",
-        str(target_port),
-    ]
+    command = (
+        [*command, "--", "--port", str(target_port)]
+        if command[0] == "npm"
+        else [
+            *command,
+            "--port",
+            str(target_port),
+        ]
+    )
     try:
         process = await asyncio.create_subprocess_exec(
             *command,

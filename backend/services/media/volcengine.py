@@ -98,9 +98,7 @@ async def _download(
         "content-type",
         "video/mp4" if kind == "video" else "image/png",
     ).split(";", 1)[0]
-    extension = mimetypes.guess_extension(mime_type) or (
-        ".mp4" if kind == "video" else ".png"
-    )
+    extension = mimetypes.guess_extension(mime_type) or (".mp4" if kind == "video" else ".png")
     file_name = f"doubao-{kind}-{int(time.time() * 1000)}-{index + 1}{extension}"
     data_url = f"data:{mime_type};base64,{base64.b64encode(response.content).decode()}"
     return {
@@ -199,11 +197,7 @@ async def generate_volcengine_video(
             },
         )
         payload = await _read_json(response)
-        task_id = str(
-            payload.get("id")
-            or ((payload.get("output") or {}).get("id"))
-            or ""
-        )
+        task_id = str(payload.get("id") or ((payload.get("output") or {}).get("id")) or "")
         if not task_id:
             raise ValueError("火山引擎视频响应中没有任务 ID")
 

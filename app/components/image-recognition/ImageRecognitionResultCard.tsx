@@ -59,10 +59,8 @@ function normalizeResult(result: ImageRecognitionResult | undefined): {
       layers: safeLayers,
       failures: Array.isArray(result.failures) ? result.failures : [],
       summary: typeof result.summary === "string" ? result.summary : "",
-      excelFileName:
-        typeof result.excelFileName === "string" ? result.excelFileName : "",
-      excelDownloadUrl:
-        typeof result.excelDownloadUrl === "string" ? result.excelDownloadUrl : "",
+      excelFileName: typeof result.excelFileName === "string" ? result.excelFileName : "",
+      excelDownloadUrl: typeof result.excelDownloadUrl === "string" ? result.excelDownloadUrl : "",
     },
     legacy: false,
   };
@@ -148,7 +146,10 @@ function LayerGrid({ layer }: { layer: ImageRecognitionLayer }) {
                       }}
                       title={`${cell.sheetNo} · ${cell.sourceImage}${cell.note ? ` · ${cell.note}` : ""}`}
                     >
-                      <span className="text-[13px] font-semibold tracking-[-0.01em]" style={{ color: COLORS.blue }}>
+                      <span
+                        className="text-[13px] font-semibold tracking-[-0.01em]"
+                        style={{ color: COLORS.blue }}
+                      >
                         {cell.sheetNo}
                       </span>
                     </td>
@@ -164,10 +165,7 @@ function LayerGrid({ layer }: { layer: ImageRecognitionLayer }) {
 }
 
 function ShelfGrid({ layers }: { layers: ImageRecognitionLayer[] }) {
-  const sorted = useMemo(
-    () => [...layers].sort((a, b) => a.layer - b.layer),
-    [layers],
-  );
+  const sorted = useMemo(() => [...layers].sort((a, b) => a.layer - b.layer), [layers]);
   const totalSheets = useMemo(
     () =>
       sorted.reduce(
@@ -175,8 +173,7 @@ function ShelfGrid({ layers }: { layers: ImageRecognitionLayer[] }) {
           sum +
           layer.cells.reduce(
             (inner, row) =>
-              inner +
-              row.filter((cell) => cell !== null && Boolean(cell.sheetNo)).length,
+              inner + row.filter((cell) => cell !== null && Boolean(cell.sheetNo)).length,
             0,
           ),
         0,
@@ -233,7 +230,11 @@ function FailureList({ failures }: { failures: ImageRecognitionFailure[] }) {
       </div>
       <ul className="mt-1.5 space-y-1">
         {failures.map((failure) => (
-          <li key={`${failure.imageName}-${failure.reason}`} className="flex gap-2 text-[11px]" style={{ color: COLORS.textMuted }}>
+          <li
+            key={`${failure.imageName}-${failure.reason}`}
+            className="flex gap-2 text-[11px]"
+            style={{ color: COLORS.textMuted }}
+          >
             <span className="shrink-0 font-medium" style={{ color: COLORS.text }}>
               {failure.imageName}
             </span>
@@ -250,15 +251,8 @@ function FailureList({ failures }: { failures: ImageRecognitionFailure[] }) {
   );
 }
 
-export default function ImageRecognitionResultCard({
-  result,
-}: {
-  result: ImageRecognitionResult;
-}) {
-  const { result: safeResult, legacy } = useMemo(
-    () => normalizeResult(result),
-    [result],
-  );
+export default function ImageRecognitionResultCard({ result }: { result: ImageRecognitionResult }) {
+  const { result: safeResult, legacy } = useMemo(() => normalizeResult(result), [result]);
   const totalSheets = useMemo(
     () =>
       safeResult.layers.reduce(
@@ -266,8 +260,7 @@ export default function ImageRecognitionResultCard({
           sum +
           layer.cells.reduce(
             (inner, row) =>
-              inner +
-              row.filter((cell) => cell !== null && Boolean(cell.sheetNo)).length,
+              inner + row.filter((cell) => cell !== null && Boolean(cell.sheetNo)).length,
             0,
           ),
         0,
@@ -277,7 +270,10 @@ export default function ImageRecognitionResultCard({
 
   if (legacy) {
     return (
-      <div className="mb-3 rounded-[12px] border px-3 py-2.5 text-[11px]" style={{ borderColor: COLORS.border, color: COLORS.textMuted }}>
+      <div
+        className="mb-3 rounded-[12px] border px-3 py-2.5 text-[11px]"
+        style={{ borderColor: COLORS.border, color: COLORS.textMuted }}
+      >
         ⚠️ 此结果来自旧版本格式，无法以矩阵展示。请重新上传照片识别一次。
       </div>
     );
@@ -314,7 +310,10 @@ export default function ImageRecognitionResultCard({
       {safeResult.layers.length > 0 ? (
         <ShelfGrid layers={safeResult.layers} />
       ) : (
-        <div className="rounded-[12px] border px-3 py-2.5 text-[11px]" style={{ borderColor: COLORS.border, color: COLORS.textMuted }}>
+        <div
+          className="rounded-[12px] border px-3 py-2.5 text-[11px]"
+          style={{ borderColor: COLORS.border, color: COLORS.textMuted }}
+        >
           未识别到图纸编号。
         </div>
       )}
@@ -324,7 +323,11 @@ export default function ImageRecognitionResultCard({
       {safeResult.summary && (
         <div
           className="rounded-[12px] border px-3 py-2.5 text-[11px] whitespace-pre-wrap"
-          style={{ borderColor: COLORS.border, color: COLORS.textMuted, background: COLORS.material }}
+          style={{
+            borderColor: COLORS.border,
+            color: COLORS.textMuted,
+            background: COLORS.material,
+          }}
         >
           {safeResult.summary}
         </div>

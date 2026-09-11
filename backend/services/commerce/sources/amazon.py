@@ -90,11 +90,7 @@ def _normalize(
         return None
     snippet = str(item.get("snippet") or "")[:240]
     price = item.get("price")
-    currency = (
-        marketplace.currency
-        if isinstance(price, (int, float)) and price > 0
-        else None
-    )
+    currency = marketplace.currency if isinstance(price, (int, float)) and price > 0 else None
     return {
         "id": f"amazon-{asin}",
         "title": title[:240],
@@ -204,11 +200,7 @@ def _parse_search_html(
         if asin in seen:
             continue
         start = marker.start()
-        end = (
-            markers[index + 1].start()
-            if index + 1 < len(markers)
-            else start + 4_000
-        )
+        end = markers[index + 1].start() if index + 1 < len(markers) else start + 4_000
         block = page[start:end]
         title = _first(r"<h2[^>]*>.*?<span[^>]*>(.*?)</span>", block) or _first(
             r"<h2[^>]*>(.*?)</h2>", block
@@ -261,9 +253,7 @@ async def _search_public_crawler(
         page = response.text
     rows = _parse_search_html(page, marketplace, limit)
     if not rows:
-        raise RuntimeError(
-            "Amazon 搜索页未解析到商品（可能被反爬拦截或页面结构变化）"
-        )
+        raise RuntimeError("Amazon 搜索页未解析到商品（可能被反爬拦截或页面结构变化）")
     return rows
 
 

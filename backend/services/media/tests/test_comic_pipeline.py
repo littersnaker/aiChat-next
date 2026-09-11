@@ -89,9 +89,7 @@ async def test_storyboard_phase_stops_before_generation(monkeypatch) -> None:
 
 
 @pytest.mark.asyncio
-async def test_confirmed_pipeline_generates_images_videos_and_merges(
-    monkeypatch, tmp_path
-) -> None:
+async def test_confirmed_pipeline_generates_images_videos_and_merges(monkeypatch, tmp_path) -> None:
     """确认后：并行出图 → 图生视频 → 合并 → 质检通过。"""
 
     from backend.services.media import comic_pipeline as pipeline

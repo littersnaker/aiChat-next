@@ -124,9 +124,7 @@ async def search_tiktok_shop(
     data = payload.get("data") or {}
     products = data.get("products") or data.get("items") or payload.get("products") or []
     return [
-        item
-        for index, raw in enumerate(products)
-        if (item := _normalize(raw, index)) is not None
+        item for index, raw in enumerate(products) if (item := _normalize(raw, index)) is not None
     ][:limit]
 
 

@@ -296,9 +296,7 @@ async def test_install_from_github_full_flow(
 
     monkeypatch.setattr(installer, "_download_github_tarball", fake_tarball)
 
-    result = await installer.install_skill_from_github(
-        "acme/skills/skills/order-triage"
-    )
+    result = await installer.install_skill_from_github("acme/skills/skills/order-triage")
     assert result["total"] == 1
     assert result["failed"] == []
     installed = result["installed"][0]
@@ -308,9 +306,7 @@ async def test_install_from_github_full_flow(
     skill_root = installer._user_skill_root() / "order-review-assistant"
     assert (skill_root / "references" / "checklist.md").is_file()
     assert (skill_root / "scripts" / "run.sh").is_file()
-    assert (skill_root / "references" / "checklist.md").read_text(
-        "utf-8"
-    ).startswith("# Checklist")
+    assert (skill_root / "references" / "checklist.md").read_text("utf-8").startswith("# Checklist")
 
     # 删除整个目录后应从 SQLite 恢复主文件与附加文件。
     import shutil
@@ -348,9 +344,7 @@ async def test_install_skill_unified_entry(
     assert from_github["id"] == "order-review-assistant"
     await installer.uninstall_skill("order-review-assistant")
 
-    from_url = (await installer.install_skill("https://example.com/SKILL.md"))[
-        "installed"
-    ][0]
+    from_url = (await installer.install_skill("https://example.com/SKILL.md"))["installed"][0]
     assert from_url["id"] == "order-review-assistant"
     await installer.uninstall_skill("order-review-assistant")
 
@@ -382,9 +376,7 @@ async def test_install_repo_root_batch_all_skills(
 
     monkeypatch.setattr(installer, "_download_github_tarball", fake_tarball)
 
-    result = await installer.install_skill_from_github(
-        "https://github.com/acme/skills"
-    )
+    result = await installer.install_skill_from_github("https://github.com/acme/skills")
     assert result["total"] == 3
     assert len(result["installed"]) == 2
     assert len(result["failed"]) == 1
@@ -431,9 +423,7 @@ async def test_skill_config_binding_and_enabled_filter(
         return SAMPLE_SKILL_MD
 
     monkeypatch.setattr(installer, "_download_text", fake_text)
-    installed = (await installer.install_skill("https://example.com/SKILL.md"))[
-        "installed"
-    ][0]
+    installed = (await installer.install_skill("https://example.com/SKILL.md"))["installed"][0]
 
     # 默认未绑定任何 Agent → 候选池为空。
     assert await installer.list_enabled_skills_for_agent("coding") == []
@@ -477,13 +467,12 @@ async def test_skill_config_enforces_50_limit(
             "Order Review Assistant",
             name,
         ).replace("order-review-assistant", f"skill-{index}")
+
         async def fake_text_for(url: str, _content=skill_md) -> str:
             return _content
 
         monkeypatch.setattr(installer, "_download_text", fake_text_for)
-        result = (await installer.install_skill("https://example.com/SKILL.md"))[
-            "installed"
-        ][0]
+        result = (await installer.install_skill("https://example.com/SKILL.md"))["installed"][0]
         installed_ids.append(result["id"])
         await installer.update_skill_config(
             result["id"],
@@ -493,9 +482,7 @@ async def test_skill_config_enforces_50_limit(
 
     # 第 51 个启用时应被拒绝。
     monkeypatch.setattr(installer, "_download_text", fake_text)
-    extra = (await installer.install_skill("https://example.com/SKILL.md"))[
-        "installed"
-    ][0]
+    extra = (await installer.install_skill("https://example.com/SKILL.md"))["installed"][0]
     with pytest.raises(ValueError, match="不能超过 50"):
         await installer.update_skill_config(
             extra["id"],
@@ -522,9 +509,7 @@ async def test_record_skill_usage_increments(
         return SAMPLE_SKILL_MD
 
     monkeypatch.setattr(installer, "_download_text", fake_text)
-    installed = (await installer.install_skill("https://example.com/SKILL.md"))[
-        "installed"
-    ][0]
+    installed = (await installer.install_skill("https://example.com/SKILL.md"))["installed"][0]
 
     await installer.record_skill_usage(installed["id"])
     await installer.record_skill_usage(installed["id"])
@@ -554,11 +539,14 @@ def test_recommend_agents_by_keywords() -> None:
         tags=(),
     ) == ["media"]
 
-    assert installer._recommend_agents(
-        name="unknown-tool",
-        description="A generic internal helper.",
-        tags=(),
-    ) == []
+    assert (
+        installer._recommend_agents(
+            name="unknown-tool",
+            description="A generic internal helper.",
+            tags=(),
+        )
+        == []
+    )
 
 
 @pytest.mark.asyncio
@@ -577,9 +565,7 @@ async def test_install_auto_binds_recommended_agent(
         return skill_md
 
     monkeypatch.setattr(installer, "_download_text", fake_text)
-    installed = (await installer.install_skill("https://example.com/SKILL.md"))[
-        "installed"
-    ][0]
+    installed = (await installer.install_skill("https://example.com/SKILL.md"))["installed"][0]
     listed = await installer.list_installed_skills()
     item = next(item for item in listed if item["id"] == installed["id"])
     assert item["enabled"] is True
@@ -612,9 +598,7 @@ async def test_install_auto_downgrades_when_over_50(
             return _content
 
         monkeypatch.setattr(installer, "_download_text", fake_text)
-        result = (await installer.install_skill("https://example.com/SKILL.md"))[
-            "installed"
-        ][0]
+        result = (await installer.install_skill("https://example.com/SKILL.md"))["installed"][0]
         assert result["enabled"] is True
 
     # 第 51 个：安装成功但自动降级为停用。
@@ -631,9 +615,7 @@ async def test_install_auto_downgrades_when_over_50(
         return _content
 
     monkeypatch.setattr(installer, "_download_text", fake_text_extra)
-    extra = (await installer.install_skill("https://example.com/SKILL.md"))[
-        "installed"
-    ][0]
+    extra = (await installer.install_skill("https://example.com/SKILL.md"))["installed"][0]
     assert extra["enabled"] is False
     listed = await installer.list_installed_skills()
     extra_row = next(item for item in listed if item["id"] == extra["id"])

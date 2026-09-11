@@ -46,8 +46,7 @@ def enrich_software_factory_works(
 
     enriched = list(works)
     searchable = "\n".join(
-        f"{item.title} {item.objective} {' '.join(item.acceptance_criteria)}"
-        for item in works
+        f"{item.title} {item.objective} {' '.join(item.acceptance_criteria)}" for item in works
     ).lower()
     used_ids = {item.id for item in enriched}
 

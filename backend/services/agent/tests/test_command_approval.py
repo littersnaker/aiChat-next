@@ -76,16 +76,12 @@ def test_validate_command_approval_gate(monkeypatch) -> None:
     monkeypatch.setenv("CODE_AGENT_INSTALL_PACKAGE_WHITELIST", "")
     _parts, reason = validate_command("pnpm install", Path.cwd())
     assert reason and "用户确认" in reason
-    parts, reason = validate_command(
-        "pnpm install", Path.cwd(), approved=True
-    )
+    parts, reason = validate_command("pnpm install", Path.cwd(), approved=True)
     assert reason is None
     assert parts == ["pnpm", "install"]
 
     monkeypatch.setenv("CODE_AGENT_INSTALL_PACKAGE_WHITELIST", "gsap")
-    _parts, reason = validate_command(
-        "pnpm add react", Path.cwd(), approved=True
-    )
+    _parts, reason = validate_command("pnpm add react", Path.cwd(), approved=True)
     assert reason and "白名单" in reason
     parts, reason = validate_command("pnpm add gsap", Path.cwd(), approved=True)
     assert reason is None

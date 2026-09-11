@@ -102,7 +102,7 @@ def detect_layer_band_ys(*, image_bytes: bytes) -> list[int] | None:
     if len(rows) < 2:
         return None
     boundaries: list[int] = []
-    for row, next_row in zip(rows, rows[1:]):
+    for row, next_row in zip(rows, rows[1:], strict=False):
         row_max_cy = max(box.cy for box in by_row[row])
         next_min_cy = min(box.cy for box in by_row[next_row])
         if next_min_cy > row_max_cy:
@@ -135,16 +135,12 @@ def _detect_boxes(
     binary_masks: list = []
     if USE_S_CHANNEL:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        threshold, binary = cv2.threshold(
-            hsv[:, :, 1], 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
-        )
+        threshold, binary = cv2.threshold(hsv[:, :, 1], 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         if threshold > _MIN_OTSU_THRESHOLD:
             binary_masks.append(binary)
     if USE_GRAY_CHANNEL:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        threshold, binary = cv2.threshold(
-            gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
-        )
+        threshold, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         if threshold > _MIN_OTSU_THRESHOLD:
             binary_masks.append(binary)
     if not binary_masks:
@@ -158,9 +154,7 @@ def _detect_boxes(
     combined = cv2.morphologyEx(combined, cv2.MORPH_CLOSE, kernel)
     combined = cv2.morphologyEx(combined, cv2.MORPH_OPEN, kernel)
 
-    contours, _ = cv2.findContours(
-        combined, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
+    contours, _ = cv2.findContours(combined, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     total_pixels = width * height
     min_area = (min_area_ratio or MIN_AREA_RATIO) * total_pixels
     max_area = (max_area_ratio or MAX_AREA_RATIO) * total_pixels
@@ -175,9 +169,7 @@ def _detect_boxes(
             continue
         if MIN_CIRCULARITY > 0:
             perimeter = cv2.arcLength(contour, True)
-            circularity = (
-                4 * math.pi * area / (perimeter * perimeter) if perimeter > 0 else 0.0
-            )
+            circularity = 4 * math.pi * area / (perimeter * perimeter) if perimeter > 0 else 0.0
             if circularity < MIN_CIRCULARITY:
                 continue
         boxes.append((x, y, w, h))
@@ -322,9 +314,7 @@ def _iou(a: tuple[int, int, int, int], b: tuple[int, int, int, int]) -> float:
     return inter / union if union > 0 else 0.0
 
 
-def _pad(
-    box: tuple[int, int, int, int], height: int, width: int
-) -> tuple[int, int, int, int]:
+def _pad(box: tuple[int, int, int, int], height: int, width: int) -> tuple[int, int, int, int]:
     """给裁剪框加少量外边距，避免裁到标签边缘，并限制在图内。"""
 
     x, y, w, h = box
@@ -372,7 +362,6 @@ def _assign_grid(
         rows.append(current)
 
     # 层号从下到上：最下面（y 最大的行）为第 1 层。
-    row_count = len(rows)
     tagged: list[TagBox] = []
     for row_index, row_boxes in enumerate(rows):
         row_boxes = sorted(row_boxes, key=lambda box: box[0] + box[2] / 2)
@@ -423,7 +412,7 @@ def absolutize_columns(boxes: list[TagBox]) -> list[TagBox]:
     diffs: list[float] = []
     for row_boxes in by_row.values():
         sorted_boxes = sorted(row_boxes, key=lambda item: item.cx)
-        for prev, curr in zip(sorted_boxes, sorted_boxes[1:]):
+        for prev, curr in zip(sorted_boxes, sorted_boxes[1:], strict=False):
             diff = curr.cx - prev.cx
             if diff > 0:
                 diffs.append(diff)

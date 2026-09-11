@@ -44,7 +44,7 @@ def _connect_real_page(root: Path, *, include_states: bool = True) -> None:
             "void empty;\n"
         )
     page_code = (
-        'import { createCommerceDataSource } from '
+        "import { createCommerceDataSource } from "
         '"../features/commerce/data-source";\n\n'
         'const dataSource = createCommerceDataSource({ mode: "mock", baseUrl: "/api" });\n'
         "const products = await dataSource.listProducts();\n"

@@ -52,7 +52,6 @@ def test_chinese_query_is_split_into_searchable_terms() -> None:
     assert "程序" in terms
 
 
-
 def test_direct_workspace_search_supports_chinese_sentence(tmp_path: Path) -> None:
     """验证 search 工具直接接收中文整句时也能命中项目内容。"""
 
@@ -62,6 +61,7 @@ def test_direct_workspace_search_supports_chinese_sentence(tmp_path: Path) -> No
 
     assert "shop.ts" in result
     assert "电商小程序" in result
+
 
 def test_context_falls_back_to_project_overview_files(tmp_path: Path) -> None:
     """验证关键词无命中时仍会读取项目清单和入口文件。"""
@@ -87,7 +87,6 @@ def test_tool_catalog_contains_read_and_write_tools() -> None:
     assert {"search", "read", "edit", "run", "complete_work", "finish"} <= names
 
 
-
 def test_tool_catalog_matches_execution_mode(monkeypatch) -> None:
     """全自动必须暴露 edit/run；自动编辑在关闭审批门时禁用 run；只读模式不得暴露写入。"""
 
@@ -96,9 +95,7 @@ def test_tool_catalog_matches_execution_mode(monkeypatch) -> None:
     assert "run" in tool_names_for_mode(execution_mode="auto_edit")
     monkeypatch.setenv("CODE_AGENT_COMMAND_APPROVAL", "0")
     assert "run" not in tool_names_for_mode(execution_mode="auto_edit")
-    assert {"edit", "run"} <= set(
-        tool_names_for_mode(execution_mode="full_auto")
-    )
+    assert {"edit", "run"} <= set(tool_names_for_mode(execution_mode="full_auto"))
     assert set(tool_names_for_mode(read_only=True)) == {
         "search",
         "read",
@@ -121,6 +118,7 @@ def test_workspace_tree_hides_sensitive_files_but_keeps_template(tmp_path: Path)
     assert ".env.example" in tree
     assert "src/app.ts" in tree
 
+
 def test_kimi_k26_omits_temperature_and_keeps_full_endpoint() -> None:
     """验证 K2.6 不发送非法 temperature，并兼容 Base URL 与完整端点。"""
 
@@ -134,9 +132,7 @@ def test_kimi_k26_omits_temperature_and_keeps_full_endpoint() -> None:
         == "https://api.moonshot.cn/v1/chat/completions"
     )
     assert (
-        gateway._normalize_chat_endpoint(
-            "https://api.moonshot.cn/v1/chat/completions"
-        )
+        gateway._normalize_chat_endpoint("https://api.moonshot.cn/v1/chat/completions")
         == "https://api.moonshot.cn/v1/chat/completions"
     )
 

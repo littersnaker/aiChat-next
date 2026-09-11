@@ -64,9 +64,9 @@ def _process_score(process: dict[str, Any] | None) -> float | None:
     guard_stopped = bool(process.get("guard_stopped"))
     if guard_stopped:
         return 0.0
-    penalties = int(process.get("retries") or 0) * 15 + int(
-        process.get("guard_rejections") or 0
-    ) * 5
+    penalties = (
+        int(process.get("retries") or 0) * 15 + int(process.get("guard_rejections") or 0) * 5
+    )
     return max(0, 100 - penalties)
 
 
@@ -123,9 +123,7 @@ def compute_quality_score(
 
     weight_sum = sum(active_weights.values())
     normalized = {key: value / weight_sum for key, value in active_weights.items()}
-    total = round(
-        sum(dimensions[name] * normalized[name] for name in dimensions), 1
-    )
+    total = round(sum(dimensions[name] * normalized[name] for name in dimensions), 1)
     return {
         "score": total,
         "dimensions": {name: round(value) for name, value in dimensions.items()},

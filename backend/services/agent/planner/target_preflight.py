@@ -71,20 +71,14 @@ def extract_tree_paths(project_tree: str) -> list[str]:
     seen: set[str] = set()
     for raw in project_tree.splitlines():
         line = raw.strip()
-        if (
-            not line
-            or line.endswith("/")
-            or line.startswith("(")
-            or line.startswith("（")
-        ):
+        if not line or line.endswith("/") or line.startswith("(") or line.startswith("（"):
             continue
         path = line.replace("\\", "/").lstrip("./")
         if not path:
             continue
         segments = path.split("/")
         if any(
-            segment in IGNORED_DIR_MARKS or is_build_output_segment(segment)
-            for segment in segments
+            segment in IGNORED_DIR_MARKS or is_build_output_segment(segment) for segment in segments
         ):
             continue
         if path in seen:
@@ -134,11 +128,7 @@ def _expand_directory(
     prefix = target.rstrip("/")
     if not prefix:
         return []
-    children = [
-        path
-        for path in project_paths
-        if path.startswith(prefix + "/")
-    ]
+    children = [path for path in project_paths if path.startswith(prefix + "/")]
     if not children:
         return []
     children.sort(key=lambda item: (item.count("/"), not _is_source(item), item))
@@ -287,9 +277,7 @@ def preflight_plan_works(
         if not before:
             notes.append(f"{work.id} 预检补全 targetFiles {len(filled)} 个")
         elif len(filled) > len(before):
-            notes.append(
-                f"{work.id} 预检展开 targetFiles {len(before)}→{len(filled)}"
-            )
+            notes.append(f"{work.id} 预检展开 targetFiles {len(before)}→{len(filled)}")
     return notes
 
 

@@ -33,8 +33,7 @@ const QUALITY_DIMENSION_LABELS: Record<string, string> = {
 function PerformanceRow({ snapshot }: { snapshot: WorkListSnapshotPayload }) {
   const step = snapshot.stepMetrics;
   if (!step || step.steps === 0) return null;
-  const ttft =
-    step.avgTtftMs != null ? `${(step.avgTtftMs / 1000).toFixed(1)}s` : "—";
+  const ttft = step.avgTtftMs != null ? `${(step.avgTtftMs / 1000).toFixed(1)}s` : "—";
   const tps = step.avgTokPerSec != null ? `${step.avgTokPerSec}` : "—";
   const totalTokens = step.totalPromptTokens + step.totalCompletionTokens;
   return (
@@ -67,7 +66,10 @@ function QualityScoreRow({ snapshot }: { snapshot: WorkListSnapshotPayload }) {
           ? "#ff9f0a"
           : "var(--accent-red)";
   return (
-    <div className="mt-2 rounded-[12px] border px-2.5 py-2" style={{ borderColor: "var(--border)" }}>
+    <div
+      className="mt-2 rounded-[12px] border px-2.5 py-2"
+      style={{ borderColor: "var(--border)" }}
+    >
       <div className="flex items-center justify-between">
         <span className="text-[8px] font-medium" style={{ color: "var(--text-tertiary)" }}>
           Quality Score
@@ -94,7 +96,10 @@ function QualityScoreRow({ snapshot }: { snapshot: WorkListSnapshotPayload }) {
                   style={{ width: hasValue ? `${Math.max(0, Math.min(100, value))}%` : "0%" }}
                 />
               </div>
-              <span className="w-6 shrink-0 text-right font-mono text-[8px] tabular-nums" style={{ color: "var(--text-tertiary)" }}>
+              <span
+                className="w-6 shrink-0 text-right font-mono text-[8px] tabular-nums"
+                style={{ color: "var(--text-tertiary)" }}
+              >
                 {hasValue ? Math.round(value) : "—"}
               </span>
             </div>
@@ -110,15 +115,7 @@ function QualityScoreRow({ snapshot }: { snapshot: WorkListSnapshotPayload }) {
  *
  * 颜色仅用于快速识别结果，文字始终保留，确保不能只依赖颜色判断状态。
  */
-function MetricCell({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: string;
-}) {
+function MetricCell({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
     <div
       className="rounded-[12px] border px-2.5 py-2"
@@ -133,10 +130,7 @@ function MetricCell({
           className="h-1.5 w-1.5 shrink-0 rounded-full"
           style={{ background: tone, boxShadow: `0 0 8px ${tone}` }}
         />
-        <span
-          className="text-[8px] font-medium"
-          style={{ color: "var(--text-tertiary)" }}
-        >
+        <span className="text-[8px] font-medium" style={{ color: "var(--text-tertiary)" }}>
           {label}
         </span>
       </div>
@@ -155,9 +149,7 @@ function MetricCell({
  *
  * 最终质量报告尚未产生时仍显示运行中的 Token 与 Work 指标，避免卡片闪烁消失。
  */
-export default function QualityMetricsCard({
-  snapshot,
-}: QualityMetricsCardProps) {
+export default function QualityMetricsCard({ snapshot }: QualityMetricsCardProps) {
   const quality = snapshot.quality;
   const metrics = snapshot.metrics;
   if (!quality && !metrics && !snapshot.stepMetrics) {
@@ -175,19 +167,15 @@ export default function QualityMetricsCard({
     : quality?.validationExecuted
       ? "var(--accent-red)"
       : "var(--text-quaternary)";
-  const regressionTone = quality?.regression
-    ? "var(--accent-red)"
-    : "var(--accent-green)";
+  const regressionTone = quality?.regression ? "var(--accent-red)" : "var(--accent-green)";
 
   return (
     <section
       className="mb-3 rounded-[16px] border p-2.5"
       style={{
-        background:
-          "linear-gradient(145deg, rgba(255,255,255,0.065), rgba(255,255,255,0.025))",
+        background: "linear-gradient(145deg, rgba(255,255,255,0.065), rgba(255,255,255,0.025))",
         borderColor: "var(--border)",
-        boxShadow:
-          "0 10px 30px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.08)",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.08)",
         backdropFilter: "blur(24px) saturate(145%)",
         WebkitBackdropFilter: "blur(24px) saturate(145%)",
       }}
@@ -202,12 +190,8 @@ export default function QualityMetricsCard({
         <span
           className="rounded-full px-2 py-0.5 text-[8px] font-medium"
           style={{
-            color: quality?.codeGatePassed
-              ? "var(--accent-green)"
-              : "var(--text-tertiary)",
-            background: quality?.codeGatePassed
-              ? "rgba(48,209,88,0.10)"
-              : "var(--glass)",
+            color: quality?.codeGatePassed ? "var(--accent-green)" : "var(--text-tertiary)",
+            background: quality?.codeGatePassed ? "rgba(48,209,88,0.10)" : "var(--glass)",
           }}
         >
           {quality
@@ -219,16 +203,8 @@ export default function QualityMetricsCard({
       </div>
 
       <div className="grid grid-cols-4 gap-1.5">
-        <MetricCell
-          label="Changes"
-          value={String(quality?.changes ?? 0)}
-          tone="#64b5ff"
-        />
-        <MetricCell
-          label="Risk"
-          value={quality ? `${quality.riskScore}` : "—"}
-          tone={riskTone}
-        />
+        <MetricCell label="Changes" value={String(quality?.changes ?? 0)} tone="#64b5ff" />
+        <MetricCell label="Risk" value={quality ? `${quality.riskScore}` : "—"} tone={riskTone} />
         <MetricCell
           label="Validation"
           value={quality?.validationPassed ? "Passed" : "Pending"}
@@ -254,9 +230,7 @@ export default function QualityMetricsCard({
         >
           <span>Total {formatTokenCount(metrics.totalTokens)}</span>
           <span>Active {formatTokenCount(metrics.activeTokens)}</span>
-          <span>
-            Compressed {formatTokenCount(metrics.compressedTokens)}
-          </span>
+          <span>Compressed {formatTokenCount(metrics.compressedTokens)}</span>
           <span>Retry {metrics.retryCount}</span>
         </div>
       )}

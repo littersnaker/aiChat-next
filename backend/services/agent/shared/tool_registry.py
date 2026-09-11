@@ -54,9 +54,7 @@ CODE_AGENT_TOOLS: tuple[AgentToolDefinition, ...] = (
     AgentToolDefinition(
         name="factory",
         scope="write",
-        description=(
-            "规划、生成或校验电商领域模型、OpenAPI、Mock、API Client 和前端数据源。"
-        ),
+        description=("规划、生成或校验电商领域模型、OpenAPI、Mock、API Client 和前端数据源。"),
         example=(
             '{"action":"factory","workId":"SF001","mode":"plan",'
             '"domainId":"commerce-miniapp","outputRoot":"src/features/commerce",'
@@ -133,19 +131,13 @@ def tool_names_for_mode(
 
     if read_only:
         return READ_ONLY_TOOL_NAMES
-    names = (
-        FULL_AUTO_TOOL_NAMES if execution_mode == "full_auto" else AUTO_EDIT_TOOL_NAMES
-    )
+    names = FULL_AUTO_TOOL_NAMES if execution_mode == "full_auto" else AUTO_EDIT_TOOL_NAMES
     # run_code 批量执行通道：仅显式开启且全自动模式才暴露（可回滚）。
     if code_mode_enabled() and execution_mode == "full_auto" and "run_code" not in names:
         names = (*names, "run_code")
     # 命令审批门开启时，自动编辑模式也暴露 run（只有安装/初始化类命令会弹审批，
     # 其余命令仍由 _run 按“自动编辑模式”跳过，不执行终端命令）。
-    if (
-        command_approval_enabled()
-        and execution_mode == "auto_edit"
-        and "run" not in names
-    ):
+    if command_approval_enabled() and execution_mode == "auto_edit" and "run" not in names:
         names = (*names, "run")
     return names
 
@@ -158,9 +150,7 @@ def render_tool_catalog(
 ) -> str:
     """把当前模式的真实工具目录渲染为模型可读文本。"""
 
-    allowed = set(
-        tool_names_for_mode(read_only=read_only, execution_mode=execution_mode)
-    )
+    allowed = set(tool_names_for_mode(read_only=read_only, execution_mode=execution_mode))
     lines: list[str] = []
     for tool in CODE_AGENT_TOOLS:
         if tool.name not in allowed:
@@ -202,9 +192,7 @@ def build_openai_tools(
         EditOperationModel,
     )
 
-    allowed = set(
-        tool_names_for_mode(read_only=False, execution_mode=execution_mode)
-    )
+    allowed = set(tool_names_for_mode(read_only=False, execution_mode=execution_mode))
     # 每类动作的参数 Schema；关键字段保持与文本协议一致（parse_agent_action 兼容）。
     schemas: dict[str, dict[str, Any]] = {
         "search": {
@@ -259,9 +247,7 @@ def build_openai_tools(
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "properties": EditOperationModel.model_json_schema().get(
-                            "properties", {}
-                        ),
+                        "properties": EditOperationModel.model_json_schema().get("properties", {}),
                     },
                     "description": "write 新建完整文件；replace 只给最小定位片段（3~8 行），禁止整段重写",
                 },

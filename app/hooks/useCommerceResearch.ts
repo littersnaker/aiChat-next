@@ -3,20 +3,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import type {
-  ChatSession,
-  Message,
-} from "../constants/page-constants";
+import type { ChatSession, Message } from "../constants/page-constants";
 import { apiFetch } from "../lib/api-client";
 import type {
   CommerceMarketplaceCode,
   CommerceProgressEvent,
   CommerceResearchReport,
 } from "../lib/commerce/types";
-import type {
-  AmazonListingDemoReport,
-  CommerceWorkflowMode,
-} from "../lib/commerce/listing/types";
+import type { AmazonListingDemoReport, CommerceWorkflowMode } from "../lib/commerce/listing/types";
 import {
   getCommerceActivityStageId,
   getCommerceProgressTitle,
@@ -36,11 +30,7 @@ interface UseCommerceResearchOptions {
   messages: Message[];
   setMessages: Dispatch<SetStateAction<Message[]>>;
   setSessions: Dispatch<SetStateAction<ChatSession[]>>;
-  persistSession: (
-    session: ChatSession,
-    nextMessages: Message[],
-    title?: string,
-  ) => Promise<void>;
+  persistSession: (session: ChatSession, nextMessages: Message[], title?: string) => Promise<void>;
   apiKeys: LlmCredentials;
   endpointOverrides: LlmEndpointOverrides;
   serviceKeys: AuxiliaryServiceCredentials;
@@ -56,9 +46,7 @@ export interface CommerceRunOptions {
   workflowModeOverride?: CommerceWorkflowMode;
   marketplaceOverride?: CommerceMarketplaceCode;
   modelOverride?: string;
-  onCheckpointFinish?: (
-    result: CheckpointFinishResult,
-  ) => void | Promise<void>;
+  onCheckpointFinish?: (result: CheckpointFinishResult) => void | Promise<void>;
 }
 
 async function readResponseError(response: Response): Promise<string> {
@@ -73,41 +61,29 @@ async function readResponseError(response: Response): Promise<string> {
   return `Commerce Agent 请求失败（HTTP ${response.status}）`;
 }
 
-function isCommerceProgressEvent(
-  value: StreamPacket["payload"],
-): value is CommerceProgressEvent {
+function isCommerceProgressEvent(value: StreamPacket["payload"]): value is CommerceProgressEvent {
+  return Boolean(value && "stage" in value && "progress" in value && "detail" in value);
+}
+
+function isCommerceResearchReport(value: StreamPacket["payload"]): value is CommerceResearchReport {
   return Boolean(
     value &&
-      "stage" in value &&
-      "progress" in value &&
-      "detail" in value,
+    "version" in value &&
+    (value.version === 2 || value.version === 3) &&
+    "metrics" in value &&
+    "products" in value &&
+    "category" in value,
   );
 }
 
-function isCommerceResearchReport(
-  value: StreamPacket["payload"],
-): value is CommerceResearchReport {
+function isAmazonListingReport(value: StreamPacket["payload"]): value is AmazonListingDemoReport {
   return Boolean(
     value &&
-      "version" in value &&
-      (value.version === 2 || value.version === 3) &&
-      "metrics" in value &&
-      "products" in value &&
-      "category" in value,
-  );
-}
-
-
-function isAmazonListingReport(
-  value: StreamPacket["payload"],
-): value is AmazonListingDemoReport {
-  return Boolean(
-    value &&
-      "mode" in value &&
-      value.mode === "listing-demo" &&
-      "draft" in value &&
-      "validation" in value &&
-      "mockErp" in value,
+    "mode" in value &&
+    value.mode === "listing-demo" &&
+    "draft" in value &&
+    "validation" in value &&
+    "mockErp" in value,
   );
 }
 
@@ -131,8 +107,7 @@ export function useCommerceResearch({
   clearAfterSubmit,
   agents,
 }: UseCommerceResearchOptions) {
-  const [workflowMode, setWorkflowMode] =
-    useState<CommerceWorkflowMode>("research");
+  const [workflowMode, setWorkflowMode] = useState<CommerceWorkflowMode>("research");
   const [isResearching, setIsResearching] = useState(false);
   const [agentStatus, setAgentStatus] = useState("");
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
@@ -153,27 +128,20 @@ export function useCommerceResearch({
 
   const submitPrompt = useCallback(
     async (promptText: string, options: CommerceRunOptions = {}) => {
-      if (
-        !activeSession ||
-        activeSession.mode !== "commerce" ||
-        isResearching
-      ) {
+      if (!activeSession || activeSession.mode !== "commerce" || isResearching) {
         return;
       }
 
       const query = promptText.trim();
       if (!query) return;
-      const effectiveWorkflowMode =
-        options.workflowModeOverride || workflowMode;
+      const effectiveWorkflowMode = options.workflowModeOverride || workflowMode;
       const effectiveMarketplace = options.marketplaceOverride || marketplace;
 
       const userMessage: Message = { role: "user", content: query };
       const resumeExistingRun = options.resumeExistingRun === true;
       const lastMessage = messages[messages.length - 1];
       const baseMessages =
-        resumeExistingRun && lastMessage?.role === "assistant"
-          ? messages.slice(0, -1)
-          : messages;
+        resumeExistingRun && lastMessage?.role === "assistant" ? messages.slice(0, -1) : messages;
       const optimisticHistory: Message[] = [
         ...baseMessages,
         ...(resumeExistingRun ? [] : [userMessage]),
@@ -224,9 +192,7 @@ export function useCommerceResearch({
         };
 
         const endpoint =
-          effectiveWorkflowMode === "listing"
-            ? "/api/commerce/listing"
-            : "/api/commerce/research";
+          effectiveWorkflowMode === "listing" ? "/api/commerce/listing" : "/api/commerce/research";
         const response = await apiFetch(endpoint, {
           method: "POST",
           headers,
@@ -265,10 +231,7 @@ export function useCommerceResearch({
             try {
               const packet = JSON.parse(line.slice(5).trim()) as StreamPacket;
 
-              if (
-                packet.type === "COMMERCE_PROGRESS" &&
-                isCommerceProgressEvent(packet.payload)
-              ) {
+              if (packet.type === "COMMERCE_PROGRESS" && isCommerceProgressEvent(packet.payload)) {
                 const event = packet.payload;
                 const now = Date.now();
                 setAgentStatus(event.detail);
@@ -290,10 +253,7 @@ export function useCommerceResearch({
                       id: `commerce_${event.stage}_${now}`,
                       label: getCommerceProgressTitle(effectiveWorkflowMode, event.stage),
                       detail: event.detail,
-                      stageId: getCommerceActivityStageId(
-                        effectiveWorkflowMode,
-                        event.stage,
-                      ),
+                      stageId: getCommerceActivityStageId(effectiveWorkflowMode, event.stage),
                       status: "running" as const,
                       startedAt: now,
                     },
@@ -302,10 +262,7 @@ export function useCommerceResearch({
                 continue;
               }
 
-              if (
-                packet.type === "COMMERCE_REPORT" &&
-                isCommerceResearchReport(packet.payload)
-              ) {
+              if (packet.type === "COMMERCE_REPORT" && isCommerceResearchReport(packet.payload)) {
                 finalReport = packet.payload;
                 setMessages((current: Message[]) => [
                   ...current.slice(0, -1),
@@ -319,10 +276,7 @@ export function useCommerceResearch({
                 continue;
               }
 
-              if (
-                packet.type === "COMMERCE_LISTING" &&
-                isAmazonListingReport(packet.payload)
-              ) {
+              if (packet.type === "COMMERCE_LISTING" && isAmazonListingReport(packet.payload)) {
                 finalListing = packet.payload;
                 setMessages((current: Message[]) => [
                   ...current.slice(0, -1),
@@ -375,19 +329,12 @@ export function useCommerceResearch({
                 continue;
               }
 
-              if (
-                packet.type === "STATUS" &&
-                typeof packet.content === "string"
-              ) {
+              if (packet.type === "STATUS" && typeof packet.content === "string") {
                 setAgentStatus(packet.content);
                 continue;
               }
 
-              if (
-                packet.type === "USAGE" &&
-                packet.content &&
-                typeof packet.content !== "string"
-              ) {
+              if (packet.type === "USAGE" && packet.content && typeof packet.content !== "string") {
                 setTokenInfo(packet.content);
               }
             } catch {
@@ -425,9 +372,7 @@ export function useCommerceResearch({
             activity.status === "running"
               ? {
                   ...activity,
-                  status: runFailed
-                    ? ("error" as const)
-                    : ("completed" as const),
+                  status: runFailed ? ("error" as const) : ("completed" as const),
                   endedAt: now,
                 }
               : activity,
@@ -436,9 +381,7 @@ export function useCommerceResearch({
 
         const answer =
           finalText ||
-          (effectiveWorkflowMode === "listing"
-            ? "已停止 Listing Demo。"
-            : "已停止市场研究。");
+          (effectiveWorkflowMode === "listing" ? "已停止 Listing Demo。" : "已停止市场研究。");
         const finalHistory: Message[] = [
           ...optimisticHistory.slice(0, -1),
           {

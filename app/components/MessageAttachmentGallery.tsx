@@ -3,10 +3,7 @@
 
 import { memo } from "react";
 import type { MessageAttachment } from "../constants/page-constants";
-import {
-  isImageMimeType,
-  isVideoMimeType,
-} from "../constants/page-constants";
+import { isImageMimeType, isVideoMimeType } from "../constants/page-constants";
 import { buildApiUrl } from "../lib/api-client";
 
 interface MessageAttachmentGalleryProps {
@@ -44,12 +41,8 @@ function MessageAttachmentGallery({
       {attachments.map((attachment, index) => {
         const rawSource = attachment.dataUrl || attachment.url || "";
         const source = attachment.dataUrl ? rawSource : buildApiUrl(rawSource);
-        const image =
-          attachment.assetKind === "image" ||
-          isImageMimeType(attachment.type);
-        const video =
-          attachment.assetKind === "video" ||
-          isVideoMimeType(attachment.type);
+        const image = attachment.assetKind === "image" || isImageMimeType(attachment.type);
+        const video = attachment.assetKind === "video" || isVideoMimeType(attachment.type);
         const downloadUrl = buildDownloadUrl(attachment);
 
         return (
@@ -58,9 +51,7 @@ function MessageAttachmentGallery({
             className="message-media-card overflow-hidden rounded-[14px] border"
             style={{
               background: compact ? "rgba(0,0,0,0.1)" : "var(--glass-soft)",
-              borderColor: compact
-                ? "rgba(255,255,255,0.2)"
-                : "var(--border)",
+              borderColor: compact ? "rgba(255,255,255,0.2)" : "var(--border)",
             }}
           >
             {image && source && (
@@ -83,11 +74,7 @@ function MessageAttachmentGallery({
               />
             )}
 
-            {!image && !video && (
-              <div className="px-3 py-4 text-[12px]">
-                {attachment.name}
-              </div>
-            )}
+            {!image && !video && <div className="px-3 py-4 text-[12px]">{attachment.name}</div>}
 
             {!compact && (
               <div className="flex items-center justify-between gap-3 px-3 py-2.5">
@@ -98,10 +85,7 @@ function MessageAttachmentGallery({
                   >
                     {attachment.name}
                   </div>
-                  <div
-                    className="mt-0.5 text-[9px]"
-                    style={{ color: "var(--text-tertiary)" }}
-                  >
+                  <div className="mt-0.5 text-[9px]" style={{ color: "var(--text-tertiary)" }}>
                     {attachment.type || attachment.assetKind || "media"}
                   </div>
                 </div>

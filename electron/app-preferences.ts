@@ -43,9 +43,7 @@ function resolvePreferenceFilePath(): string {
 /** 读取完整偏好；文件缺失或 JSON 损坏时返回空对象。 */
 function readPreferenceFile(): PreferenceFile {
   try {
-    return JSON.parse(
-      fs.readFileSync(resolvePreferenceFilePath(), "utf8"),
-    ) as PreferenceFile;
+    return JSON.parse(fs.readFileSync(resolvePreferenceFilePath(), "utf8")) as PreferenceFile;
   } catch {
     return {};
   }
@@ -56,11 +54,7 @@ function writePreferenceFile(preferences: PreferenceFile): void {
   const preferencePath = resolvePreferenceFilePath();
   const temporaryPath = `${preferencePath}.${process.pid}.tmp`;
   fs.mkdirSync(path.dirname(preferencePath), { recursive: true });
-  fs.writeFileSync(
-    temporaryPath,
-    `${JSON.stringify(preferences, null, 2)}\n`,
-    "utf8",
-  );
+  fs.writeFileSync(temporaryPath, `${JSON.stringify(preferences, null, 2)}\n`, "utf8");
   try {
     fs.renameSync(temporaryPath, preferencePath);
   } catch (error) {
@@ -143,10 +137,7 @@ export function writeCachedTheme(theme: AppTheme): void {
 }
 
 /** 带超时访问本地偏好接口。 */
-async function requestThemeApi(
-  url: string,
-  init?: RequestInit,
-): Promise<Response> {
+async function requestThemeApi(url: string, init?: RequestInit): Promise<Response> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
@@ -157,18 +148,12 @@ async function requestThemeApi(
 }
 
 /** 把主题写入 FastAPI 管理的 SQLite 表。 */
-export async function writeThemeToBackend(
-  backendBaseUrl: string,
-  theme: AppTheme,
-): Promise<void> {
-  const response = await requestThemeApi(
-    `${backendBaseUrl}/api/preferences/theme`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ theme }),
-    },
-  );
+export async function writeThemeToBackend(backendBaseUrl: string, theme: AppTheme): Promise<void> {
+  const response = await requestThemeApi(`${backendBaseUrl}/api/preferences/theme`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ theme }),
+  });
   if (!response.ok) {
     throw new Error(`主题写入 SQLite 失败：HTTP ${response.status}`);
   }
@@ -180,9 +165,7 @@ export async function synchronizeThemeWithBackend(
   cachedTheme: AppTheme,
 ): Promise<AppTheme> {
   try {
-    const response = await requestThemeApi(
-      `${backendBaseUrl}/api/preferences/theme`,
-    );
+    const response = await requestThemeApi(`${backendBaseUrl}/api/preferences/theme`);
     if (!response.ok) throw new Error(`主题读取失败：HTTP ${response.status}`);
 
     const payload = (await response.json()) as ThemeApiResponse;

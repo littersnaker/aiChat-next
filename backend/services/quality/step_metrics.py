@@ -71,9 +71,7 @@ async def aggregate_step_metrics(session_id: str) -> dict[str, Any]:
     return {
         "steps": int(row["n"]),
         "avgTtftMs": int(round(float(row["avg_ttft"]))) if row["avg_ttft"] is not None else None,
-        "avgTokPerSec": (
-            round(float(row["avg_tps"]), 1) if row["avg_tps"] is not None else None
-        ),
+        "avgTokPerSec": (round(float(row["avg_tps"]), 1) if row["avg_tps"] is not None else None),
         "totalPromptTokens": int(row["sum_prompt"] or 0),
         "totalCompletionTokens": int(row["sum_completion"] or 0),
         "totalCachedTokens": int(row["sum_cached"] or 0),

@@ -7,12 +7,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from pathlib import PurePosixPath
 from typing import Any
 
 
-class RiskLevel(str, Enum):
+class RiskLevel(StrEnum):
     """质量控制层使用的三档风险等级。"""
 
     LOW = "low"

@@ -38,9 +38,7 @@ def resolve_python_interpreter() -> str:
 
     if getattr(sys, "frozen", False):
         # 打包 onedir：<resources>/backend/ 与 <resources>/python-runtime/ 平级。
-        packaged = (
-            Path(sys.executable).resolve().parent.parent / "python-runtime" / "python.exe"
-        )
+        packaged = Path(sys.executable).resolve().parent.parent / "python-runtime" / "python.exe"
         if packaged.is_file():
             return str(packaged)
 
@@ -74,9 +72,7 @@ async def _serve_child_requests(
         response = {"id": request.get("id") or "", **response}
         try:
             process.stdin.write(
-                ("[RES] " + json.dumps(response, ensure_ascii=False) + "\n").encode(
-                    "utf-8"
-                )
+                ("[RES] " + json.dumps(response, ensure_ascii=False) + "\n").encode("utf-8")
             )
             await process.stdin.drain()
         except (BrokenPipeError, ConnectionResetError):
@@ -129,9 +125,7 @@ async def run_code_program(
     )
 
     try:
-        exit_code = await asyncio.wait_for(
-            process.wait(), timeout=CODE_MODE_TIMEOUT_SECONDS
-        )
+        exit_code = await asyncio.wait_for(process.wait(), timeout=CODE_MODE_TIMEOUT_SECONDS)
     except TimeoutError:
         process.kill()
         await process.wait()

@@ -26,9 +26,6 @@ export function buildApiUrl(path: string): string {
 /**
  * 与浏览器原生 fetch 用法一致，但会自动补上 FastAPI 地址。
  */
-export function apiFetch(
-  path: string,
-  options?: RequestInit,
-): Promise<Response> {
+export function apiFetch(path: string, options?: RequestInit): Promise<Response> {
   return fetch(buildApiUrl(path), options);
 }

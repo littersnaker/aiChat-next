@@ -109,9 +109,11 @@ def _rows_from_model(items: list[RecognizedRow]) -> list[SheetRecognition]:
     for item in items:
         sheet_no = (item.sheetNo or "").strip()
         note = (item.note or "").strip()
-        if not sheet_no and not any(
-            marker in note for marker in UNCERTAIN_MARKERS
-        ) and "空货位" not in note:
+        if (
+            not sheet_no
+            and not any(marker in note for marker in UNCERTAIN_MARKERS)
+            and "空货位" not in note
+        ):
             continue
         if not sheet_no:
             note = "编号无法辨认" if "空货位" not in note else "空货位"
@@ -128,9 +130,7 @@ def _rows_from_model(items: list[RecognizedRow]) -> list[SheetRecognition]:
     return result
 
 
-def _coords_preserved(
-    raw_rows: list[SheetRecognition], structured: list[SheetRecognition]
-) -> bool:
+def _coords_preserved(raw_rows: list[SheetRecognition], structured: list[SheetRecognition]) -> bool:
     """校验 LLM 整理结果是否完整保留输入坐标（含空位与叠放排）。"""
 
     in_coords = {(item.layer, item.position, item.stack) for item in raw_rows}

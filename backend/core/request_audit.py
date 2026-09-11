@@ -245,9 +245,7 @@ def _sanitize_value(key: Any, value: Any, max_chars: int) -> Any:
     return value
 
 
-def sanitize_payload(
-    value: Any, *, max_chars: int | None = None
-) -> Any:
+def sanitize_payload(value: Any, *, max_chars: int | None = None) -> Any:
     """对请求 / 响应载荷执行统一的脱敏与截断。"""
 
     return _sanitize_value(None, value, max_chars or _max_payload_chars())
@@ -489,9 +487,7 @@ class RequestAuditMiddleware:
 
         # 仅对 JSON / 纯文本请求体做记录，避免缓冲大文件上传。
         replay_body: bytes | None = None
-        if content_type.startswith("application/json") or content_type.startswith(
-            "text/plain"
-        ):
+        if content_type.startswith("application/json") or content_type.startswith("text/plain"):
             replay_body = await _collect_body(receive)
 
         async def audit_receive() -> dict[str, Any]:
@@ -538,7 +534,9 @@ class RequestAuditMiddleware:
         try:
             await self.app(scope, audit_receive, audit_send)
         except BaseException as exc:
-            LOGGER.exception("RequestAuditMiddleware 捕获异常: %s", type(exc).__name__, exc_info=exc)
+            LOGGER.exception(
+                "RequestAuditMiddleware 捕获异常: %s", type(exc).__name__, exc_info=exc
+            )
             raise
         finally:
             audit_snapshot = effective_audit()
@@ -556,9 +554,7 @@ class RequestAuditMiddleware:
                     None
                     if success
                     else (
-                        f"HTTP {status_code}"
-                        if status_code is not None
-                        else "未处理的服务端异常"
+                        f"HTTP {status_code}" if status_code is not None else "未处理的服务端异常"
                     )
                 ),
                 extra=_client_extra(scope, headers),
@@ -601,9 +597,7 @@ def iter_entries(
                     try:
                         yield json.loads(line)
                     except (ValueError, TypeError):
-                        LOGGER.warning(
-                            "审计日志解析失败: %s 第 %s 行", path, line_number
-                        )
+                        LOGGER.warning("审计日志解析失败: %s 第 %s 行", path, line_number)
         except OSError:
             continue
 
@@ -680,13 +674,13 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     query_parser.add_argument("--request-id", default=None, help="requestId 或 httpRequestId")
     query_parser.add_argument("--agent", default=None, help="Agent ID，例如 modify_worker:W001")
-    query_parser.add_argument("--kind", default=None, help="记录类型，例如 llm.complete / http.request")
+    query_parser.add_argument(
+        "--kind", default=None, help="记录类型，例如 llm.complete / http.request"
+    )
     query_parser.add_argument("--status", default=None, help="状态，例如 success / error")
     query_parser.add_argument("--limit", type=int, default=50, help="最大返回条数")
 
-    tail_parser = subparsers.add_parser(
-        "tail", help="查看最近记录", parents=[parent_parser]
-    )
+    tail_parser = subparsers.add_parser("tail", help="查看最近记录", parents=[parent_parser])
     tail_parser.add_argument("--limit", type=int, default=20, help="最大返回条数")
 
     subparsers.add_parser("stats", help="统计概览", parents=[parent_parser])

@@ -173,9 +173,7 @@ async def test_write_operation_not_limited(tmp_path, monkeypatch) -> None:
 
 
 @pytest.mark.asyncio
-async def test_mixed_write_executes_while_oversized_replace_skipped(
-    tmp_path, monkeypatch
-) -> None:
+async def test_mixed_write_executes_while_oversized_replace_skipped(tmp_path, monkeypatch) -> None:
     """混合场景：write 新文件照常落盘，仅超长 replace 被跳过并反馈。"""
 
     (tmp_path / "a.ts").write_text("OLD", encoding="utf-8")

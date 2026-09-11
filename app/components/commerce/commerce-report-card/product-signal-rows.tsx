@@ -31,7 +31,10 @@ export function ObservationRow({ observation }: { observation: CommerceMarketObs
             {observation.title}
           </a>
         ) : (
-          <div className="truncate font-medium text-[var(--text-primary)]" title={observation.title}>
+          <div
+            className="truncate font-medium text-[var(--text-primary)]"
+            title={observation.title}
+          >
             {observation.title}
           </div>
         )}
@@ -73,15 +76,14 @@ export function ProductRow({ product }: { product: CommerceProductSignal }) {
             {product.title}
           </a>
         ) : (
-          <div
-            className="truncate font-medium text-[var(--text-primary)]"
-            title={product.title}
-          >
+          <div className="truncate font-medium text-[var(--text-primary)]" title={product.title}>
             {product.title}
           </div>
         )}
         <div className="mt-0.5 flex items-center gap-2 text-[9px] text-[var(--text-tertiary)]">
-          <span className="font-mono">{product.platform === "amazon" || !product.platform ? product.asin : product.platform}</span>
+          <span className="font-mono">
+            {product.platform === "amazon" || !product.platform ? product.asin : product.platform}
+          </span>
           {product.brand && <span className="truncate">{product.brand}</span>}
         </div>
       </div>
@@ -91,9 +93,7 @@ export function ProductRow({ product }: { product: CommerceProductSignal }) {
       <div className="text-right font-mono text-[var(--text-secondary)]">
         {product.salesRank ? `#${formatCompact(product.salesRank)}` : "—"}
       </div>
-      <div className="text-right font-mono text-[var(--text-secondary)]">
-        {demandText}
-      </div>
+      <div className="text-right font-mono text-[var(--text-secondary)]">{demandText}</div>
     </div>
   );
 }

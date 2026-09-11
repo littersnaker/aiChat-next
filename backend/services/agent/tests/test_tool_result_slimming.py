@@ -77,9 +77,7 @@ async def test_read_dedup_does_not_reinject_unchanged_content(tmp_path: Path) ->
     assert "export const a = 1;" in "\n".join(state.transcript)
     assert state.transcript_versions.get("a.ts")
 
-    second = await handler.execute(
-        AgentAction("read", work_id="W001", paths=["a.ts"])
-    )
+    second = await handler.execute(AgentAction("read", work_id="W001", paths=["a.ts"]))
     assert second.kind == "continue"
     joined = "\n".join(state.transcript)
     assert "未变化" in joined

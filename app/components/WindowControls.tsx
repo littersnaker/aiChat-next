@@ -6,12 +6,7 @@ import { useEffect, useState } from "react";
 function MinimizeIcon() {
   return (
     <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none">
-      <path
-        d="M3.5 8h9"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-      />
+      <path d="M3.5 8h9" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
     </svg>
   );
 }
@@ -95,8 +90,7 @@ export default function WindowControls() {
           "linear-gradient(180deg, color-mix(in srgb, var(--glass-active) 82%, transparent), color-mix(in srgb, var(--glass) 88%, transparent))",
         borderColor: "var(--border)",
         color: "var(--text-secondary)",
-        boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.26), 0 5px 14px rgba(15,23,42,0.055)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.26), 0 5px 14px rgba(15,23,42,0.055)",
       }}
     >
       <button

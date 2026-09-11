@@ -7,8 +7,8 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from backend.services.mcp.executor import execute_mcp_tool
 from backend.services.mcp.client import load_server_configs, resolve_tools
+from backend.services.mcp.executor import execute_mcp_tool
 from backend.services.workspace.repository import get_project
 
 router = APIRouter(tags=["mcp"])
@@ -23,7 +23,9 @@ class McpToolCallRequest(BaseModel):
 
 
 @router.get("/api/mcp/status")
-async def get_mcp_status(project_id: str | None = Query(default=None, alias="projectId")) -> dict[str, object]:
+async def get_mcp_status(
+    project_id: str | None = Query(default=None, alias="projectId")
+) -> dict[str, object]:
     """返回当前项目可见的 MCP 服务和工具，但不返回任何认证请求头。"""
 
     if not project_id:
@@ -83,5 +85,7 @@ async def post_mcp_tool_call(body: McpToolCallRequest) -> dict[str, object]:
     )
     if not result.get("ok"):
         status_code = 403 if result.get("approvalNeeded") else 502
-        raise HTTPException(status_code=status_code, detail=str(result.get("message") or result.get("error")))
+        raise HTTPException(
+            status_code=status_code, detail=str(result.get("message") or result.get("error"))
+        )
     return result

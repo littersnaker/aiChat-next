@@ -106,10 +106,7 @@ def build_work_digest(
         sections.append(f"CHANGED_FILES: {files}")
     if transcript_tail:
         tail_lines = [str(line)[:300] for line in transcript_tail[-MAX_TRANSCRIPT_LINES:]]
-        sections.append(
-            "TRANSCRIPT_TAIL:\n"
-            + "\n".join(f"  {line}" for line in tail_lines)
-        )
+        sections.append("TRANSCRIPT_TAIL:\n" + "\n".join(f"  {line}" for line in tail_lines))
 
     entries = _related_audit_entries(work_id=work_id, audit_dir=audit_dir)
     if entries:

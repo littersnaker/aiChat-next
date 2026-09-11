@@ -9,8 +9,8 @@
 
 from __future__ import annotations
 
-import logging
 import hashlib
+import logging
 import sqlite3
 from pathlib import Path
 from uuid import uuid4
@@ -209,9 +209,7 @@ async def _list_registered_document_paths() -> dict[str, str]:
     """返回 knowledge_documents 的 file_path -> id 映射。"""
 
     async with open_database() as connection:
-        cursor = await connection.execute(
-            "SELECT id, file_path FROM knowledge_documents"
-        )
+        cursor = await connection.execute("SELECT id, file_path FROM knowledge_documents")
         rows = await cursor.fetchall()
     return {str(row["file_path"]): str(row["id"]) for row in rows}
 

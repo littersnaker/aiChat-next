@@ -25,9 +25,7 @@ export async function readClipboard(): Promise<string> {
  */
 export function stripMarkdown(text: string): string {
   return text
-    .replace(/```[\s\S]*?```/g, (block) =>
-      block.replace(/^```[^\n]*\n/, "").replace(/\n```$/, ""),
-    )
+    .replace(/```[\s\S]*?```/g, (block) => block.replace(/^```[^\n]*\n/, "").replace(/\n```$/, ""))
     .replace(/`([^`\n]+)`/g, "$1")
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
     .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")

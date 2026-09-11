@@ -12,14 +12,10 @@ export const DEFAULT_MEDIA_MODEL_ID = mediaModelConfig.defaultMediaModelId;
 export const MEDIA_MODEL_CATALOG: readonly MediaModelDefinition[] =
   mediaModelConfig.models as unknown as readonly MediaModelDefinition[];
 
-export function getMediaModelDefinition(
-  modelId: string,
-): MediaModelDefinition | undefined {
+export function getMediaModelDefinition(modelId: string): MediaModelDefinition | undefined {
   return MEDIA_MODEL_CATALOG.find((model) => model.id === modelId);
 }
 
-export function getMediaModelsByMode(
-  mode: MediaMode,
-): readonly MediaModelDefinition[] {
+export function getMediaModelsByMode(mode: MediaMode): readonly MediaModelDefinition[] {
   return MEDIA_MODEL_CATALOG.filter((model) => model.modes.includes(mode));
 }

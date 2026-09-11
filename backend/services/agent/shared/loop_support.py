@@ -139,8 +139,7 @@ async def perform_batch_replan(
                 )
         return ReplanResult(
             reason=(
-                "Planner 暂时不可用，已保留全部成功 Work，仅重试本波次失败项："
-                f"{str(exc)[:300]}"
+                "Planner 暂时不可用，已保留全部成功 Work，仅重试本波次失败项：" f"{str(exc)[:300]}"
             ),
             retry_items=retry_items,
             new_items=[],

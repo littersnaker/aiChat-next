@@ -6,19 +6,13 @@ import agentRoutingConfig from "../../config/agent-routing.json";
 
 export const MAX_CONTEXT_MESSAGES = 24;
 
-const AGENT_KIND_ALIASES = agentRoutingConfig.aliases as Record<
-  string,
-  AgentKind
->;
+const AGENT_KIND_ALIASES = agentRoutingConfig.aliases as Record<string, AgentKind>;
 const AGENT_INTENTS = agentRoutingConfig.intents as Array<{
   agent: AgentKind;
   keywords: string[];
 }>;
 
-export function buildWelcomeMessages(
-  mode: SessionMode,
-  project?: WorkspaceProject,
-): Message[] {
+export function buildWelcomeMessages(mode: SessionMode, project?: WorkspaceProject): Message[] {
   return [
     {
       role: "assistant",
@@ -31,7 +25,7 @@ export function buildWelcomeMessages(
               ? "已进入 AI 漫剧工作室。输入剧本或剧情梗概，我会拆分成镜并等待你确认，然后并行出图、图生视频并合并成集。"
               : mode === "image"
                 ? "已进入图片识别 Agent。上传货架照片，我会先增强清晰度并放大，再由视觉模型识别每个图纸编号在第几层第几位，最后生成 Excel 表格。"
-            : "你好，我是独立的问答 Agent。你可以直接问我任何问题。",
+                : "你好，我是独立的问答 Agent。你可以直接问我任何问题。",
     },
   ];
 }
@@ -45,11 +39,7 @@ export function inferAgentKind(text: string): AgentKind {
   const normalized = text.toLowerCase();
 
   for (const intent of AGENT_INTENTS) {
-    if (
-      intent.keywords.some((keyword) =>
-        normalized.includes(keyword.toLowerCase()),
-      )
-    ) {
+    if (intent.keywords.some((keyword) => normalized.includes(keyword.toLowerCase()))) {
       return intent.agent;
     }
   }

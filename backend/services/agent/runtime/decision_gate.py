@@ -68,9 +68,7 @@ class DecisionGate:
         validations = list(dict.fromkeys(validation_commands or work.commands))
         if not validations:
             validations = [
-                criterion.strip()
-                for criterion in work.acceptance_criteria
-                if criterion.strip()
+                criterion.strip() for criterion in work.acceptance_criteria if criterion.strip()
             ]
         if not validations:
             validations = ["至少执行语法、Lint 或相关测试检查"]

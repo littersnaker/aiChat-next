@@ -86,9 +86,12 @@ def test_media_base_url_accepts_chat_or_full_endpoint(monkeypatch) -> None:
         "https://workspace.example.test/compatible-mode/v1",
     )
     assert resolve_media_api_base() == "https://workspace.example.test"
-    assert resolve_media_api_base(
-        "https://another.example.test/api/v1/services/aigc/video-generation/video-synthesis"
-    ) == "https://another.example.test"
+    assert (
+        resolve_media_api_base(
+            "https://another.example.test/api/v1/services/aigc/video-generation/video-synthesis"
+        )
+        == "https://another.example.test"
+    )
 
 
 def test_media_route_forwards_settings_base_url(
@@ -118,9 +121,7 @@ def test_media_route_forwards_settings_base_url(
             "/api/media/generate",
             headers={
                 "x-llm-key-qwen": "test-key",
-                "x-llm-base-url-qwen": (
-                    "https://workspace.example.test/compatible-mode/v1"
-                ),
+                "x-llm-base-url-qwen": ("https://workspace.example.test/compatible-mode/v1"),
             },
             json={
                 "modelId": "qwen:qwen-image-2.0",

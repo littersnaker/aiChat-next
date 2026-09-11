@@ -43,10 +43,8 @@ function launchElectron(): void {
     cwd: rootDirectory,
     env: {
       ...process.env,
-      VITE_DEV_SERVER_URL:
-        process.env.VITE_DEV_SERVER_URL || "http://127.0.0.1:5173",
-      BACKEND_DEV_URL:
-        process.env.BACKEND_DEV_URL || "http://127.0.0.1:3100",
+      VITE_DEV_SERVER_URL: process.env.VITE_DEV_SERVER_URL || "http://127.0.0.1:5173",
+      BACKEND_DEV_URL: process.env.BACKEND_DEV_URL || "http://127.0.0.1:3100",
       ELECTRON_DEV_STRICT: "1",
     },
     stdio: "inherit",

@@ -35,8 +35,7 @@ async def post_image_chat(body: ChatRequest, request: Request):
 
     preferred_model = request.headers.get("x-llm-model-id", AUTO_MODEL_ID).strip()
     messages = tuple(
-        RuntimeMessage(role=message.role, content=message.content)
-        for message in body.messages
+        RuntimeMessage(role=message.role, content=message.content) for message in body.messages
     )
     runtime_request = RuntimeRequest(
         agent_id="image",

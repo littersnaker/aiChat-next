@@ -69,18 +69,14 @@ export function buildVisibleUserContent(
     return `请分析这 ${attachments.length} 个附件`;
   }
 
-  return attachments[0]?.type.startsWith("image/")
-    ? "请分析这张图片"
-    : "请分析这份文件";
+  return attachments[0]?.type.startsWith("image/") ? "请分析这张图片" : "请分析这份文件";
 }
 
 export function buildRequestUserContent(
   prompt: string,
   attachments: readonly AttachedFile[],
 ): string {
-  const textAttachments = attachments.filter(
-    (attachment) => !attachment.type.startsWith("image/"),
-  );
+  const textAttachments = attachments.filter((attachment) => !attachment.type.startsWith("image/"));
   if (textAttachments.length === 0) return prompt;
 
   const sections: string[] = [];
@@ -89,10 +85,7 @@ export function buildRequestUserContent(
   for (const attachment of textAttachments) {
     const header = `--- ${attachment.relativePath || attachment.name} ---`;
     const content = attachment.textContent || "（未提取到可读文本）";
-    const availableContentLength = Math.max(
-      0,
-      remainingCharacters - header.length - 2,
-    );
+    const availableContentLength = Math.max(0, remainingCharacters - header.length - 2);
     const includedContent = content.slice(0, availableContentLength);
 
     sections.push([header, includedContent].join("\n"));
@@ -136,10 +129,10 @@ export function isAgentLifecyclePayload(
 ): payload is AgentLifecycleEventPayload {
   return Boolean(
     payload &&
-      "role" in payload &&
-      "status" in payload &&
-      "iteration" in payload &&
-      "detail" in payload,
+    "role" in payload &&
+    "status" in payload &&
+    "iteration" in payload &&
+    "detail" in payload,
   );
 }
 
@@ -154,9 +147,9 @@ export function isMediaResultPayload(
 ): value is { content?: string; attachments?: Message["attachments"] } {
   return Boolean(
     value &&
-      typeof value === "object" &&
-      "attachments" in value &&
-      Array.isArray((value as { attachments?: unknown }).attachments),
+    typeof value === "object" &&
+    "attachments" in value &&
+    Array.isArray((value as { attachments?: unknown }).attachments),
   );
 }
 
@@ -165,16 +158,14 @@ export function isWorkListSnapshotPayload(
 ): payload is WorkListSnapshotPayload {
   return Boolean(
     payload &&
-      "revision" in payload &&
-      "items" in payload &&
-      "overallProgress" in payload &&
-      Array.isArray(payload.items),
+    "revision" in payload &&
+    "items" in payload &&
+    "overallProgress" in payload &&
+    Array.isArray(payload.items),
   );
 }
 
-export function describeWorkListSnapshot(
-  snapshot: WorkListSnapshotPayload,
-): string {
+export function describeWorkListSnapshot(snapshot: WorkListSnapshotPayload): string {
   const activeWorks = snapshot.items.filter((item) => item.status === "running");
   if (activeWorks.length > 1) {
     return `并行执行 ${activeWorks.length} 个 Work：${activeWorks
@@ -193,18 +184,14 @@ export function buildInteractiveReplyPrompt(
   answer?: string,
 ): string {
   const normalizedAnswer =
-    mode === "user"
-      ? (answer ?? fallbackAnswer).replace(/\r?\n/g, "")
-      : answer;
+    mode === "user" ? (answer ?? fallbackAnswer).replace(/\r?\n/g, "") : answer;
   const reply =
     mode === "user"
       ? `answer=${normalizedAnswer === "" ? "__ENTER__" : normalizedAnswer}`
       : normalizedAnswer
         ? `answer=${normalizedAnswer}`
         : "";
-  return [`[INTERACTIVE_REPLY] id=${request.id} mode=${mode}`, reply]
-    .filter(Boolean)
-    .join(" ");
+  return [`[INTERACTIVE_REPLY] id=${request.id} mode=${mode}`, reply].filter(Boolean).join(" ");
 }
 
 /** 把交互等待状态同步到右侧 Agent 面板。 */

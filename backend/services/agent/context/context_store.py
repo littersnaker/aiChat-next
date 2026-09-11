@@ -53,9 +53,7 @@ class ContextStore:
     def restore(self, snapshot: dict[str, dict[str, Any]]) -> None:
         """从快照恢复全部上下文。"""
 
-        self._store = {
-            wid: WorkContext.from_json(data) for wid, data in snapshot.items()
-        }
+        self._store = {wid: WorkContext.from_json(data) for wid, data in snapshot.items()}
 
     def clear(self) -> None:
         """清空全部存储。"""

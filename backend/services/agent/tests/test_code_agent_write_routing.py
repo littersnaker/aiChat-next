@@ -63,10 +63,7 @@ def test_declarative_change_request_stays_read_only_in_suggest() -> None:
 def test_read_keyword_wins_over_auto_edit_default() -> None:
     """读关键词（“解释/怎么”）在 auto_edit 下仍保持只读，不被兜底改写。"""
 
-    assert (
-        classify_request("解释一下首页的布局结构", agent_mode="auto_edit")
-        == "read_only"
-    )
+    assert classify_request("解释一下首页的布局结构", agent_mode="auto_edit") == "read_only"
 
 
 def test_read_only_complaint_switches_back_to_full_auto_tools() -> None:

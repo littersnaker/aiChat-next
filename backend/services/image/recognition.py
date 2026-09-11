@@ -45,8 +45,7 @@ _RECORD_WITH_STACK_PATTERN = re.compile(
 )
 # 无叠放排：003|第1层|第5位|
 _RECORD_BASE_PATTERN = re.compile(
-    r"\[?\s*(\d{1,4})\s*\]?\s*[|｜]\s*\[?\s*第\s*(\d+)\s*层"
-    r"\s*[|｜]?\s*\[?\s*第\s*(\d+)\s*位"
+    r"\[?\s*(\d{1,4})\s*\]?\s*[|｜]\s*\[?\s*第\s*(\d+)\s*层" r"\s*[|｜]?\s*\[?\s*第\s*(\d+)\s*位"
 )
 # 只有坐标 + 无法辨认：第1层|第3位|编号无法辨认（编号缺失也要保留占位）
 _RECORD_UNCERTAIN_PATTERN = re.compile(
@@ -56,12 +55,8 @@ _RECORD_UNCERTAIN_PATTERN = re.compile(
 
 # 完整网格模板：第1层：第1位=325, 第2位=空, 第3位=编号无法辨认, ...
 # 支持“第1层第2排：”形式的叠放排；位号是绝对物理货位号，空位也显式输出。
-_GRID_LINE_PATTERN = re.compile(
-    r"第\s*(\d+)\s*层(?:第\s*(\d+)\s*排)?\s*[:：]\s*([^\n]+)"
-)
-_GRID_CELL_PATTERN = re.compile(
-    r"第\s*(\d+)\s*位\s*[=＝:]?\s*([^,，;；、\n]+)"
-)
+_GRID_LINE_PATTERN = re.compile(r"第\s*(\d+)\s*层(?:第\s*(\d+)\s*排)?\s*[:：]\s*([^\n]+)")
+_GRID_CELL_PATTERN = re.compile(r"第\s*(\d+)\s*位\s*[=＝:]?\s*([^,，;；、\n]+)")
 
 # 紧凑网格模板（glm-4v-flash 的 max_tokens 上限 1024，必须压缩输出）：
 # 每层一行 “第N层:1=编号,2=编号;2排:1=编号;3排:1=编号”，叠放排作为分号段。
@@ -83,6 +78,7 @@ def build_tag_batch_prompt(count: int) -> str:
     """生成按图顺序输出编号的批次提示词。"""
 
     return f"{_TAG_BATCH_PROMPT}\n共 {count} 张图。请按顺序输出 {count} 行编号。"
+
 
 _RECOGNITION_PROMPT = """你是货架图纸识别员。照片里的货架有若干层，每层从左到右有若干货位；
 **每个货位可能上下叠放多张图纸（2-3 层），叠放的每一张都要单独识别**。
@@ -174,9 +170,7 @@ async def recognize_single_image(
     """
 
     try:
-        result = await client.analyze_images(
-            [image], prompt=prompt, include_thinking=False
-        )
+        result = await client.analyze_images([image], prompt=prompt, include_thinking=False)
     except GLM46VError as exc:
         return [], "", f"视觉识别失败：{exc}"
     except Exception as exc:  # noqa: BLE001 - 单张降级需兼容未知网络/客户端错误。
@@ -225,7 +219,7 @@ def _parse_glm_output(content: str, *, source_image: str) -> tuple[list[SheetRec
         accepted.append((start, end, match))
 
     parsed: list[SheetRecognition] = []
-    for index, (start, end, match) in enumerate(accepted):
+    for index, (_start, end, match) in enumerate(accepted):
         if match.re is _RECORD_UNCERTAIN_PATTERN:
             # 编号缺失：GLM 只给了坐标 + 无法辨认，保留占位。
             layer = int(match.group(1))
@@ -271,9 +265,7 @@ def _parse_glm_output(content: str, *, source_image: str) -> tuple[list[SheetRec
     return _summarize_rows(parsed, source_image, content)
 
 
-def _parse_grid_output(
-    content: str, *, source_image: str
-) -> list[SheetRecognition]:
+def _parse_grid_output(content: str, *, source_image: str) -> list[SheetRecognition]:
     """解析“第N层：第1位=..., 第2位=空, ...”完整网格模板。
 
     支持叠放排行（第N层第M排：...）；空位（空）与无法辨认都生成占位行，
@@ -374,9 +366,7 @@ def _summarize_rows(
     return rows, summary
 
 
-def _parse_compact_output(
-    content: str, *, source_image: str
-) -> list[SheetRecognition]:
+def _parse_compact_output(content: str, *, source_image: str) -> list[SheetRecognition]:
     """解析 glm-4v-flash 的紧凑网格输出（第N层:1=编号,...;2排:...）。
 
     每层一行，第 1 排跟在“第N层:”后，叠放排用“;N排:”分号段表示；
@@ -557,9 +547,7 @@ async def recognize_image_segments(
     """
 
     try:
-        bands, layer_counts = _split_into_bands(
-            image, original_bytes=original_bytes
-        )
+        bands, layer_counts = _split_into_bands(image, original_bytes=original_bytes)
     except Exception as exc:  # noqa: BLE001 - 分片失败降级为可读错误。
         return [], "", f"图片分片失败：{exc}"
 
@@ -574,9 +562,7 @@ async def recognize_image_segments(
         if count is not None:
             running += count
     for index, band in enumerate(bands, start=1):
-        known_count = (
-            layer_counts[index - 1] if index - 1 < len(layer_counts) else None
-        )
+        known_count = layer_counts[index - 1] if index - 1 < len(layer_counts) else None
         if known_count is not None:
             layer_offset = offsets[index - 1] if index - 1 < len(offsets) else 0
         else:
@@ -596,9 +582,7 @@ async def recognize_image_segments(
         if not content or "未检测到货架图纸" in content or "数不清" in content:
             summaries.append(f"{source_name} 第{index}段未识别到货架图纸")
             continue
-        rows = _parse_compact_output(
-            content, source_image=f"{source_name}#{index}"
-        )
+        rows = _parse_compact_output(content, source_image=f"{source_name}#{index}")
         if not rows:
             summaries.append(f"{source_name} 第{index}段未解析到编号")
             continue

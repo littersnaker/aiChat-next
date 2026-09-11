@@ -176,15 +176,14 @@ async def stream_read_only_tool_answer(
                 _append_transcript(
                     transcript,
                     "DUPLICATE ACTION REJECTED：该 search/read/inspect 已执行，"
-                    "结果没有变化。请改用其他安全路径，或根据现有证据 finish。"
+                    "结果没有变化。请改用其他安全路径，或根据现有证据 finish。",
                 )
                 continue
         if kind == "finish":
             answer = str(action.get("answer") or action.get("summary") or "").strip()
             if not used_tool:
                 _append_transcript(
-                    transcript,
-                    "FINISH REJECTED: 尚未使用 search/read。必须先检查真实项目文件。"
+                    transcript, "FINISH REJECTED: 尚未使用 search/read。必须先检查真实项目文件。"
                 )
                 continue
             if not answer:
@@ -252,8 +251,7 @@ async def stream_read_only_tool_answer(
             )
             used_tool = True
             _append_transcript(
-                transcript,
-                f"ACTION inspect paths={paths} query={query}\nOBSERVATION:\n{result}"
+                transcript, f"ACTION inspect paths={paths} query={query}\nOBSERVATION:\n{result}"
             )
             yield encode_sse(
                 {
@@ -284,8 +282,7 @@ async def stream_read_only_tool_answer(
         )
         used_tool = used_tool or bool(read_result.versions)
         _append_transcript(
-            transcript,
-            f"ACTION read paths={paths}\nOBSERVATION:\n{read_result.content}"
+            transcript, f"ACTION read paths={paths}\nOBSERVATION:\n{read_result.content}"
         )
         yield encode_sse(
             {

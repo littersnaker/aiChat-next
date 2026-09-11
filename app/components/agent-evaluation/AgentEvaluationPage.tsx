@@ -182,9 +182,7 @@ export default function AgentEvaluationPage({
               </svg>
             </button>
             <div>
-              <h1 className="text-[17px] font-semibold tracking-[-0.01em]">
-                Agent 评测
-              </h1>
+              <h1 className="text-[17px] font-semibold tracking-[-0.01em]">Agent 评测</h1>
               <p className="mt-0.5 text-[11px]" style={{ color: "var(--text-tertiary)" }}>
                 选数据集跑分，看通过率 / 耗时 / Token
               </p>
@@ -270,13 +268,11 @@ export default function AgentEvaluationPage({
                 className="flex flex-wrap gap-x-5 gap-y-1 text-[12px]"
                 style={{ color: "var(--text-secondary)" }}
               >
-                <span>通过 {run.passed}/{run.totalCases}</span>
                 <span>
-                  通过率{" "}
-                  {run.totalCases
-                    ? Math.round((run.passed / run.totalCases) * 100)
-                    : 0}
-                  %
+                  通过 {run.passed}/{run.totalCases}
+                </span>
+                <span>
+                  通过率 {run.totalCases ? Math.round((run.passed / run.totalCases) * 100) : 0}%
                 </span>
                 <span>均耗 {run.avgDurationMs}ms</span>
                 <span>Token {run.totalTokens}</span>
@@ -296,9 +292,7 @@ export default function AgentEvaluationPage({
                     <span
                       className="inline-block h-2 w-2 rounded-full"
                       style={{
-                        background: item.passed
-                          ? "var(--accent-green)"
-                          : "var(--accent-red)",
+                        background: item.passed ? "var(--accent-green)" : "var(--accent-red)",
                       }}
                     />
                     <span className="font-medium">

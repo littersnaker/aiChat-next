@@ -38,10 +38,7 @@ function readTextContent(attachment: AttachedFile): string | null {
   return content ? content : null;
 }
 
-function getOrCreateIndex(
-  attachment: AttachedFile,
-  content: string,
-): RagDocumentIndex {
+function getOrCreateIndex(attachment: AttachedFile, content: string): RagDocumentIndex {
   const cached = attachmentIndexCache.get(attachment);
   if (cached?.sourceContent === content) return cached.index;
 
@@ -67,10 +64,7 @@ function formatRetrievedContext(
       result.chunk.text,
     ].join("\n");
 
-    if (
-      sections.length > 0 &&
-      currentLength + section.length > maxContextCharacters
-    ) {
+    if (sections.length > 0 && currentLength + section.length > maxContextCharacters) {
       break;
     }
 
@@ -101,8 +95,7 @@ export function buildRetrievedAttachment(
   if (!content) return attachment;
 
   const minimumContentCharacters =
-    options.minimumContentCharacters ??
-    DEFAULT_MINIMUM_CONTENT_CHARACTERS;
+    options.minimumContentCharacters ?? DEFAULT_MINIMUM_CONTENT_CHARACTERS;
 
   // 小文件直接发送全文，避免检索导致上下文缺失。
   if (content.length <= minimumContentCharacters) {
@@ -110,11 +103,7 @@ export function buildRetrievedAttachment(
   }
 
   const index = getOrCreateIndex(attachment, content);
-  const results = retrieveRagChunks(
-    index,
-    query,
-    options.topK ?? DEFAULT_TOP_K,
-  );
+  const results = retrieveRagChunks(index, query, options.topK ?? DEFAULT_TOP_K);
   const retrievedContext = formatRetrievedContext(
     attachment.name,
     results,

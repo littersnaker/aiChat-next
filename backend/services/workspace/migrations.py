@@ -29,9 +29,7 @@ async def _read_applied_versions() -> set[str]:
 
     async with open_database() as connection:
         await connection.execute(_MIGRATIONS_TABLE)
-        cursor = await connection.execute(
-            "SELECT version FROM schema_migrations ORDER BY version"
-        )
+        cursor = await connection.execute("SELECT version FROM schema_migrations ORDER BY version")
         rows = await cursor.fetchall()
     return {str(row["version"]) for row in rows}
 

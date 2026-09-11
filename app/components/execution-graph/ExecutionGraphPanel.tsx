@@ -55,10 +55,7 @@ function ExecutionNode({ data }: NodeProps<Node<GraphNodeData>>) {
         {data.label}
       </div>
       {data.detail ? (
-        <div
-          className="mt-0.5 break-words text-[10px]"
-          style={{ color: COLORS.textSubtle }}
-        >
+        <div className="mt-0.5 break-words text-[10px]" style={{ color: COLORS.textSubtle }}>
           {data.detail}
         </div>
       ) : null}

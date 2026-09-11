@@ -75,9 +75,7 @@ def test_context_actions_increment_stall_and_edit_resets() -> None:
     guard.record(
         AgentAction(
             action="edit",
-            operations=[
-                EditOperation(type="write", path="src/a.ts", content="x")
-            ],
+            operations=[EditOperation(type="write", path="src/a.ts", content="x")],
         ),
         "continue",
         progress_made=True,
@@ -165,9 +163,7 @@ def test_edit_resets_context_phase_for_conflict_reread() -> None:
     read = AgentAction(action="read", paths=["src/app.ts"])
     edit = AgentAction(
         action="edit",
-        operations=[
-            EditOperation(type="replace", path="src/app.ts", old_text="a", new_text="b")
-        ],
+        operations=[EditOperation(type="replace", path="src/app.ts", old_text="a", new_text="b")],
     )
 
     guard.record(read, "continue")
@@ -186,9 +182,7 @@ def test_parallel_conflict_allows_rereading_same_file_version() -> None:
     read = AgentAction(action="read", paths=["src/app.ts"])
     edit = AgentAction(
         action="edit",
-        operations=[
-            EditOperation(type="replace", path="src/app.ts", old_text="a", new_text="b")
-        ],
+        operations=[EditOperation(type="replace", path="src/app.ts", old_text="a", new_text="b")],
     )
 
     guard.record(read, "continue")

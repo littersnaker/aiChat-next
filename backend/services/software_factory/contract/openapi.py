@@ -15,10 +15,7 @@ from backend.services.software_factory.contracts import (
 def build_openapi_document(blueprint: FactoryBlueprint) -> dict[str, Any]:
     """生成前端、Mock 服务和未来后端共同使用的 OpenAPI 文档。"""
 
-    schemas = {
-        entity.name: _entity_schema(entity)
-        for entity in blueprint.entities
-    }
+    schemas = {entity.name: _entity_schema(entity) for entity in blueprint.entities}
     paths: dict[str, dict[str, Any]] = {}
     for endpoint in blueprint.endpoints:
         path_item = paths.setdefault(endpoint.path, {})

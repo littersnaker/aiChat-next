@@ -15,9 +15,7 @@ class WorkspaceProject(FlexibleModel):
     id: str
     name: str
     root_path: str = Field(alias="rootPath")
-    index_status: Literal["idle", "indexing", "ready", "error"] = Field(
-        alias="indexStatus"
-    )
+    index_status: Literal["idle", "indexing", "ready", "error"] = Field(alias="indexStatus")
     indexed_file_count: int = Field(alias="indexedFileCount")
     last_opened_at: str = Field(alias="lastOpenedAt")
 

@@ -111,9 +111,7 @@ def test_size_split_keeps_each_chunk_within_limits(tmp_path) -> None:
     split_works_by_size(works, tmp_path, max_chars=40_000, max_files=12)
     assert len(works) == 4
     for item in works:
-        total = sum(
-            (tmp_path / path).stat().st_size for path in item.target_files
-        )
+        total = sum((tmp_path / path).stat().st_size for path in item.target_files)
         assert total <= 40_000
 
 

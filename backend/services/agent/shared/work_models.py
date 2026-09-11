@@ -104,9 +104,7 @@ class WorkLedger:
         """判断 Work 的所有显式依赖是否已经成功或明确跳过。"""
 
         completed_ids = {
-            candidate.id
-            for candidate in self.items
-            if candidate.status in {"succeeded", "skipped"}
+            candidate.id for candidate in self.items if candidate.status in {"succeeded", "skipped"}
         }
         return all(dependency in completed_ids for dependency in item.dependencies)
 
@@ -117,8 +115,7 @@ class WorkLedger:
         ready = [
             item
             for item in self.items
-            if item.status in {"pending", "failed", "paused"}
-            and self._dependencies_satisfied(item)
+            if item.status in {"pending", "failed", "paused"} and self._dependencies_satisfied(item)
         ]
         return sorted(ready, key=lambda item: (item.priority, order[item.id]))
 
@@ -129,9 +126,8 @@ class WorkLedger:
         if requested:
             if requested.status == "running":
                 return requested
-            if (
-                requested.status in {"pending", "failed", "paused"}
-                and self._dependencies_satisfied(requested)
+            if requested.status in {"pending", "failed", "paused"} and self._dependencies_satisfied(
+                requested
             ):
                 return requested
             return None
@@ -237,9 +233,7 @@ class WorkLedger:
     def apply_replan(self, result: Any) -> None:
         """应用重规划，同时保证 succeeded/skipped 工作项不可被回滚。"""
 
-        immutable = {
-            item.id for item in self.items if item.status in {"succeeded", "skipped"}
-        }
+        immutable = {item.id for item in self.items if item.status in {"succeeded", "skipped"}}
         for replacement in result.retry_items:
             current = self.get(replacement.id)
             if not current or current.id in immutable:
@@ -256,9 +250,7 @@ class WorkLedger:
             current.target_files = replacement.target_files or current.target_files
             current.serial_group = replacement.serial_group or current.serial_group
             current.execution_type = replacement.execution_type
-            current.file_operations = (
-                replacement.file_operations or current.file_operations
-            )
+            current.file_operations = replacement.file_operations or current.file_operations
             current.validation_commands = (
                 replacement.validation_commands or current.validation_commands
             )

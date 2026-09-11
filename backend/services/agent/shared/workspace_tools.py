@@ -24,8 +24,6 @@ MAXIMUM_SOURCE_LINES = 500
 LINE_LIMITED_SUFFIXES = {".py", ".ts", ".tsx", ".js", ".jsx"}
 
 
-
-
 @dataclass(slots=True)
 class ReadBatchResult:
     """一批文件读取结果及读取时的内容指纹。"""
@@ -102,8 +100,7 @@ def search_workspace(root: Path, query: str, *, limit: int = 24) -> str:
         path_lower = relative.lower()
         content_lower = content.lower()
         score = sum(
-            (8 if term in path_lower else 0) + min(content_lower.count(term), 20)
-            for term in terms
+            (8 if term in path_lower else 0) + min(content_lower.count(term), 20) for term in terms
         )
         if score <= 0:
             continue
@@ -148,9 +145,7 @@ def score_workspace_paths(
         path_lower = relative.lower()
         content_lower = content.lower()
         score = sum(
-            (8 if term in path_lower else 0)
-            + min(content_lower.count(term), 20)
-            for term in terms
+            (8 if term in path_lower else 0) + min(content_lower.count(term), 20) for term in terms
         )
         if score <= 0 or relative in seen:
             continue
@@ -239,9 +234,7 @@ def _validate_written_content(target: Path, relative_path: str, content: str) ->
         target.suffix.lower() in LINE_LIMITED_SUFFIXES
         and len(content.splitlines()) > MAXIMUM_SOURCE_LINES
     ):
-        raise ValueError(
-            f"文件 {relative_path} 超过 {MAXIMUM_SOURCE_LINES} 行，请拆分模块后再写入"
-        )
+        raise ValueError(f"文件 {relative_path} 超过 {MAXIMUM_SOURCE_LINES} 行，请拆分模块后再写入")
 
 
 def _apply_operation(target: Path, operation: EditOperation) -> tuple[str, str]:
@@ -262,8 +255,7 @@ def _apply_operation(target: Path, operation: EditOperation) -> tuple[str, str]:
         if occurrences == 0:
             hint = _nearby_text_hint(before, operation.old_text)
             raise ValueError(
-                f"replace 未找到精确旧文本：{operation.path}"
-                + (f"；{hint}" if hint else "")
+                f"replace 未找到精确旧文本：{operation.path}" + (f"；{hint}" if hint else "")
             )
         count = -1 if operation.replace_all else 1
         after = before.replace(operation.old_text, operation.new_text, count)
@@ -298,8 +290,7 @@ def _nearby_text_hint(before: str, needle: str) -> str:
     start = max(0, best_index - 3)
     end = min(len(lines), best_index + 4)
     context = "\n".join(
-        f"{number}: {line}"
-        for number, line in enumerate(lines[start:end], start=start + 1)
+        f"{number}: {line}" for number, line in enumerate(lines[start:end], start=start + 1)
     )
     return f"最接近的代码块（行 {start + 1}~{end}）:\n{context[:1_500]}"
 

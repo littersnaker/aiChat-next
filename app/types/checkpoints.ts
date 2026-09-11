@@ -10,12 +10,7 @@ import type { CommerceMarketplaceCode } from "../lib/commerce/types";
 
 export type AgentCheckpointKind = "qa" | "code" | "media" | "commerce" | "image";
 export type AgentCheckpointStatus =
-  | "running"
-  | "paused"
-  | "interrupted"
-  | "failed"
-  | "completed"
-  | "discarded";
+  "running" | "paused" | "interrupted" | "failed" | "completed" | "discarded";
 
 export interface AgentCheckpointRequest {
   input: string;

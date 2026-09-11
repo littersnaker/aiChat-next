@@ -164,9 +164,7 @@ async def probe_model(
                 latency_ms = round(network_ms)
                 credential_source = credentials.source(model.provider)
                 source_note = (
-                    "（正在使用应用内置百炼兜底）"
-                    if credential_source == "builtin"
-                    else ""
+                    "（正在使用应用内置百炼兜底）" if credential_source == "builtin" else ""
                 )
                 return {
                     "ok": True,

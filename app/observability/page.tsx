@@ -94,8 +94,7 @@ function statusClassName(status: TraceSummary["status"]): string {
  */
 export default function ObservabilityPage() {
   const [traces, setTraces] = useState<TraceSummary[]>([]);
-  const [cacheStats, setCacheStats] =
-    useState<ContextCacheStats>(EMPTY_CACHE_STATS);
+  const [cacheStats, setCacheStats] = useState<ContextCacheStats>(EMPTY_CACHE_STATS);
   const [selectedTraceId, setSelectedTraceId] = useState("");
   const [detail, setDetail] = useState<TraceDetailResponse | null>(null);
   const [loadingList, setLoadingList] = useState(true);
@@ -194,10 +193,7 @@ export default function ObservabilityPage() {
             ["淘汰次数", cacheStats.evictions],
             ["命中率", `${(cacheStats.hitRate * 100).toFixed(1)}%`],
           ].map(([label, value]) => (
-            <div
-              key={label}
-              className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
-            >
+            <div key={label} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <p className="text-xs text-slate-500">{label}</p>
               <p className="mt-1 text-xl font-semibold">{value}</p>
             </div>
@@ -258,9 +254,7 @@ export default function ObservabilityPage() {
               </p>
             </div>
             <div className="max-h-[720px] overflow-y-auto p-5">
-              {loadingDetail ? (
-                <p className="text-sm text-slate-500">正在读取事件时间线…</p>
-              ) : null}
+              {loadingDetail ? <p className="text-sm text-slate-500">正在读取事件时间线…</p> : null}
 
               {!loadingDetail && detail ? (
                 <div className="space-y-6">
@@ -268,18 +262,13 @@ export default function ObservabilityPage() {
                     <h3 className="mb-3 text-sm font-semibold">事件时间线</h3>
                     <ol className="space-y-3">
                       {detail.events.map((event: TraceEvent) => (
-                        <li
-                          key={event.id}
-                          className="rounded-xl border border-slate-200 p-3"
-                        >
+                        <li key={event.id} className="rounded-xl border border-slate-200 p-3">
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <div className="flex items-center gap-2">
                               <span className="rounded bg-slate-100 px-2 py-1 text-xs">
                                 {event.category}
                               </span>
-                              <span className="text-sm font-medium">
-                                {event.name}
-                              </span>
+                              <span className="text-sm font-medium">{event.name}</span>
                             </div>
                             <span className="text-xs text-slate-500">
                               {event.status}

@@ -20,24 +20,17 @@ from backend.utils.paths import is_build_output_path
 from backend.utils.sensitive_paths import is_sensitive_workspace_path
 
 FACTORY_GENERATE_TERMS = tuple(
-    str(item)
-    for item in worklist_reviewer_rules().get("factoryGenerateTerms") or ()
+    str(item) for item in worklist_reviewer_rules().get("factoryGenerateTerms") or ()
 )
-GENERATE_TERMS = tuple(
-    str(item)
-    for item in worklist_reviewer_rules().get("generateTerms") or ()
-)
+GENERATE_TERMS = tuple(str(item) for item in worklist_reviewer_rules().get("generateTerms") or ())
 PAGE_INTENT_TERMS = tuple(
-    str(item)
-    for item in worklist_reviewer_rules().get("pageIntentTerms") or ()
+    str(item) for item in worklist_reviewer_rules().get("pageIntentTerms") or ()
 )
 VALIDATION_ONLY_TERMS = tuple(
-    str(item)
-    for item in worklist_reviewer_rules().get("validationOnlyTerms") or ()
+    str(item) for item in worklist_reviewer_rules().get("validationOnlyTerms") or ()
 )
 EDIT_INTENT_TERMS = tuple(
-    str(item)
-    for item in worklist_reviewer_rules().get("editIntentTerms") or ()
+    str(item) for item in worklist_reviewer_rules().get("editIntentTerms") or ()
 )
 
 
@@ -76,8 +69,7 @@ def review_worklist(works: list[WorkItem]) -> tuple[list[WorkItem], WorklistRevi
         filtered = [
             path
             for path in targets
-            if not is_sensitive_workspace_path(path)
-            and not is_build_output_path(path)
+            if not is_sensitive_workspace_path(path) and not is_build_output_path(path)
         ]
         if len(filtered) != len(targets):
             report.adjustments.append(
@@ -161,12 +153,7 @@ def _reclassify_execution_type(work: WorkItem) -> str:
     has_factory = any(term in text for term in FACTORY_GENERATE_TERMS)
     has_generate = any(term in text for term in GENERATE_TERMS)
     has_page = any(term in text for term in PAGE_INTENT_TERMS)
-    if (
-        has_factory
-        and has_generate
-        and not has_page
-        and not is_factory_audit_work(work)
-    ):
+    if has_factory and has_generate and not has_page and not is_factory_audit_work(work):
         return "artifact"
     has_validation = any(term in text for term in VALIDATION_ONLY_TERMS)
     has_edit = any(term in text for term in EDIT_INTENT_TERMS)

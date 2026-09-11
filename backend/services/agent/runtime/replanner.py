@@ -50,8 +50,7 @@ class Replanner:
             f"当前 Work：{work.id} · {work.title}\n目标：{work.objective}"
         )
         next_goal = (
-            "NEXT SMALL STEP:\n"
-            f"{summary.next_recommendation or '读取最新代码并定位根因。'}"
+            "NEXT SMALL STEP:\n" f"{summary.next_recommendation or '读取最新代码并定位根因。'}"
         )
         entries = [summary.to_retry_prompt(), current_state, next_goal]
         if memory_text:

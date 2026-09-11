@@ -38,9 +38,7 @@ class MemoryRouter:
             store = self._stores.get(memory_type)
             if store is None:
                 raise KeyError(f"未注册 Memory 类型：{memory_type}")
-            records.extend(
-                await store.search(query=query, scope_ids=scope_ids, top_k=per_store)
-            )
+            records.extend(await store.search(query=query, scope_ids=scope_ids, top_k=per_store))
 
         # 同一 ID 只保留一条，再按更新时间倒序截取总上限。
         unique = {record.id: record for record in records}

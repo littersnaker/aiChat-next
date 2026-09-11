@@ -11,10 +11,7 @@ export function formatCompact(value: number | undefined): string {
   return Math.round(value).toLocaleString();
 }
 
-export function formatPrice(
-  value: number | undefined,
-  currency: string | undefined,
-): string {
+export function formatPrice(value: number | undefined, currency: string | undefined): string {
   if (value === undefined) return "—";
   try {
     return new Intl.NumberFormat("en-US", {
@@ -34,19 +31,11 @@ export function scoreLabel(score: number): string {
   return "谨慎进入";
 }
 
-export function MetricBar({
-  label,
-  score,
-}: {
-  label: string;
-  score: number;
-}) {
+export function MetricBar({ label, score }: { label: string; score: number }) {
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between gap-3">
-        <span className="text-[10px] font-medium text-[var(--text-secondary)]">
-          {label}
-        </span>
+        <span className="text-[10px] font-medium text-[var(--text-secondary)]">{label}</span>
         <span className="font-mono text-[10px] tabular-nums text-[var(--text-tertiary)]">
           {score}
         </span>
@@ -98,9 +87,7 @@ export function MetricSnapshot({
             borderColor: "var(--border)",
           }}
         >
-          <div className="text-[9px] text-[var(--text-tertiary)]">
-            {item.label}
-          </div>
+          <div className="text-[9px] text-[var(--text-tertiary)]">{item.label}</div>
           <div className="mt-1 truncate text-[13px] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
             {item.value}
           </div>

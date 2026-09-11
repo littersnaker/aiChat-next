@@ -6,21 +6,14 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { LLM_PROVIDER_CATALOG } from "../../lib/llm/registry/providers";
-import type {
-  LlmCredentials,
-  LlmEndpointOverrides,
-  LlmProviderId,
-} from "../../lib/llm/types";
+import type { LlmCredentials, LlmEndpointOverrides, LlmProviderId } from "../../lib/llm/types";
 import {
   buildCommerceCredentialHeaders,
   type AuxiliaryServiceCredentials,
 } from "../../lib/service-credentials";
 import { apiFetch } from "../../lib/api-client";
 import { getModelDefinition } from "../../lib/llm/registry/models";
-import {
-  AppleButton,
-  AppleModalCloseButton,
-} from "../ui/AppleModalControls";
+import { AppleButton, AppleModalCloseButton } from "../ui/AppleModalControls";
 import { LlmProviderSettings } from "./llm-provider-settings";
 import {
   COLORS,
@@ -46,13 +39,9 @@ export function ApiKeyModal({
   const DEFAULT_REVIEW_MODEL_ID = "deepseek-v4-flash";
 
   const [keys, setKeys] = useState<LlmCredentials>(initialKeys);
-  const [endpoints, setEndpoints] =
-    useState<LlmEndpointOverrides>(initialEndpoints);
-  const [serviceKeys, setServiceKeys] =
-    useState<AuxiliaryServiceCredentials>(initialServiceKeys);
-  const [visibleFields, setVisibleFields] = useState<ReadonlySet<string>>(
-    () => new Set(),
-  );
+  const [endpoints, setEndpoints] = useState<LlmEndpointOverrides>(initialEndpoints);
+  const [serviceKeys, setServiceKeys] = useState<AuxiliaryServiceCredentials>(initialServiceKeys);
+  const [visibleFields, setVisibleFields] = useState<ReadonlySet<string>>(() => new Set());
   const [environmentProviders, setEnvironmentProviders] = useState<
     Partial<Record<MarketProviderId, ProviderEnvironmentStatus>>
   >({});
@@ -120,10 +109,7 @@ export function ApiKeyModal({
     setEndpoints((current) => ({ ...current, [provider]: value }));
   };
 
-  const updateServiceKey = (
-    field: keyof AuxiliaryServiceCredentials,
-    value: string,
-  ) => {
+  const updateServiceKey = (field: keyof AuxiliaryServiceCredentials, value: string) => {
     setServiceKeys((current) => ({ ...current, [field]: value }));
     setProviderStates((current) => {
       const next = { ...current };
@@ -175,10 +161,8 @@ export function ApiKeyModal({
               : response.ok
                 ? "连接正常。"
                 : "连接验证失败。",
-          detail:
-            typeof payload.detail === "string" ? payload.detail : undefined,
-          latencyMs:
-            typeof payload.latencyMs === "number" ? payload.latencyMs : undefined,
+          detail: typeof payload.detail === "string" ? payload.detail : undefined,
+          latencyMs: typeof payload.latencyMs === "number" ? payload.latencyMs : undefined,
         },
       }));
     } catch (error) {
@@ -267,9 +251,7 @@ export function ApiKeyModal({
     if (!resolved) {
       return { providerName: "", keyConfigured: false, valid: false };
     }
-    const provider = LLM_PROVIDER_CATALOG.find(
-      (item) => item.id === resolved.provider,
-    );
+    const provider = LLM_PROVIDER_CATALOG.find((item) => item.id === resolved.provider);
     if (!provider) {
       return { providerName: "", keyConfigured: false, valid: false };
     }
@@ -304,8 +286,7 @@ export function ApiKeyModal({
           background:
             "linear-gradient(180deg, color-mix(in srgb, var(--glass-solid) 98%, transparent), color-mix(in srgb, var(--glass-strong) 96%, transparent))",
           borderColor: COLORS.border,
-          boxShadow:
-            "0 34px 100px rgba(15,23,42,0.24), inset 0 1px 0 rgba(255,255,255,0.32)",
+          boxShadow: "0 34px 100px rgba(15,23,42,0.24), inset 0 1px 0 rgba(255,255,255,0.32)",
           backdropFilter: "blur(36px) saturate(155%)",
           WebkitBackdropFilter: "blur(36px) saturate(155%)",
         }}
@@ -319,10 +300,7 @@ export function ApiKeyModal({
             >
               服务与数据源
             </h2>
-            <p
-              className="mt-2 text-[12px] leading-5"
-              style={{ color: COLORS.textMuted }}
-            >
+            <p className="mt-2 text-[12px] leading-5" style={{ color: COLORS.textMuted }}>
               本机填写的凭证只保存在当前设备；打包环境中的默认凭证会在服务端自动回退使用。
             </p>
           </div>
@@ -345,8 +323,8 @@ export function ApiKeyModal({
                 Agent 复盘循环
               </div>
               <div className="mt-0.5 text-[9px] leading-4 text-[var(--text-tertiary)]">
-                任务完成后自动复盘并沉淀长期记忆；复盘模型与对应厂商的 API
-                Key 都配置好后才会运行，且不会阻塞主任务。填模型名即可（如
+                任务完成后自动复盘并沉淀长期记忆；复盘模型与对应厂商的 API Key
+                都配置好后才会运行，且不会阻塞主任务。填模型名即可（如
                 deepseek-v4-flash），无需厂商前缀。
               </div>
             </div>
@@ -421,7 +399,8 @@ export function ApiKeyModal({
                   跨境市场数据
                 </div>
                 <div className="mt-0.5 text-[9px] leading-4 text-[var(--text-tertiary)]">
-                  已检测 {configuredCount}/{PROVIDERS.length} 个可配置来源。单个数据源失败不会阻断其他来源。
+                  已检测 {configuredCount}/{PROVIDERS.length}{" "}
+                  个可配置来源。单个数据源失败不会阻断其他来源。
                 </div>
               </div>
               <AppleButton
@@ -470,10 +449,7 @@ export function ApiKeyModal({
                           <span className="text-[11px] font-semibold text-[var(--text-primary)]">
                             {provider.title}
                           </span>
-                          <span
-                            className="text-[8px]"
-                            style={{ color: statusColor }}
-                          >
+                          <span className="text-[8px]" style={{ color: statusColor }}>
                             {status.state === "idle"
                               ? isConfigured
                                 ? "已配置 · 未验证"
@@ -557,9 +533,7 @@ export function ApiKeyModal({
                     <div className="mt-2.5 text-[8px] leading-4 text-[var(--text-tertiary)]">
                       {status.message || provider.note}
                       {status.detail ? ` ${status.detail}` : ""}
-                      {status.latencyMs !== undefined
-                        ? ` · ${status.latencyMs} ms`
-                        : ""}
+                      {status.latencyMs !== undefined ? ` · ${status.latencyMs} ms` : ""}
                       {environment?.fingerprint
                         ? ` · 默认凭证 ${String(environment.fingerprint)}`
                         : ""}
@@ -571,16 +545,8 @@ export function ApiKeyModal({
           </section>
         </div>
 
-        <footer
-          className="flex gap-2 border-t px-6 py-4"
-          style={{ borderColor: COLORS.border }}
-        >
-          <AppleButton
-            type="button"
-            variant="secondary"
-            fullWidth
-            onClick={onClose}
-          >
+        <footer className="flex gap-2 border-t px-6 py-4" style={{ borderColor: COLORS.border }}>
+          <AppleButton type="button" variant="secondary" fullWidth onClick={onClose}>
             取消
           </AppleButton>
           <AppleButton type="submit" variant="primary" fullWidth>

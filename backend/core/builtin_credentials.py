@@ -37,9 +37,7 @@ def _xor_bytes(payload: bytes, salt: bytes) -> bytes:
     output = bytearray()
     counter = 0
     while len(output) < len(payload):
-        block = hashlib.sha256(
-            ENCODING_CONTEXT + salt + counter.to_bytes(4, "big")
-        ).digest()
+        block = hashlib.sha256(ENCODING_CONTEXT + salt + counter.to_bytes(4, "big")).digest()
         output.extend(block)
         counter += 1
     return bytes(value ^ output[index] for index, value in enumerate(payload))
@@ -53,9 +51,7 @@ def _normalize_payload(value: Any) -> dict[str, str]:
     return {
         name: raw_value.strip()
         for name, raw_value in value.items()
-        if name in ALLOWED_BUILTIN_VARIABLES
-        and isinstance(raw_value, str)
-        and raw_value.strip()
+        if name in ALLOWED_BUILTIN_VARIABLES and isinstance(raw_value, str) and raw_value.strip()
     }
 
 

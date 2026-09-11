@@ -54,19 +54,21 @@ async def test_delete_project_removes_related_rows(tmp_path: Path, monkeypatch) 
     await delete_project(project_id)
 
     async with open_database() as connection:
-        project_row = await (await connection.execute(
-            "SELECT id FROM projects WHERE id = ?", (project_id,)
-        )).fetchone()
-        session_row = await (await connection.execute(
-            "SELECT id FROM sessions WHERE project_id = ?", (project_id,)
-        )).fetchone()
-        completed_row = await (await connection.execute(
-            "SELECT id FROM project_completed_works WHERE project_id = ?",
-            (project_id,),
-        )).fetchone()
-        trace_row = await (await connection.execute(
-            "SELECT id FROM traces WHERE project_id = ?", (project_id,)
-        )).fetchone()
+        project_row = await (
+            await connection.execute("SELECT id FROM projects WHERE id = ?", (project_id,))
+        ).fetchone()
+        session_row = await (
+            await connection.execute("SELECT id FROM sessions WHERE project_id = ?", (project_id,))
+        ).fetchone()
+        completed_row = await (
+            await connection.execute(
+                "SELECT id FROM project_completed_works WHERE project_id = ?",
+                (project_id,),
+            )
+        ).fetchone()
+        trace_row = await (
+            await connection.execute("SELECT id FROM traces WHERE project_id = ?", (project_id,))
+        ).fetchone()
 
     assert project_row is None
     assert session_row is None

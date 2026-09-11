@@ -73,9 +73,7 @@ async def execute_factory_work(
         )
         if _factory_artifacts_reusable(validation):
             state.quality["softwareFactory"] = validation
-            state.append_transcript(
-                "FACTORY REUSE: 已存在一致的生成产物，本次直接复用并跳过覆盖。"
-            )
+            state.append_transcript("FACTORY REUSE: 已存在一致的生成产物，本次直接复用并跳过覆盖。")
             await checkpoint()
             return WorkExecutionResult(
                 work_id=work.id,

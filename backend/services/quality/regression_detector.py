@@ -110,9 +110,7 @@ class RegressionDetector:
                 changed_contracts.append(relative)
 
         invalid_artifacts = [
-            relative
-            for relative in artifact_dependencies or []
-            if not (root / relative).is_file()
+            relative for relative in artifact_dependencies or [] if not (root / relative).is_file()
         ]
         functional_failure = validation.executed and not validation.passed
         issues: list[str] = []
@@ -142,10 +140,9 @@ class RegressionDetector:
                 return "syntax-error"
             public = []
             for node in tree.body:
-                if (
-                    isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-                    and not node.name.startswith("_")
-                ):
+                if isinstance(
+                    node, (ast.FunctionDef, ast.AsyncFunctionDef)
+                ) and not node.name.startswith("_"):
                     public.append(f"fn:{node.name}:{len(node.args.args)}")
                 elif isinstance(node, ast.ClassDef) and not node.name.startswith("_"):
                     public.append(f"class:{node.name}")

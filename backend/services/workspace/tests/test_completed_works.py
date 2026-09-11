@@ -73,7 +73,9 @@ async def test_record_and_skip_reuses_completed_work(tmp_path, monkeypatch) -> N
         root.mkdir()
         (root / "src").mkdir()
         (root / "src" / "tokens.ts").write_text("export const tokens = {}", encoding="utf-8")
-        (root / "src" / "Button.tsx").write_text("export const Button = () => null", encoding="utf-8")
+        (root / "src" / "Button.tsx").write_text(
+            "export const Button = () => null", encoding="utf-8"
+        )
 
         assert await record_completed_works("project-1", [_completed_item()]) == 1
         ledger = WorkLedger([_pending_work()])
@@ -122,9 +124,7 @@ async def test_skip_requires_title_match(tmp_path, monkeypatch) -> None:
         (root / "src" / "tokens.ts").write_text("x", encoding="utf-8")
         (root / "src" / "Button.tsx").write_text("y", encoding="utf-8")
         await record_completed_works("project-1", [_completed_item()])
-        ledger = WorkLedger(
-            [_pending_work(title="继续优化 Apple 风格组件交互细节")]
-        )
+        ledger = WorkLedger([_pending_work(title="继续优化 Apple 风格组件交互细节")])
 
         skipped = await skip_redundant_works(root=root, project_id="project-1", ledger=ledger)
 
@@ -147,13 +147,7 @@ async def test_skip_respects_explicit_redo_intent(tmp_path, monkeypatch) -> None
         (root / "src" / "tokens.ts").write_text("x", encoding="utf-8")
         (root / "src" / "Button.tsx").write_text("y", encoding="utf-8")
         await record_completed_works("project-1", [_completed_item()])
-        ledger = WorkLedger(
-            [
-                _pending_work(
-                    objective="重新生成 Apple 风格设计 tokens 与组件"
-                )
-            ]
-        )
+        ledger = WorkLedger([_pending_work(objective="重新生成 Apple 风格设计 tokens 与组件")])
 
         skipped = await skip_redundant_works(root=root, project_id="project-1", ledger=ledger)
 

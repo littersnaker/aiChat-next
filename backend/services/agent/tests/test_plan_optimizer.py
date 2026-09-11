@@ -54,18 +54,10 @@ def test_large_multi_domain_work_is_split_with_cap() -> None:
         id="W001",
         title="完整实现电商商城全部模块",
         objective="实现商品分类、商品详情、购物车、结算、订单和个人中心的完整商城功能",
-        target_files=[
-            f"src/pages/catalog{i}/index.tsx" for i in range(3)
-        ]
-        + [
-            f"src/pages/cart{i}/index.tsx" for i in range(3)
-        ]
-        + [
-            f"src/pages/checkout{i}/index.tsx" for i in range(3)
-        ]
-        + [
-            f"src/pages/order{i}/index.tsx" for i in range(3)
-        ],
+        target_files=[f"src/pages/catalog{i}/index.tsx" for i in range(3)]
+        + [f"src/pages/cart{i}/index.tsx" for i in range(3)]
+        + [f"src/pages/checkout{i}/index.tsx" for i in range(3)]
+        + [f"src/pages/order{i}/index.tsx" for i in range(3)],
         execution_type="coding",
     )
 

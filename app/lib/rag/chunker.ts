@@ -98,15 +98,10 @@ function splitLongParagraph(
 /**
  * 将文档正文转换为带词频信息的检索切片。
  */
-export function chunkDocumentText(
-  rawText: string,
-  options: ChunkTextOptions = {},
-): RagChunk[] {
-  const targetCharacters =
-    options.targetCharacters ?? DEFAULT_TARGET_CHARACTERS;
+export function chunkDocumentText(rawText: string, options: ChunkTextOptions = {}): RagChunk[] {
+  const targetCharacters = options.targetCharacters ?? DEFAULT_TARGET_CHARACTERS;
   const maxCharacters = options.maxCharacters ?? DEFAULT_MAX_CHARACTERS;
-  const overlapCharacters =
-    options.overlapCharacters ?? DEFAULT_OVERLAP_CHARACTERS;
+  const overlapCharacters = options.overlapCharacters ?? DEFAULT_OVERLAP_CHARACTERS;
 
   const normalized = normalizeDocumentText(rawText);
 

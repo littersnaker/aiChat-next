@@ -11,10 +11,7 @@ import type {
   AmazonListingValidation,
   AmazonMockErpProduct,
 } from "./types";
-import {
-  AMAZON_LISTING_DEMO_RULES,
-  AMAZON_TITLE_REPEAT_EXEMPTIONS,
-} from "./rules";
+import { AMAZON_LISTING_DEMO_RULES, AMAZON_TITLE_REPEAT_EXEMPTIONS } from "./rules";
 
 function clampScore(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
@@ -25,7 +22,10 @@ function utf8Bytes(value: string): number {
 }
 
 function normalizeText(value: string): string {
-  return value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  return value
+    .toLocaleLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
 }
 
 function repeatedTitleWords(title: string): string[] {
@@ -34,9 +34,7 @@ function repeatedTitleWords(title: string): string[] {
     if (!word || AMAZON_TITLE_REPEAT_EXEMPTIONS.has(word)) continue;
     counts.set(word, (counts.get(word) || 0) + 1);
   }
-  return [...counts.entries()]
-    .filter(([, count]) => count > 2)
-    .map(([word]) => word);
+  return [...counts.entries()].filter(([, count]) => count > 2).map(([word]) => word);
 }
 
 function addTextPolicyIssues(
@@ -112,7 +110,12 @@ export function validateAmazonListing(input: {
   const issues: AmazonListingIssue[] = [];
 
   if (!draft.title.trim()) {
-    issues.push({ field: "title", severity: "error", code: "TITLE_EMPTY", message: "标题不能为空。" });
+    issues.push({
+      field: "title",
+      severity: "error",
+      code: "TITLE_EMPTY",
+      message: "标题不能为空。",
+    });
   } else if (draft.title.length > rules.titleMaxCharacters) {
     issues.push({
       field: "title",
@@ -221,7 +224,10 @@ export function validateAmazonListing(input: {
   const warningCount = issues.filter((item) => item.severity === "warning").length;
   const compliance = clampScore(100 - errorCount * 24 - warningCount * 7);
   const completeness = clampScore(
-    35 + draft.bulletPoints.length * 9 + (draft.productDescription ? 12 : 0) + (draft.searchTerms ? 8 : 0),
+    35 +
+      draft.bulletPoints.length * 9 +
+      (draft.productDescription ? 12 : 0) +
+      (draft.searchTerms ? 8 : 0),
   );
   const factualSafety = clampScore(100 - Math.min(55, unconfirmedFacts.length * 7));
   const readability = calculateReadability(draft);

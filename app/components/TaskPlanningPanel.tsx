@@ -16,10 +16,7 @@ import {
   buildPlanningSummary,
   buildWorkListProgress,
 } from "./task-planning/derive";
-import type {
-  PlanningStageStatus,
-  TaskPlanningPanelProps,
-} from "./task-planning/types";
+import type { PlanningStageStatus, TaskPlanningPanelProps } from "./task-planning/types";
 
 /**
  * 根据阶段状态渲染无文字依赖的轻量图标。
@@ -58,12 +55,7 @@ function StageIcon({ status }: { status: PlanningStageStatus }) {
   if (status === "skipped") {
     return (
       <svg viewBox="0 0 20 20" className="h-3 w-3" fill="none">
-        <path
-          d="M6 10h8"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
+        <path d="M6 10h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       </svg>
     );
   }
@@ -121,20 +113,10 @@ export default function TaskPlanningPanel({
         agentStatus,
         lifecycleEvents,
       ),
-    [
-      agentStatus,
-      agents,
-      definitions,
-      isStreaming,
-      lifecycleEvents,
-      toolActivities,
-    ],
+    [agentStatus, agents, definitions, isStreaming, lifecycleEvents, toolActivities],
   );
   const summary = useMemo(() => buildPlanningSummary(stages), [stages]);
-  const workProgress = useMemo(
-    () => buildWorkListProgress(workListSnapshot),
-    [workListSnapshot],
-  );
+  const workProgress = useMemo(() => buildWorkListProgress(workListSnapshot), [workListSnapshot]);
   const latestWorkEvents = useMemo(() => {
     const map = new Map<string, AgentLifecycleEventPayload>();
     lifecycleEvents.forEach((event) => {
@@ -142,15 +124,12 @@ export default function TaskPlanningPanel({
       const workId = match ? match[1] : null;
       if (!workId) return;
       const existing = map.get(workId);
-      const existingTime = existing
-        ? Date.parse(existing.createdAt) || 0
-        : -1;
+      const existingTime = existing ? Date.parse(existing.createdAt) || 0 : -1;
       const eventTime = Date.parse(event.createdAt) || 0;
       if (
         !existing ||
         eventTime > existingTime ||
-        (eventTime === existingTime &&
-          (event.sequence || 0) >= (existing.sequence || 0))
+        (eventTime === existingTime && (event.sequence || 0) >= (existing.sequence || 0))
       ) {
         map.set(workId, event);
       }
@@ -189,12 +168,8 @@ export default function TaskPlanningPanel({
   }, [latestWorkEvents]);
   const hasWorkList = Boolean(workProgress);
   const workFinished = workProgress?.finished || 0;
-  const displayProgress = workProgress
-    ? workProgress.overallProgress
-    : summary.overallProgress;
-  const displayFailed = workProgress
-    ? workProgress.failed > 0
-    : summary.failed;
+  const displayProgress = workProgress ? workProgress.overallProgress : summary.overallProgress;
+  const displayFailed = workProgress ? workProgress.failed > 0 : summary.failed;
   const statusText = hasWorkList
     ? workProgress?.failed
       ? `${workProgress.failed} 个 Work 失败，Planner 正在重规划`
@@ -219,11 +194,9 @@ export default function TaskPlanningPanel({
     <section
       className={`task-planning-panel flex min-h-[300px] max-h-[46%] shrink-0 flex-col overflow-hidden rounded-[22px] border ${className}`}
       style={{
-        background:
-          "linear-gradient(145deg, var(--glass-strong), var(--glass-soft))",
+        background: "linear-gradient(145deg, var(--glass-strong), var(--glass-soft))",
         borderColor: "var(--border)",
-        boxShadow:
-          "var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.08)",
+        boxShadow: "var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.08)",
         backdropFilter: "blur(34px) saturate(155%)",
         WebkitBackdropFilter: "blur(34px) saturate(155%)",
       }}
@@ -246,13 +219,7 @@ export default function TaskPlanningPanel({
                   strokeWidth="1.55"
                   strokeLinecap="round"
                 />
-                <circle
-                  cx="15.2"
-                  cy="14.6"
-                  r="2.2"
-                  stroke="currentColor"
-                  strokeWidth="1.45"
-                />
+                <circle cx="15.2" cy="14.6" r="2.2" stroke="currentColor" strokeWidth="1.45" />
               </svg>
             </span>
             <div className="min-w-0">
@@ -262,10 +229,7 @@ export default function TaskPlanningPanel({
               >
                 任务规划
               </h2>
-              <p
-                className="mt-0.5 truncate text-[10px]"
-                style={{ color: "var(--text-tertiary)" }}
-              >
+              <p className="mt-0.5 truncate text-[10px]" style={{ color: "var(--text-tertiary)" }}>
                 {statusText}
               </p>
             </div>
@@ -275,9 +239,7 @@ export default function TaskPlanningPanel({
             className="shrink-0 rounded-full px-2 py-1 font-mono text-[9px] tabular-nums"
             style={{
               color: displayFailed ? "var(--accent-red)" : "#64b5ff",
-              background: displayFailed
-                ? "rgba(255,69,58,0.11)"
-                : "rgba(10,132,255,0.12)",
+              background: displayFailed ? "rgba(255,69,58,0.11)" : "rgba(10,132,255,0.12)",
             }}
           >
             {displayProgress}%
@@ -299,10 +261,7 @@ export default function TaskPlanningPanel({
               }}
             />
           </div>
-          <span
-            className="text-[9px] tabular-nums"
-            style={{ color: "var(--text-tertiary)" }}
-          >
+          <span className="text-[9px] tabular-nums" style={{ color: "var(--text-tertiary)" }}>
             {hasWorkList
               ? `${workFinished}/${workProgress?.total || 0} Work`
               : `${summary.completed}/${stages.length} 阶段`}
@@ -310,10 +269,7 @@ export default function TaskPlanningPanel({
         </div>
       </header>
 
-      <div
-        className="mx-4 h-px shrink-0"
-        style={{ background: "var(--border)" }}
-      />
+      <div className="mx-4 h-px shrink-0" style={{ background: "var(--border)" }} />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
         {(liveEditing || changedFiles.length > 0) && (
@@ -410,7 +366,7 @@ export default function TaskPlanningPanel({
                               ? "#64b5ff"
                               : item.status === "paused"
                                 ? "#ff9f0a"
-                              : "var(--text-quaternary)",
+                                : "var(--text-quaternary)",
                       }}
                     />
                     <span
@@ -429,9 +385,7 @@ export default function TaskPlanningPanel({
                     <span
                       className="shrink-0 text-[8px]"
                       style={{
-                        color: failed
-                          ? "var(--accent-red)"
-                          : "var(--text-tertiary)",
+                        color: failed ? "var(--accent-red)" : "var(--text-tertiary)",
                       }}
                     >
                       {failed && item.attempts > 1
@@ -443,13 +397,9 @@ export default function TaskPlanningPanel({
                   </div>
                   {(() => {
                     const liveEvent =
-                      item.status === "running"
-                        ? latestWorkEvents.get(item.id)
-                        : null;
+                      item.status === "running" ? latestWorkEvents.get(item.id) : null;
                     if (!liveEvent) return null;
-                    const files = liveEvent.currentFiles?.length
-                      ? liveEvent.currentFiles
-                      : null;
+                    const files = liveEvent.currentFiles?.length ? liveEvent.currentFiles : null;
                     return (
                       <p
                         className="mt-1 truncate pl-3.5 text-[8px] leading-[1.45]"
@@ -476,9 +426,7 @@ export default function TaskPlanningPanel({
             })}
           </div>
         )}
-        {workListSnapshot && (
-          <QualityMetricsCard snapshot={workListSnapshot} />
-        )}
+        {workListSnapshot && <QualityMetricsCard snapshot={workListSnapshot} />}
         <div className="relative space-y-1.5">
           <span
             className="pointer-events-none absolute bottom-5 left-[18px] top-5 w-px"
@@ -497,12 +445,8 @@ export default function TaskPlanningPanel({
                   "px-2.5 py-2.5 transition-all duration-300"
                 }
                 style={{
-                  background: isActive
-                    ? "rgba(10,132,255,0.09)"
-                    : "transparent",
-                  borderColor: isActive
-                    ? "rgba(10,132,255,0.22)"
-                    : "transparent",
+                  background: isActive ? "rgba(10,132,255,0.09)" : "transparent",
+                  borderColor: isActive ? "rgba(10,132,255,0.22)" : "transparent",
                 }}
               >
                 <span
@@ -517,9 +461,7 @@ export default function TaskPlanningPanel({
                       stage.status === "idle" || stage.status === "queued"
                         ? "var(--border-strong)"
                         : meta.color,
-                    boxShadow: isActive
-                      ? "0 0 0 4px rgba(10,132,255,0.10)"
-                      : "none",
+                    boxShadow: isActive ? "0 0 0 4px rgba(10,132,255,0.10)" : "none",
                   }}
                 >
                   <StageIcon status={stage.status} />

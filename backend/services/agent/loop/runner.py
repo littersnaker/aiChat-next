@@ -141,9 +141,7 @@ async def stream_autonomous_loop(
                 ledger=ledger,
             )
 
-    restored_harness = (
-        dict(resume_state.get("projectHarness") or {}) if resume_state else {}
-    )
+    restored_harness = dict(resume_state.get("projectHarness") or {}) if resume_state else {}
     harness = (
         ProjectHarness.from_json(restored_harness)
         if restored_harness
@@ -194,8 +192,7 @@ async def stream_autonomous_loop(
                 + sum(state.iterations for state in worker_states.values()),
                 execution_mode=execution_mode,
                 worker_states={
-                    work_id: state.to_json()
-                    for work_id, state in worker_states.items()
+                    work_id: state.to_json() for work_id, state in worker_states.items()
                 },
                 active_work_ids=list(active_work_ids),
                 project_harness=harness.to_json(),
@@ -294,14 +291,8 @@ async def stream_autonomous_loop(
     try:
         while not ledger.all_finished():
             used_slots = {slot for _work_id, slot in running.values()}
-            free_slots = [
-                slot for slot in range(1, parallel_limit + 1) if slot not in used_slots
-            ]
-            ready = [
-                item
-                for item in ledger.ready_items()
-                if item.status in {"pending", "paused"}
-            ]
+            free_slots = [slot for slot in range(1, parallel_limit + 1) if slot not in used_slots]
+            ready = [item for item in ledger.ready_items() if item.status in {"pending", "paused"}]
             active_items = [
                 item
                 for work_id, _slot in running.values()
@@ -321,12 +312,10 @@ async def stream_autonomous_loop(
 
             if selected:
                 active_work_ids = [
-                    work_id
-                    for work_id, _slot in sorted(running.values(), key=lambda item: item[1])
+                    work_id for work_id, _slot in sorted(running.values(), key=lambda item: item[1])
                 ]
                 ledger.reason = (
-                    f"滚动并行执行 {len(running)} 个 Work："
-                    f"{', '.join(active_work_ids)}"
+                    f"滚动并行执行 {len(running)} 个 Work：" f"{', '.join(active_work_ids)}"
                 )
                 await persist_checkpoint(force=True)
                 yield AgentLoopEvent("worklist", snapshot())
@@ -401,8 +390,7 @@ async def stream_autonomous_loop(
                 if paused_now:
                     break
                 active_work_ids = [
-                    work_id
-                    for work_id, _slot in sorted(running.values(), key=lambda item: item[1])
+                    work_id for work_id, _slot in sorted(running.values(), key=lambda item: item[1])
                 ]
                 await persist_checkpoint(force=True)
                 yield AgentLoopEvent("worklist", snapshot())
@@ -411,28 +399,21 @@ async def stream_autonomous_loop(
             failed = [item for item in ledger.items if item.status == "failed"]
             if failed:
                 runtime_failed = [
-                    item
-                    for item in failed
-                    if failure_kinds.get(item.id) == "runtime"
+                    item for item in failed if failure_kinds.get(item.id) == "runtime"
                 ]
                 if runtime_failed:
                     exhausted_runtime = [
-                        item
-                        for item in runtime_failed
-                        if item.attempts >= max_runtime_attempts()
+                        item for item in runtime_failed if item.attempts >= max_runtime_attempts()
                     ]
                     if exhausted_runtime:
                         details = ", ".join(
-                            f"{item.id}({item.attempts} 次)"
-                            for item in exhausted_runtime
+                            f"{item.id}({item.attempts} 次)" for item in exhausted_runtime
                         )
                         # 附上最近一次真实原因（如未配置 API Key），避免 UI
                         # 只看到笼统的"连续错误"而无法定位配置问题。
                         reasons = []
                         for item in exhausted_runtime:
-                            reason = failure_observations.get(
-                                item.id, item.error or ""
-                            )
+                            reason = failure_observations.get(item.id, item.error or "")
                             reason = " ".join(str(reason).split())[:200]
                             if reason:
                                 reasons.append(f"{item.id}：{reason}")
@@ -452,20 +433,13 @@ async def stream_autonomous_loop(
                     yield AgentLoopEvent("worklist", snapshot())
                     continue
 
-                exhausted = [
-                    item for item in failed if item.attempts >= max_work_attempts()
-                ]
+                exhausted = [item for item in failed if item.attempts >= max_work_attempts()]
                 if exhausted:
-                    details = ", ".join(
-                        f"{item.id}({item.attempts} 次)" for item in exhausted
-                    )
-                    raise ValueError(
-                        f"以下 Work 已达到最大尝试次数，停止继续返工：{details}"
-                    )
+                    details = ", ".join(f"{item.id}({item.attempts} 次)" for item in exhausted)
+                    raise ValueError(f"以下 Work 已达到最大尝试次数，停止继续返工：{details}")
                 if replan_round >= max_replan_rounds():
                     raise ValueError(
-                        f"任务已达到 {max_replan_rounds()} 轮重规划上限，"
-                        "已停止无限返工。"
+                        f"任务已达到 {max_replan_rounds()} 轮重规划上限，" "已停止无限返工。"
                     )
 
                 failed_ids = [item.id for item in failed]
@@ -497,8 +471,7 @@ async def stream_autonomous_loop(
                         for item in failed
                     ],
                     failure_observation="\n\n".join(
-                        failure_observations.get(work_id, work_id)
-                        for work_id in failed_ids
+                        failure_observations.get(work_id, work_id) for work_id in failed_ids
                     ),
                     preferred_model_id=preferred_model_id,
                     credentials=credentials,
@@ -519,8 +492,7 @@ async def stream_autonomous_loop(
                     state = worker_states.setdefault(work_id, WorkWorkerState())
                     state.quality["replanReason"] = replan.reason
                     state.append_transcript(
-                        f"PLANNER REPLAN: {replan.reason}\n"
-                        "只修复明确失败，不得重做已成功产物。"
+                        f"PLANNER REPLAN: {replan.reason}\n" "只修复明确失败，不得重做已成功产物。"
                     )
                     failure_kinds.pop(work_id, None)
                     failure_observations.pop(work_id, None)
@@ -546,14 +518,8 @@ async def stream_autonomous_loop(
                 )
                 continue
 
-            blocked = [
-                item
-                for item in ledger.items
-                if item.status not in {"succeeded", "skipped"}
-            ]
-            details = ", ".join(
-                f"{item.id}(依赖:{item.dependencies})" for item in blocked
-            )
+            blocked = [item for item in ledger.items if item.status not in {"succeeded", "skipped"}]
+            details = ", ".join(f"{item.id}(依赖:{item.dependencies})" for item in blocked)
             raise ValueError(f"WorkList 存在循环依赖或不可满足依赖：{details}")
     finally:
         if running:
@@ -619,9 +585,7 @@ async def stream_autonomous_loop(
         commands=command_results,
         usage=total_usage,
         model_name=model_name,
-        iterations=base_iterations
-        + sum(state.iterations for state in worker_states.values())
-        + 1,
+        iterations=base_iterations + sum(state.iterations for state in worker_states.values()) + 1,
         replans=replan_round,
         optimized_prompt=task_plan.optimized_prompt,
         objective=task_plan.objective,

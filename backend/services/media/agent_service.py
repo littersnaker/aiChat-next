@@ -76,9 +76,7 @@ def _media_emit(queue: asyncio.Queue[str | None]):
                         "status": str(payload.get("status") or "running").upper(),
                         "iteration": 0,
                         "detail": str(payload.get("detail") or ""),
-                        "createdAt": datetime.datetime.now(
-                            datetime.UTC
-                        ).isoformat(),
+                        "createdAt": datetime.datetime.now(datetime.UTC).isoformat(),
                     },
                 }
             )
@@ -135,9 +133,7 @@ async def _stream_direct_media(
     yield _lifecycle_frame(f"正在调用 {model_id} 生成媒体内容…")
     api_key = credentials.get(provider)
     if not api_key:
-        yield encode_sse(
-            {"type": "TEXT", "content": f"缺少 {provider} API Key，无法生成媒体。"}
-        )
+        yield encode_sse({"type": "TEXT", "content": f"缺少 {provider} API Key，无法生成媒体。"})
         return
     prompt = re.sub(r"^(帮我|请|生成|画|做|来|一个|一张|一段|个|条)", "", user_text).strip()
     prompt = prompt or user_text
@@ -206,11 +202,7 @@ async def _stream_storyboard(
         preferred_model_id=preferred_model_id,
         emit=_media_emit(queue),
     )
-    output_dir = str(
-        Path(tempfile.gettempdir())
-        / "media"
-        / (body.session_id or "default")
-    )
+    output_dir = str(Path(tempfile.gettempdir()) / "media" / (body.session_id or "default"))
     initial: dict[str, object] = {
         "script": user_text,
         "title": "",

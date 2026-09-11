@@ -139,11 +139,7 @@ def write_recognition_excel(
                 sheet.write_string(cursor, 0, f"排{stack_index + 1}", stack_format)
                 row_cells = cells[stack_index] if stack_index < len(cells) else []
                 for position in range(1, max_position + 1):
-                    cell = (
-                        row_cells[position - 1]
-                        if position - 1 < len(row_cells)
-                        else None
-                    )
+                    cell = row_cells[position - 1] if position - 1 < len(row_cells) else None
                     if cell is None:
                         continue
                     sheet_no = clean_cell_text(cell["sheetNo"])

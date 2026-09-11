@@ -13,13 +13,7 @@ export type AgentKind =
   | "media"
   | "commerce";
 
-export type AgentStatus =
-  | "idle"
-  | "queued"
-  | "thinking"
-  | "running"
-  | "completed"
-  | "error";
+export type AgentStatus = "idle" | "queued" | "thinking" | "running" | "completed" | "error";
 
 export interface AgentInstance {
   id: string;
@@ -31,18 +25,22 @@ export interface AgentInstance {
   updatedAt: number;
 }
 
-export const AGENT_BLUEPRINTS: Array<
-  Pick<AgentInstance, "id" | "name" | "type" | "currentTask">
-> = [
-  { id: "orchestrator", name: "Orchestrator", type: "orchestrator", currentTask: "等待接收任务" },
-  { id: "planner", name: "Planner", type: "planner", currentTask: "等待任务拆解" },
-  { id: "researcher", name: "Researcher", type: "researcher", currentTask: "等待检索上下文" },
-  { id: "coder", name: "Coding Agent", type: "coder", currentTask: "等待代码任务" },
-  { id: "media", name: "Media Agent", type: "media", currentTask: "等待图片或视频任务" },
-  { id: "commerce", name: "Market Intelligence Analyst", type: "commerce", currentTask: "等待跨境市场研究任务" },
-  { id: "reviewer", name: "Reviewer", type: "reviewer", currentTask: "等待质量审查" },
-  { id: "terminal", name: "Terminal Agent", type: "terminal", currentTask: "等待终端任务" },
-];
+export const AGENT_BLUEPRINTS: Array<Pick<AgentInstance, "id" | "name" | "type" | "currentTask">> =
+  [
+    { id: "orchestrator", name: "Orchestrator", type: "orchestrator", currentTask: "等待接收任务" },
+    { id: "planner", name: "Planner", type: "planner", currentTask: "等待任务拆解" },
+    { id: "researcher", name: "Researcher", type: "researcher", currentTask: "等待检索上下文" },
+    { id: "coder", name: "Coding Agent", type: "coder", currentTask: "等待代码任务" },
+    { id: "media", name: "Media Agent", type: "media", currentTask: "等待图片或视频任务" },
+    {
+      id: "commerce",
+      name: "Market Intelligence Analyst",
+      type: "commerce",
+      currentTask: "等待跨境市场研究任务",
+    },
+    { id: "reviewer", name: "Reviewer", type: "reviewer", currentTask: "等待质量审查" },
+    { id: "terminal", name: "Terminal Agent", type: "terminal", currentTask: "等待终端任务" },
+  ];
 
 export function createIdleAgents(): AgentInstance[] {
   return AGENT_BLUEPRINTS.map((agent) => ({
@@ -156,11 +154,7 @@ interface AgentPanelProps {
   className?: string;
 }
 
-export default function AgentPanel({
-  agents,
-  isStreaming,
-  className = "",
-}: AgentPanelProps) {
+export default function AgentPanel({ agents, isStreaming, className = "" }: AgentPanelProps) {
   const [expanded, setExpanded] = useState(true);
 
   const summary = useMemo(() => {
@@ -170,13 +164,10 @@ export default function AgentPanel({
     const running = participating.filter((agent) =>
       ["running", "thinking"].includes(agent.status),
     ).length;
-    const completed = participating.filter(
-      (agent) => agent.status === "completed",
-    ).length;
+    const completed = participating.filter((agent) => agent.status === "completed").length;
     const progress = participating.length
       ? Math.round(
-          participating.reduce((total, agent) => total + agent.progress, 0) /
-            participating.length,
+          participating.reduce((total, agent) => total + agent.progress, 0) / participating.length,
         )
       : 0;
 
@@ -187,11 +178,9 @@ export default function AgentPanel({
     <aside
       className={`agent-panel flex min-h-0 w-full flex-col overflow-hidden rounded-[22px] border ${className}`}
       style={{
-        background:
-          "linear-gradient(145deg, var(--glass-strong), var(--glass-soft))",
+        background: "linear-gradient(145deg, var(--glass-strong), var(--glass-soft))",
         borderColor: "var(--border)",
-        boxShadow:
-          "var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.08)",
+        boxShadow: "var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.08)",
         backdropFilter: "blur(34px) saturate(155%)",
         WebkitBackdropFilter: "blur(34px) saturate(155%)",
       }}
@@ -224,8 +213,7 @@ export default function AgentPanel({
           className="block h-full rounded-full transition-[width] duration-500"
           style={{
             width: `${summary.progress}%`,
-            background:
-              "linear-gradient(90deg, var(--accent-from), var(--accent-to))",
+            background: "linear-gradient(90deg, var(--accent-from), var(--accent-to))",
           }}
         />
       </div>
@@ -250,9 +238,7 @@ export default function AgentPanel({
                     <AgentGlyph type={agent.type} status={agent.status} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <div className="truncate text-[12px] font-semibold">
-                          {agent.name}
-                        </div>
+                        <div className="truncate text-[12px] font-semibold">{agent.name}</div>
                         <span
                           className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-medium"
                           style={{

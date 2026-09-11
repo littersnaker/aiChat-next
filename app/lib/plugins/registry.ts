@@ -1,9 +1,5 @@
 // 模块说明：负责 registry 核心服务与领域逻辑。
-import type {
-  BuiltinPluginId,
-  BuiltinPluginManifest,
-  BuiltinPluginState,
-} from "./types";
+import type { BuiltinPluginId, BuiltinPluginManifest, BuiltinPluginState } from "./types";
 
 /**
  * 插件清单只保存轻量元数据，不能在这里 import Agent 实现。
@@ -23,7 +19,8 @@ export const BUILTIN_PLUGINS: readonly BuiltinPluginManifest[] = [
     id: "commerce-research",
     name: "Cross-border Market Intelligence Agent",
     shortName: "跨境市场情报",
-    description: "无需 Amazon 店铺或付费平台 API，基于公开 SERP/Shopping 完成跨境市场情报初筛；付费数据仅作为可选增强。",
+    description:
+      "无需 Amazon 店铺或付费平台 API，基于公开 SERP/Shopping 完成跨境市场情报初筛；付费数据仅作为可选增强。",
     accent: "blue",
     sessionMode: "commerce",
     defaultEnabled: false,

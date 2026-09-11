@@ -52,9 +52,7 @@ MAX_INVALID_PROTOCOL_ROUNDS = 2
 MAX_WORK_OUTPUT_TOKENS = _env_int("CODE_AGENT_MAX_OUTPUT_TOKENS", 8_000, 1_000, 200_000)
 
 
-def _missing_provider_key(
-    preferred_model_id: str, credentials: LlmCredentials
-) -> tuple[bool, str]:
+def _missing_provider_key(preferred_model_id: str, credentials: LlmCredentials) -> tuple[bool, str]:
     """判断 worker 手动选定的模型是否缺供应商 Key。
 
     返回 ``(missing, provider_label)``：
@@ -67,9 +65,7 @@ def _missing_provider_key(
 
     if not preferred_model_id or preferred_model_id == "auto":
         return False, ""  # auto 路由交给 gateway 决策
-    model = get_custom_model_definition(preferred_model_id) or get_model(
-        preferred_model_id
-    )
+    model = get_custom_model_definition(preferred_model_id) or get_model(preferred_model_id)
     if model is None:
         return False, ""  # 未知模型交由 gateway 报错
     if credentials.get(model.provider):
@@ -182,9 +178,7 @@ async def execute_work(
 
     if state.attempt_number > 1:
         retry_reason = (
-            str(dict(state.failure_summary).get("error") or "")
-            if state.failure_summary
-            else ""
+            str(dict(state.failure_summary).get("error") or "") if state.failure_summary else ""
         )
         await emit(
             "lifecycle",
@@ -220,8 +214,7 @@ async def execute_work(
         worker_budget = session.budget.get("worker")
         if (
             worker_budget.consumed > 0
-            and worker_budget.remaining
-            < session_prompt.estimated_tokens + 2_000
+            and worker_budget.remaining < session_prompt.estimated_tokens + 2_000
         ):
             # 预算不再作为调用前硬闸门：先压缩上下文腾出空间，再通过软信号
             # 引导模型本轮收尾（edit 或 complete_work），而不是直接失败交回 Planner。
@@ -235,11 +228,7 @@ async def execute_work(
         if budget_hint:
             user_text = f"{user_text}\n\n{budget_hint}"
         next_attempt_iteration = state.attempt_iterations + 1
-        attempt_note = (
-            f" · 第 {state.attempt_number} 次尝试"
-            if state.attempt_number > 1
-            else ""
-        )
+        attempt_note = f" · 第 {state.attempt_number} 次尝试" if state.attempt_number > 1 else ""
         await emit(
             "lifecycle",
             {
@@ -264,9 +253,7 @@ async def execute_work(
         # 未配置 Key 快速失败：确定性错误，重试 N 次结果一样，不应发起无效
         # 调用或消耗运行时重试次数（否则会在 runner 层白等 2 次后才报"连续
         # 错误"，且真实原因被吞成笼统汇总）。auto 路由交由 gateway 决策。
-        missing_key, provider_label = _missing_provider_key(
-            preferred_model_id, credentials
-        )
+        missing_key, provider_label = _missing_provider_key(preferred_model_id, credentials)
         if missing_key:
             error = (
                 f"未配置 {provider_label} API Key，请在设置中填写后再执行。"
@@ -318,10 +305,7 @@ async def execute_work(
         except (TimeoutError, ProviderRequestError) as exc:
             if isinstance(exc, ProviderRequestError) and "超时" not in str(exc):
                 raise
-            error = (
-                f"模型响应超时：{str(exc)}"
-                "。已终止本次尝试，避免长期占用执行槽。"
-            )
+            error = f"模型响应超时：{str(exc)}" "。已终止本次尝试，避免长期占用执行槽。"
             session.record_failure(action="model_timeout", error=error)
             state.runtime_failures += 1
             await checkpoint()
@@ -453,9 +437,7 @@ async def execute_work(
             )
             continue
         if action.action == "finish":
-            state.append_transcript(
-                "FINISH REJECTED: 并行 Worker 必须使用 complete_work。"
-            )
+            state.append_transcript("FINISH REJECTED: 并行 Worker 必须使用 complete_work。")
             continue
         if action.action == "edit" and not action.operations:
             state.append_transcript(

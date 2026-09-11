@@ -15,17 +15,10 @@ from backend.services.agent.shared.work_models import WorkItem
 WorkHandler = Callable[..., Awaitable[Any]]
 
 FACTORY_AUDIT_TERMS = tuple(
-    str(item)
-    for item in work_router_rules().get("factoryAuditTerms") or ()
+    str(item) for item in work_router_rules().get("factoryAuditTerms") or ()
 )
-FACTORY_TERMS = tuple(
-    str(item)
-    for item in work_router_rules().get("factoryTerms") or ()
-)
-PAGE_INTENT_TERMS = tuple(
-    str(item)
-    for item in work_router_rules().get("pageIntentTerms") or ()
-)
+FACTORY_TERMS = tuple(str(item) for item in work_router_rules().get("factoryTerms") or ())
+PAGE_INTENT_TERMS = tuple(str(item) for item in work_router_rules().get("pageIntentTerms") or ())
 
 
 def is_factory_audit_work(work: WorkItem) -> bool:

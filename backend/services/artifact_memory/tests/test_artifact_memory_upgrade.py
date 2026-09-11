@@ -12,9 +12,7 @@ def test_artifact_index_persists_and_reuses_hash(tmp_path) -> None:
 
     storage = tmp_path / "artifact-index.json"
     index = ArtifactIndex(storage)
-    first, reused = index.upsert(
-        ArtifactRecord(id="A001", hash="same", type="json", path="a.json")
-    )
+    first, reused = index.upsert(ArtifactRecord(id="A001", hash="same", type="json", path="a.json"))
     duplicate, duplicate_reused = index.upsert(
         ArtifactRecord(id="A002", hash="same", type="json", path="b.json")
     )

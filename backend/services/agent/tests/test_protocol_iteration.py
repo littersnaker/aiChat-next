@@ -37,7 +37,5 @@ def test_iteration_budget_only_consumed_on_valid_rounds() -> None:
     assert "state.attempt_invalid_rounds = 0" in success_part
     assert "state.attempt_iterations += 1" in success_part
     # 调用前（usage 上报区）不得累加有效轮预算。
-    usage_part = source[
-        source.index("state.iterations += 1") : source.index("await emit(")
-    ]
+    usage_part = source[source.index("state.iterations += 1") : source.index("await emit(")]
     assert "attempt_iterations" not in usage_part

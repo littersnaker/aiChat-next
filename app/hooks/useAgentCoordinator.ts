@@ -16,10 +16,7 @@ export function useAgentCoordinator() {
   const [agents, setAgents] = useState<AgentInstance[]>(() => createIdleAgents());
 
   const runningAgentCount = useMemo(
-    () =>
-      agents.filter((agent) =>
-        ["running", "thinking"].includes(agent.status),
-      ).length,
+    () => agents.filter((agent) => ["running", "thinking"].includes(agent.status)).length,
     [agents],
   );
 

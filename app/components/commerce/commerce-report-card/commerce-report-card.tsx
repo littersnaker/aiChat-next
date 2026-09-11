@@ -5,7 +5,10 @@
  */
 import { useMemo, useState } from "react";
 import { exportCommerceReportPdf } from "../../../lib/commerce/pdf-export";
-import { getCommerceRunModeMeta, resolveCommerceReportRunMode } from "../../../lib/commerce/run-mode";
+import {
+  getCommerceRunModeMeta,
+  resolveCommerceReportRunMode,
+} from "../../../lib/commerce/run-mode";
 import type { CommerceProductSignal, CommerceResearchReport } from "../../../lib/commerce/types";
 import { MetricBar, MetricSnapshot, formatCompact, scoreLabel } from "./metric-widgets";
 import { PlatformComparison, SourceCoverage } from "./source-coverage";
@@ -17,27 +20,19 @@ import { ReviewAnalysisBlock } from "./review-analysis";
  * 首先展示公开市场 observations；Amazon、TikTok Shop、Temu 与 1688
  * 都会明确显示来自 API 还是爬虫。只有所有真实来源都失败时才进入 Demo。
  */
-export function CommerceReportCard({
-  report,
-}: {
-  report: CommerceResearchReport;
-}) {
+export function CommerceReportCard({ report }: { report: CommerceResearchReport }) {
   const runMode = resolveCommerceReportRunMode(report);
   const modeMeta = getCommerceRunModeMeta(runMode);
   const isDemo = runMode === "demo";
   const [showAllProducts, setShowAllProducts] = useState(false);
   const [showAllObservations, setShowAllObservations] = useState(false);
-  const [pdfState, setPdfState] = useState<
-    "idle" | "exporting" | "saved" | "error"
-  >("idle");
+  const [pdfState, setPdfState] = useState<"idle" | "exporting" | "saved" | "error">("idle");
   const products = useMemo(
     () => (showAllProducts ? report.products : report.products.slice(0, 6)),
     [report.products, showAllProducts],
   );
   const observations = report.observations || [];
-  const visibleObservations = showAllObservations
-    ? observations
-    : observations.slice(0, 8);
+  const visibleObservations = showAllObservations ? observations : observations.slice(0, 8);
   const score = report.metrics.opportunityScore;
   const handleExportPdf = async () => {
     if (pdfState === "exporting") return;
@@ -85,16 +80,12 @@ export function CommerceReportCard({
                 className="rounded-full px-2 py-1 text-[9px] font-semibold"
                 style={{
                   color: isDemo ? "#ff9f0a" : "#0a84ff",
-                  background: isDemo
-                    ? "rgba(255,159,10,0.12)"
-                    : "rgba(10,132,255,0.10)",
+                  background: isDemo ? "rgba(255,159,10,0.12)" : "rgba(10,132,255,0.10)",
                 }}
               >
                 {modeMeta.label}
               </span>
-              <span className="text-[9px] text-[var(--text-tertiary)]">
-                {qualityLabel}
-              </span>
+              <span className="text-[9px] text-[var(--text-tertiary)]">{qualityLabel}</span>
             </div>
             <h3 className="mt-2 truncate text-[16px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
               {report.category.categoryName}
@@ -171,14 +162,8 @@ export function CommerceReportCard({
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <MetricBar label="市场活跃度" score={report.metrics.demandScore} />
-          <MetricBar
-            label="竞争开放度"
-            score={report.metrics.competitionScore}
-          />
-          <MetricBar
-            label="价格信号"
-            score={report.metrics.priceHealthScore}
-          />
+          <MetricBar label="竞争开放度" score={report.metrics.competitionScore} />
+          <MetricBar label="价格信号" score={report.metrics.priceHealthScore} />
           <MetricBar label="进入研究度" score={report.metrics.newEntryScore} />
         </div>
 
@@ -203,7 +188,7 @@ export function CommerceReportCard({
                 样本月销量估算区间
               </div>
               <div className="mt-0.5 font-mono text-[12px] font-semibold text-[var(--text-primary)]">
-                {formatCompact(report.metrics.estimatedMonthlyUnits.low)} – {" "}
+                {formatCompact(report.metrics.estimatedMonthlyUnits.low)} –{" "}
                 {formatCompact(report.metrics.estimatedMonthlyUnits.high)}
                 <span className="ml-2 text-[9px] font-normal text-[var(--text-tertiary)]">
                   中位估算 {formatCompact(report.metrics.estimatedMonthlyUnits.median)}
@@ -216,7 +201,6 @@ export function CommerceReportCard({
           </div>
         )}
       </div>
-
 
       {observations.length > 0 && (
         <div className="border-t border-[var(--border)] px-4 py-3">

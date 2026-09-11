@@ -87,10 +87,7 @@ export function ListingEditor({
       </div>
 
       <div>
-        <FieldHeader
-          label="Bullet Points"
-          issues={fieldIssueCount(validation, "bulletPoints")}
-        />
+        <FieldHeader label="Bullet Points" issues={fieldIssueCount(validation, "bulletPoints")} />
         <div className="space-y-2">
           {draft.bulletPoints.map((bullet, index) => (
             <div key={`bullet-${index + 1}`} className="flex gap-2">

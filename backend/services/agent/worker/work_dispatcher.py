@@ -133,10 +133,7 @@ class WorkDispatcher:
         """区分 Factory 闭环校验和普通项目质量命令。"""
 
         validation_text = f"{work.title} {work.objective}".lower()
-        if any(
-            term in validation_text
-            for term in ("factory", "契约", "mock", "数据闭环")
-        ):
+        if any(term in validation_text for term in ("factory", "契约", "mock", "数据闭环")):
             return await execute_factory_validation_work(
                 root=self._env.root,
                 work=work,
@@ -147,9 +144,7 @@ class WorkDispatcher:
                 checkpoint=self._env.checkpoint,
                 slot=slot,
             )
-        commands = list(work.validation_commands) or list(
-            self._env.harness.quality_commands
-        )
+        commands = list(work.validation_commands) or list(self._env.harness.quality_commands)
         return await execute_validation_work(
             root=self._env.root,
             work=work,

@@ -181,9 +181,7 @@ def _compact_products(products: list[dict[str, Any]], limit: int = 20) -> str:
         price = item.get("price")
         rating = item.get("rating")
         reviews = item.get("reviewCount")
-        lines.append(
-            f"- {title} | price={price} | rating={rating} | reviews={reviews}"
-        )
+        lines.append(f"- {title} | price={price} | rating={rating} | reviews={reviews}")
     return "\n".join(lines)
 
 
@@ -224,11 +222,9 @@ def _review_sources(state: ResearchState) -> list[dict[str, Any]]:
                 if collected
                 else "评论采集失败，使用演示样本占位。"
             ),
-            "warnings": [
-                warning
-                for item in analyses
-                for warning in (item.get("warnings") or [])
-            ][:5],
+            "warnings": [warning for item in analyses for warning in (item.get("warnings") or [])][
+                :5
+            ],
         }
     ]
 
@@ -283,9 +279,9 @@ def build_research_graph(
                     "你是跨境电商品类分析师。根据用户问题输出结构化品类分析，"
                     "只返回一个 JSON 对象，禁止 Markdown 围栏。"
                 ),
-                user_prompt=_CATEGORY_PROMPT.replace(
-                    "__QUERY__", state["query"]
-                ).replace("__MARKET__", marketplace_meta["label"]),
+                user_prompt=_CATEGORY_PROMPT.replace("__QUERY__", state["query"]).replace(
+                    "__MARKET__", marketplace_meta["label"]
+                ),
                 schema_cls=CommerceCategoryAnalysis,
             )
             if analysis is not None:
@@ -549,9 +545,9 @@ def build_research_graph(
                     "你是跨境电商评论分析师。基于给定评论提炼口碑重点与改进建议，"
                     "只返回一个 JSON 对象，禁止 Markdown 围栏。"
                 ),
-                user_prompt=_REVIEW_PROMPT.replace(
-                    "__TITLE__", title
-                ).replace("__MARKET__", marketplace_meta["label"]).replace(
+                user_prompt=_REVIEW_PROMPT.replace("__TITLE__", title)
+                .replace("__MARKET__", marketplace_meta["label"])
+                .replace(
                     "__REVIEWS__",
                     "\n".join(
                         f"- {item.get('title', '')} | {item.get('rating', '')}星 | "
@@ -595,7 +591,7 @@ def build_research_graph(
             key=lambda item: float(item.get("reviewCount") or 0),
             reverse=True,
         )
-        selected = amazon_products[: _REVIEW_MAX_PRODUCTS]
+        selected = amazon_products[:_REVIEW_MAX_PRODUCTS]
         if not selected:
             return {}
         analyses = await asyncio.gather(
@@ -629,7 +625,9 @@ def build_research_graph(
             "dataSource": {
                 "provider": provider,
                 "quality": "low" if is_demo else "medium",
-                "description": "离线演示样本" if is_demo else "TalorData 公开 SERP / Shopping 搜索样本",
+                "description": (
+                    "离线演示样本" if is_demo else "TalorData 公开 SERP / Shopping 搜索样本"
+                ),
             },
             "sources": [
                 {
@@ -640,7 +638,9 @@ def build_research_graph(
                     "quality": "low" if is_demo else "medium",
                     "sampleSize": len(observations),
                     "coverage": ["标题", "结果来源", "价格（若公开）", "评分（若公开）"],
-                    "summary": "本轮使用演示数据。" if is_demo else "已取得并解析公开市场搜索结果。",
+                    "summary": (
+                        "本轮使用演示数据。" if is_demo else "已取得并解析公开市场搜索结果。"
+                    ),
                     "warnings": list(state.get("warnings") or []),
                     "metrics": {"observationCount": len(observations)},
                 },
@@ -653,15 +653,11 @@ def build_research_graph(
                         }.get(status["provider"], status["provider"]),
                         "status": status.get("status", "unconfigured"),
                         "quality": (
-                            "low"
-                            if status.get("status") == "collected"
-                            else "unavailable"
+                            "low" if status.get("status") == "collected" else "unavailable"
                         ),
                         "sampleSize": int(status.get("sampleSize") or 0),
                         "coverage": (
-                            ["标题", "价格", "商家"]
-                            if status.get("status") == "collected"
-                            else []
+                            ["标题", "价格", "商家"] if status.get("status") == "collected" else []
                         ),
                         "summary": (
                             status.get("message")
@@ -801,9 +797,8 @@ def build_listing_graph(
                     "可读、事实安全的 Listing 草稿。禁止编造尺寸、材质、认证、保修、"
                     "性能等用户未提供的事实。只返回一个 JSON 对象，禁止 Markdown 围栏。"
                 ),
-                user_prompt=_LISTING_PROMPT.replace(
-                    "__QUERY__", state["query"]
-                ).replace("__KEYWORDS__", str([item.get("phrase") for item in keywords]))
+                user_prompt=_LISTING_PROMPT.replace("__QUERY__", state["query"])
+                .replace("__KEYWORDS__", str([item.get("phrase") for item in keywords]))
                 .replace("__FEEDBACK__", feedback),
                 schema_cls=CommerceListingDraft,
             )

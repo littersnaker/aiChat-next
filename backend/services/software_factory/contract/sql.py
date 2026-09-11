@@ -87,14 +87,11 @@ def _render_indexes() -> list[str]:
     """返回商品、购物车和订单常用查询索引。"""
 
     return [
-        "CREATE INDEX IF NOT EXISTS idx_products_category_id "
-        "ON products (category_id);",
+        "CREATE INDEX IF NOT EXISTS idx_products_category_id " "ON products (category_id);",
         "CREATE INDEX IF NOT EXISTS idx_skus_product_id ON skus (product_id);",
         "CREATE INDEX IF NOT EXISTS idx_cart_items_user_id ON cart_items (user_id);",
-        "CREATE INDEX IF NOT EXISTS idx_orders_user_status "
-        "ON orders (user_id, status);",
-        "CREATE INDEX IF NOT EXISTS idx_order_items_order_id "
-        "ON order_items (order_id);",
+        "CREATE INDEX IF NOT EXISTS idx_orders_user_status " "ON orders (user_id, status);",
+        "CREATE INDEX IF NOT EXISTS idx_order_items_order_id " "ON order_items (order_id);",
     ]
 
 

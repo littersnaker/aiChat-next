@@ -68,9 +68,7 @@ async def merge_videos(
 
     ffmpeg = resolve_ffmpeg()
     if not ffmpeg:
-        raise RuntimeError(
-            "未找到 ffmpeg：请安装 ffmpeg 或 pip install imageio-ffmpeg"
-        )
+        raise RuntimeError("未找到 ffmpeg：请安装 ffmpeg 或 pip install imageio-ffmpeg")
     sources = [Path(path) for path in video_paths]
     sources = [path for path in sources if path.is_file()]
     if not sources:

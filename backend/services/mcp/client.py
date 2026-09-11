@@ -39,9 +39,7 @@ def _normalize_server(raw: dict[str, Any]) -> dict[str, Any]:
         if str(key).strip() and _interpolate_environment(str(value))
     }
     approvals = [
-        str(item).strip()
-        for item in list(raw.get("requireApproval") or [])
-        if str(item).strip()
+        str(item).strip() for item in list(raw.get("requireApproval") or []) if str(item).strip()
     ]
     return {
         "id": server_id,
@@ -56,7 +54,11 @@ def _normalize_server(raw: dict[str, Any]) -> dict[str, Any]:
 def _read_configuration_value(value: Any) -> list[dict[str, Any]]:
     """把数组或 ``{servers: []}`` 配置转换成统一列表。"""
 
-    raw_servers = value if isinstance(value, list) else value.get("servers", []) if isinstance(value, dict) else []
+    raw_servers = (
+        value
+        if isinstance(value, list)
+        else value.get("servers", []) if isinstance(value, dict) else []
+    )
     servers: list[dict[str, Any]] = []
     for raw in raw_servers:
         if not isinstance(raw, dict):
@@ -112,7 +114,12 @@ async def _post_rpc(
     response = await client.post(
         server["url"],
         headers=headers,
-        json={"jsonrpc": "2.0", "id": request_id, "method": method, **({"params": params} if params else {})},
+        json={
+            "jsonrpc": "2.0",
+            "id": request_id,
+            "method": method,
+            **({"params": params} if params else {}),
+        },
     )
     response.raise_for_status()
     returned_session = response.headers.get("mcp-session-id") or session_id
@@ -181,7 +188,9 @@ async def discover_server_tools(server: dict[str, Any]) -> list[dict[str, Any]]:
         if not isinstance(tool, dict) or not tool.get("name"):
             continue
         remote_name = str(tool["name"])
-        requires_approval = "*" in server["requireApproval"] or remote_name in server["requireApproval"]
+        requires_approval = (
+            "*" in server["requireApproval"] or remote_name in server["requireApproval"]
+        )
         safe_server = re.sub(r"[^A-Za-z0-9_]", "_", server["id"])
         safe_tool = re.sub(r"[^A-Za-z0-9_]", "_", remote_name)
         resolved.append(
@@ -190,7 +199,9 @@ async def discover_server_tools(server: dict[str, Any]) -> list[dict[str, Any]]:
                 "serverName": server["name"],
                 "remoteName": remote_name,
                 "llmName": f"mcp__{safe_server}__{safe_tool}",
-                "description": tool.get("description") or tool.get("title") or f"调用远程工具 {remote_name}。",
+                "description": tool.get("description")
+                or tool.get("title")
+                or f"调用远程工具 {remote_name}。",
                 "inputSchema": tool.get("inputSchema") or {"type": "object", "properties": {}},
                 "requiresApproval": requires_approval,
             }

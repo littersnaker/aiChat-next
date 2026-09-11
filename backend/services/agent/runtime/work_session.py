@@ -49,9 +49,7 @@ class WorkIntelligenceSession:
         self.state = state
         self.controller = ReasoningController()
         restored_reasoning = (
-            ReasoningState.from_json(state.reasoning_state)
-            if state.reasoning_state
-            else None
+            ReasoningState.from_json(state.reasoning_state) if state.reasoning_state else None
         )
         self.reasoning = self.controller.prepare(work, restored_reasoning)
         self.memory = ReasoningMemory.from_json(state.reasoning_memory)
@@ -81,9 +79,7 @@ class WorkIntelligenceSession:
         if self.state.transcript:
             self._persist()
             return
-        selected = self._select_relevant_file_sections(
-            f"{harness_context}\n\n{initial_context}"
-        )
+        selected = self._select_relevant_file_sections(f"{harness_context}\n\n{initial_context}")
         self.context.relevant_files = [path for path, _ in selected]
         # 注意：预读文件不登记 transcript_versions 指纹。若这里预置指纹，
         # 模型首轮 read 同一文件时会命中"未变化"瘦身，完整内容被吞，导致
@@ -91,12 +87,8 @@ class WorkIntelligenceSession:
         # read 的真实指纹由 work_action_handler._read 在首次注入后写入。
         dependency_state = self._dependency_state(ledger_snapshot)
         metadata = self._project_metadata(project_tree)
-        file_context = "\n\n".join(
-            f"--- FILE: {path} ---\n{content}" for path, content in selected
-        )
-        memory_notes = self._extract_memory_notes(
-            f"{harness_context}\n\n{initial_context}"
-        )
+        file_context = "\n\n".join(f"--- FILE: {path} ---\n{content}" for path, content in selected)
+        memory_notes = self._extract_memory_notes(f"{harness_context}\n\n{initial_context}")
         entries = [
             f"WORK CONTEXT:\n{metadata}\n{dependency_state}",
             f"RELATED FILES:\n{file_context or '首轮未命中相关文件，请使用 search/read 获取真实代码。'}",
@@ -115,11 +107,7 @@ class WorkIntelligenceSession:
         matches = list(_MEMORY_HEADER.finditer(text))
         notes: list[str] = []
         for index, match in enumerate(matches[:8]):
-            end = (
-                matches[index + 1].start()
-                if index + 1 < len(matches)
-                else len(text)
-            )
+            end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
             block = text[match.end() : end]
             next_heading = re.search(
                 r"^(?:## (?!Memory · ).+|--- FILE:.*)$",
@@ -192,9 +180,7 @@ class WorkIntelligenceSession:
 
         if bool(self.state.quality.get("budgetCompacted")):
             return False
-        compacted, stats = self.compactor.compact_transcript_budget(
-            self.state.transcript
-        )
+        compacted, stats = self.compactor.compact_transcript_budget(self.state.transcript)
         if not compacted:
             return False
         saved = max(0, int(stats.get("saved_tokens") or 0))
@@ -215,7 +201,7 @@ class WorkIntelligenceSession:
     def record_usage(self, total_tokens: int) -> bool:
         """记录 Worker Token；严重超限时先压缩一次让循环收尾，而不是立即失败。"""
 
-        within_budget = self.budget.consume("worker", total_tokens)
+        self.budget.consume("worker", total_tokens)
         mitigation = self.budget.apply_mitigation("worker")
         actions = [str(item) for item in mitigation.get("actions", [])]
         self.context.update_token_usage(total=max(0, total_tokens))
@@ -259,9 +245,7 @@ class WorkIntelligenceSession:
                 evidence=fact,
                 category="verified",
             )
-        self.context.add_action(
-            f"{action}: {outcome_kind} - {summary or error or '已观察结果'}"
-        )
+        self.context.add_action(f"{action}: {outcome_kind} - {summary or error or '已观察结果'}")
         self._persist()
 
     def record_failure(self, *, action: str, error: str) -> None:
@@ -322,9 +306,7 @@ class WorkIntelligenceSession:
         if isinstance(items, list):
             wanted = {self.work.id, *self.work.dependencies}
             selected = [
-                item
-                for item in items
-                if isinstance(item, dict) and str(item.get("id")) in wanted
+                item for item in items if isinstance(item, dict) and str(item.get("id")) in wanted
             ]
         blocks: list[str] = ["WORK DEPENDENCIES:"]
         for item in selected:

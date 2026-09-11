@@ -42,8 +42,6 @@ class KnowledgeSearchRequest(FlexibleModel):
     """知识库向量检索请求：query + 可选 metadata 过滤与候选数。"""
 
     query: str
-    metadata_filter: dict[str, Any] | None = Field(
-        default=None, alias="metadataFilter"
-    )
+    metadata_filter: dict[str, Any] | None = Field(default=None, alias="metadataFilter")
     recall_k: int | None = Field(default=None, alias="recallK")
     top_k: int | None = Field(default=None, alias="topK")

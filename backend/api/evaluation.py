@@ -46,15 +46,11 @@ async def post_evaluation_dataset_seed() -> dict[str, object]:
 
 
 @router.post("/api/agent/evaluation/runs")
-async def post_evaluation_run(
-    body: EvaluationRunRequest, request: Request
-) -> dict[str, object]:
+async def post_evaluation_run(body: EvaluationRunRequest, request: Request) -> dict[str, object]:
     """按数据集发起评测跑分（后台执行，返回 runId）。"""
 
     datasets = load_datasets()
-    dataset = next(
-        (item for item in datasets if item["name"] == body.dataset_name), None
-    )
+    dataset = next((item for item in datasets if item["name"] == body.dataset_name), None)
     if dataset is None:
         raise HTTPException(status_code=404, detail="评测数据集不存在")
     try:
@@ -70,16 +66,18 @@ async def post_evaluation_run(
     session_id = f"eval-{body.agent_id}"
 
     run_id = f"eval_{uuid.uuid4().hex[:12]}"
-    spawn(run_evaluation(
-        agent_id=body.agent_id,
-        dataset_name=body.dataset_name,
-        cases=cases,
-        credentials=credentials,
-        preferred_model_id=preferred_model,
-        project_id=body.project_id,
-        session_id=session_id,
-        run_id=run_id,
-    ))
+    spawn(
+        run_evaluation(
+            agent_id=body.agent_id,
+            dataset_name=body.dataset_name,
+            cases=cases,
+            credentials=credentials,
+            preferred_model_id=preferred_model,
+            project_id=body.project_id,
+            session_id=session_id,
+            run_id=run_id,
+        )
+    )
     return {"ok": True, "runId": run_id}
 
 

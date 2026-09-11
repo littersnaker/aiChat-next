@@ -1,10 +1,7 @@
 // 模块说明：提供用户附件读取、类型识别与内容提取能力。
 import { parseImageDataUrl } from "../constants/page-constants";
 import type { AttachedFile } from "../constants/page-constants";
-import type {
-  AttachmentCandidate,
-  AttachmentSourceKind,
-} from "./attachment-input";
+import type { AttachmentCandidate, AttachmentSourceKind } from "./attachment-input";
 
 const TEXT_FILE_EXTENSIONS = new Set([
   "adoc",
@@ -72,10 +69,7 @@ function fileExtension(fileName: string): string {
 }
 
 function isTextFile(file: File): boolean {
-  return (
-    file.type.startsWith("text/") ||
-    TEXT_FILE_EXTENSIONS.has(fileExtension(file.name))
-  );
+  return file.type.startsWith("text/") || TEXT_FILE_EXTENSIONS.has(fileExtension(file.name));
 }
 
 function baseAttachment(
@@ -83,13 +77,7 @@ function baseAttachment(
   options: ParseUserSelectedFileOptions,
 ): Pick<
   AttachedFile,
-  | "id"
-  | "name"
-  | "type"
-  | "size"
-  | "lastModified"
-  | "relativePath"
-  | "sourceKind"
+  "id" | "name" | "type" | "size" | "lastModified" | "relativePath" | "sourceKind"
 > {
   return {
     id: createAttachmentId(file),
@@ -102,10 +90,7 @@ function baseAttachment(
   };
 }
 
-function readBinaryFile(
-  file: File,
-  options: ParseUserSelectedFileOptions,
-): Promise<AttachedFile> {
+function readBinaryFile(file: File, options: ParseUserSelectedFileOptions): Promise<AttachedFile> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -137,8 +122,7 @@ async function readPdfFile(
   options: ParseUserSelectedFileOptions,
 ): Promise<AttachedFile> {
   const pdfjsLib = await import("pdfjs-dist");
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
   const arrayBuffer = await file.arrayBuffer();
   const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
@@ -165,10 +149,7 @@ async function readPdfFile(
   };
 }
 
-function readTextFile(
-  file: File,
-  options: ParseUserSelectedFileOptions,
-): Promise<AttachedFile> {
+function readTextFile(file: File, options: ParseUserSelectedFileOptions): Promise<AttachedFile> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 

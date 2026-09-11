@@ -5,10 +5,7 @@
  * 从 page.tsx 抽离的独立面板，保持页面入口文件在 500 行以内；
  * 所有数据均由 props 传入，不持有业务状态。
  */
-import type {
-  AgentLifecycleEventPayload,
-  WorkListSnapshotPayload,
-} from "../types/workspace";
+import type { AgentLifecycleEventPayload, WorkListSnapshotPayload } from "../types/workspace";
 import AgentPanel, { type AgentInstance } from "./AgentPanel";
 import type { ToolActivity } from "./AssistantMessageRow";
 import ExecutionGraphPanel from "./execution-graph/ExecutionGraphPanel";
@@ -53,15 +50,8 @@ export default function AgentTaskPanel({
         isStreaming={isStreaming}
         workflowMode={workflowMode}
       />
-      <ExecutionGraphPanel
-        lifecycleEvents={lifecycleEvents}
-        toolActivities={toolActivities}
-      />
-      <AgentPanel
-        agents={agents}
-        isStreaming={isStreaming}
-        className="shrink-0"
-      />
+      <ExecutionGraphPanel lifecycleEvents={lifecycleEvents} toolActivities={toolActivities} />
+      <AgentPanel agents={agents} isStreaming={isStreaming} className="shrink-0" />
     </aside>
   );
 }

@@ -92,7 +92,6 @@ class ReplanResult:
     model_name: str
 
 
-
 def _extract_json(text: str) -> dict[str, Any]:
     """从模型回复提取 JSON 对象。"""
 
@@ -116,8 +115,6 @@ def _strings(value: object, *, limit: int = 30) -> list[str]:
     return [str(item).strip()[:1000] for item in value if str(item).strip()][:limit]
 
 
-
-
 def _priority(value: object) -> int:
     """容错解析 Planner 优先级，非数字时回退到默认值 100。"""
 
@@ -138,12 +135,8 @@ def _parse_file_operations(value: object) -> list[FileSystemOperation]:
         if not isinstance(raw, dict):
             continue
         operation_type = str(raw.get("type") or "").strip().lower()
-        source_path = str(
-            raw.get("sourcePath") or raw.get("from") or raw.get("path") or ""
-        ).strip()
-        target_path = str(
-            raw.get("targetPath") or raw.get("to") or ""
-        ).strip()
+        source_path = str(raw.get("sourcePath") or raw.get("from") or raw.get("path") or "").strip()
+        target_path = str(raw.get("targetPath") or raw.get("to") or "").strip()
         if operation_type not in allowed or not source_path:
             continue
         if operation_type in {"rename", "move"} and not target_path:
@@ -513,17 +506,13 @@ failures 数组逐条列出每个失败 Work 的原因、状态与失败类型�
         failed = ledger.get(failed_work_id)
         if not failed:
             continue
-        replacements = [
-            item for item in new_items if _replacement_matches(failed, item)
-        ]
+        replacements = [item for item in new_items if _replacement_matches(failed, item)]
         if replacements:
             # Planner 忘记填写 skip 时由后端兜底，防止原 Work 与拆分修复项同时返工。
             skipped_ids.append(failed.id)
             for replacement in replacements:
                 replacement.dependencies = [
-                    dependency
-                    for dependency in replacement.dependencies
-                    if dependency != failed.id
+                    dependency for dependency in replacement.dependencies if dependency != failed.id
                 ]
             continue
         retry_items.append(

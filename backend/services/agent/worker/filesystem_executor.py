@@ -20,6 +20,7 @@ class FileSystemExecutionResult:
     changed_paths: list[str]
     summary: str
 
+
 _DIRECT_RENAME_PATTERNS = (
     re.compile(
         r"^\s*(?:请|麻烦)?(?:把|将)\s*(?P<source>`[^`]+`|\"[^\"]+\"|'[^']+'|\S+)"
@@ -193,12 +194,8 @@ def execute_filesystem_operations(
             changed_paths.extend([operation.source_path, operation.target_path])
 
         unique_paths = list(dict.fromkeys(changed_paths))
-        rename_count = sum(
-            operation.type in {"rename", "move"} for operation in operations
-        )
-        delete_count = sum(
-            operation.type == "delete_empty_dir" for operation in operations
-        )
+        rename_count = sum(operation.type in {"rename", "move"} for operation in operations)
+        delete_count = sum(operation.type == "delete_empty_dir" for operation in operations)
         parts = []
         if rename_count:
             parts.append(f"重命名或移动 {rename_count} 项")

@@ -84,9 +84,7 @@ class ContextCompactor:
 
         if after > self._max_work_context_token:
             # 最终手段：截断 objective
-            max_obj_len = self._max_work_context_token * 2 - sum(
-                len(a) for a in ctx.recent_actions
-            )
+            max_obj_len = self._max_work_context_token * 2 - sum(len(a) for a in ctx.recent_actions)
             if max_obj_len > 0 and len(ctx.objective) > max_obj_len:
                 ctx.objective = ctx.objective[:max_obj_len] + "\n（上下文已压缩）"
             after = ctx.estimate_tokens()
@@ -190,9 +188,7 @@ class ContextCompactor:
             return action
         return action[:max_len] + "\n（工具输出已截断）"
 
-    def compact_transcript(
-        self, transcript: list[str]
-    ) -> tuple[list[str], dict[str, Any]]:
+    def compact_transcript(self, transcript: list[str]) -> tuple[list[str], dict[str, Any]]:
         """开窗透传 transcript：完整保留最近若干轮，更早历史折叠为动作摘要。
 
         旧实现每次模型调用都完整重发全部历史，导致单 Work 的输入量随轮数
@@ -344,10 +340,7 @@ class ContextCompactor:
                 break
         if not lines:
             return ""
-        return (
-            "== 前期动作摘要（详情已随窗口折叠，需要时可重新 read 查看）==\n"
-            + "\n".join(lines)
-        )
+        return "== 前期动作摘要（详情已随窗口折叠，需要时可重新 read 查看）==\n" + "\n".join(lines)
 
     @staticmethod
     def _action_line(entry: str) -> str:
@@ -391,9 +384,7 @@ class ContextCompactor:
             fitted[index] = slimmed
         return fitted
 
-    def compact_transcript_budget(
-        self, transcript: list[str]
-    ) -> tuple[list[str], dict[str, Any]]:
+    def compact_transcript_budget(self, transcript: list[str]) -> tuple[list[str], dict[str, Any]]:
         """预算耗尽前的一次性紧急压缩：完整保留最近若干轮，旧观察做工具结果瘦身。
 
         这是预算硬性耗尽时的兜底路径（而不是正常循环的默认行为）：完整保留

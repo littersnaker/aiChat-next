@@ -91,17 +91,15 @@ def _parse_reviews_html(page: str, asin: str, limit: int) -> list[dict[str, Any]
             continue
         # 新旧两种评论页评分标记：星级文本直接可见，或 class 里的 a-star-N。
         rating_text = _first(
-            r'<i[^>]*a-icon-star[^>]*>([^<]+)</i>',
+            r"<i[^>]*a-icon-star[^>]*>([^<]+)</i>",
             block,
         ) or _first(
-            r'<i[^>]*a-icon-alt[^>]*>([^<]+)</i>',
+            r"<i[^>]*a-icon-alt[^>]*>([^<]+)</i>",
             block,
         )
         rating = _number(rating_text)
         if rating is None:
-            rating = _rating_from_class(
-                _first(r'<i[^>]*class="([^"]+)"[^>]*>', block) or ""
-            )
+            rating = _rating_from_class(_first(r'<i[^>]*class="([^"]+)"[^>]*>', block) or "")
         body = _first(
             r'<span[^>]*data-hook="review-body"[^>]*>([\s\S]*?)</span>',
             block,
@@ -186,9 +184,7 @@ async def fetch_amazon_reviews(
         raise RuntimeError("Amazon 公开爬虫已通过 COMMERCE_AMAZON_CRAWLER 关闭")
     rows = await _fetch_review_pages(asin, marketplace, pages=REVIEW_PAGES)
     if not rows:
-        raise RuntimeError(
-            "Amazon 评论页未解析到评论（可能被反爬拦截或页面结构变化）"
-        )
+        raise RuntimeError("Amazon 评论页未解析到评论（可能被反爬拦截或页面结构变化）")
     rows = rows[:limit]
     return rows, {
         "provider": "amazon-reviews",

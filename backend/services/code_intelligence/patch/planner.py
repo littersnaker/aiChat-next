@@ -20,6 +20,7 @@ def _get_impact_analyzer():
     global _ImpactAnalyzer
     if _ImpactAnalyzer is None:
         from backend.services.code_intelligence.patch.impact import ImpactAnalyzer
+
         _ImpactAnalyzer = ImpactAnalyzer
     return _ImpactAnalyzer
 
@@ -109,9 +110,7 @@ class PatchPlanner:
         # critical
         return self._plan_critical_risk(changed_files, risk)
 
-    def _plan_low_risk(
-        self, changed_files: list[str], risk: PatchRiskScore
-    ) -> PatchPlan:
+    def _plan_low_risk(self, changed_files: list[str], risk: PatchRiskScore) -> PatchPlan:
         """低风险：直接应用，不需要全项目分析。"""
 
         return PatchPlan(
@@ -126,17 +125,13 @@ class PatchPlanner:
             reason="低风险变更，可直接应用",
         )
 
-    def _plan_medium_risk(
-        self, changed_files: list[str], risk: PatchRiskScore
-    ) -> PatchPlan:
+    def _plan_medium_risk(self, changed_files: list[str], risk: PatchRiskScore) -> PatchPlan:
         """中风险：局部影响分析。"""
 
         impacted = []
         if self._root and self._impact_analyzer is not None:
             # 只对直接依赖文件进行分析，不进行全项目扫描
-            impacted = self._impact_analyzer.impacted_files(
-                self._root, changed_files, limit=20
-            )
+            impacted = self._impact_analyzer.impacted_files(self._root, changed_files, limit=20)
 
         return PatchPlan(
             can_proceed=True,
@@ -151,16 +146,12 @@ class PatchPlanner:
             reason="中风险变更，需局部影响分析",
         )
 
-    def _plan_high_risk(
-        self, changed_files: list[str], risk: PatchRiskScore
-    ) -> PatchPlan:
+    def _plan_high_risk(self, changed_files: list[str], risk: PatchRiskScore) -> PatchPlan:
         """高风险：完整影响分析 + 验证。"""
 
         impacted = []
         if self._root and self._impact_analyzer is not None:
-            impacted = self._impact_analyzer.impacted_files(
-                self._root, changed_files, limit=50
-            )
+            impacted = self._impact_analyzer.impacted_files(self._root, changed_files, limit=50)
 
         steps = [
             {"action": "backup", "files": changed_files},
@@ -181,16 +172,12 @@ class PatchPlanner:
             reason="高风险变更，需完整影响分析",
         )
 
-    def _plan_critical_risk(
-        self, changed_files: list[str], risk: PatchRiskScore
-    ) -> PatchPlan:
+    def _plan_critical_risk(self, changed_files: list[str], risk: PatchRiskScore) -> PatchPlan:
         """极高风险：建议人工确认。"""
 
         impacted = []
         if self._root and self._impact_analyzer is not None:
-            impacted = self._impact_analyzer.impacted_files(
-                self._root, changed_files, limit=100
-            )
+            impacted = self._impact_analyzer.impacted_files(self._root, changed_files, limit=100)
 
         return PatchPlan(
             can_proceed=False,  # 建议人工确认

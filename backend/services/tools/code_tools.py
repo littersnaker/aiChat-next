@@ -159,10 +159,16 @@ def register_code_tools() -> None:
         ToolDefinition("workspace.search", "搜索工作区文本", "read", _search, 60.0, 1),
         ToolDefinition("workspace.read", "读取工作区文本文件", "read", _read, 60.0, 1),
         ToolDefinition("code.inspect", "AST、符号、调用图和影响分析", "read", _inspect, 120.0, 0),
-        ToolDefinition("workspace.file_version", "读取文件版本指纹", "read", _file_version, 30.0, 1),
+        ToolDefinition(
+            "workspace.file_version", "读取文件版本指纹", "read", _file_version, 30.0, 1
+        ),
         ToolDefinition("workspace.edit", "事务式修改工作区文件", "write", _edit, 180.0, 0),
-        ToolDefinition("workspace.filesystem", "确定性文件系统操作", "write", _filesystem, 180.0, 0),
-        ToolDefinition("workspace.apply_proposal", "应用已批准的文件提案", "write", _apply_proposal, 180.0, 0),
+        ToolDefinition(
+            "workspace.filesystem", "确定性文件系统操作", "write", _filesystem, 180.0, 0
+        ),
+        ToolDefinition(
+            "workspace.apply_proposal", "应用已批准的文件提案", "write", _apply_proposal, 180.0, 0
+        ),
         ToolDefinition("workspace.run", "执行白名单验证命令", "execute", _run, 600.0, 0),
     )
     for definition in definitions:

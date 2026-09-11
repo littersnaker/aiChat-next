@@ -118,8 +118,7 @@ class WorkExecutionGuard:
                 allowed=False,
                 stop=True,
                 error=(
-                    "模型连续忽略执行守卫，仍重复读取或搜索；"
-                    "已停止当前 Work，避免无限分析。"
+                    "模型连续忽略执行守卫，仍重复读取或搜索；" "已停止当前 Work，避免无限分析。"
                 ),
             )
         stall_rounds = self.state.stall_rounds
@@ -154,10 +153,7 @@ class WorkExecutionGuard:
                     f"分析阶段已执行 {self.state.context_actions} 个上下文动作，"
                     "信息已达到上限。下一步必须修改代码或明确完成，不能继续扩展读取范围。"
                 )
-        elif (
-            self.state.post_write_context_actions
-            >= self.limits.max_post_write_context_actions
-        ):
+        elif self.state.post_write_context_actions >= self.limits.max_post_write_context_actions:
             return self._reject(
                 "代码已经发生修改，后续读取次数已达到上限。"
                 "请执行验证、修复明确错误或提交 complete_work。"
@@ -196,17 +192,10 @@ class WorkExecutionGuard:
         if action.action == "edit" and progress_made:
             self._record_progress()
             progressed = True
-        if (
-            action.action == "factory"
-            and action.factory_mode == "generate"
-            and progress_made
-        ):
+        if action.action == "factory" and action.factory_mode == "generate" and progress_made:
             self._record_progress()
             progressed = True
-        if (
-            action.action in {"run", "complete_work"}
-            and outcome_kind != "failure"
-        ):
+        if action.action in {"run", "complete_work"} and outcome_kind != "failure":
             # 运行/完成代表有实质进展，但不应把 write_actions 计数当作“已写文件”阶段。
             self.state.last_progress_iteration = self.state.attempt_iterations
             self.state.stall_rounds = 0
@@ -222,13 +211,9 @@ class WorkExecutionGuard:
         if self.state.write_actions > 0:
             post_write_remaining = max(
                 0,
-                self.limits.max_post_write_context_actions
-                - self.state.post_write_context_actions,
+                self.limits.max_post_write_context_actions - self.state.post_write_context_actions,
             )
-            phase = (
-                "已修改代码；优先验证并完成 Work，"
-                f"最多再读取 {post_write_remaining} 次。"
-            )
+            phase = "已修改代码；优先验证并完成 Work，" f"最多再读取 {post_write_remaining} 次。"
         else:
             phase = (
                 "尚未修改代码；应批量读取必要文件后尽快编辑，"
@@ -251,11 +236,7 @@ class WorkExecutionGuard:
             allowed=False,
             stop=stop,
             feedback=f"EXECUTION GUARD REJECTED: {feedback}",
-            error=(
-                "模型连续重复上下文动作，执行守卫已终止当前 Work。"
-                if stop
-                else ""
-            ),
+            error=("模型连续重复上下文动作，执行守卫已终止当前 Work。" if stop else ""),
         )
 
     def _record_progress(self) -> None:
@@ -276,10 +257,7 @@ def action_fingerprint(action: AgentAction) -> str:
         payload = {
             "action": "read",
             "paths": sorted(set(action.paths)),
-            "offsets": {
-                path: action.offsets.get(path, 0)
-                for path in sorted(set(action.paths))
-            },
+            "offsets": {path: action.offsets.get(path, 0) for path in sorted(set(action.paths))},
         }
     elif action.action == "search":
         payload = {"action": "search", "query": " ".join(action.query.lower().split())}
@@ -292,9 +270,7 @@ def action_fingerprint(action: AgentAction) -> str:
     elif action.action == "edit":
         payload = {
             "action": "edit",
-            "operations": [
-                {"type": item.type, "path": item.path} for item in action.operations
-            ],
+            "operations": [{"type": item.type, "path": item.path} for item in action.operations],
         }
     elif action.action == "factory":
         payload = {

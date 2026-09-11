@@ -78,15 +78,10 @@ export function migrateLegacyApplicationData(): void {
   for (const legacyDataDirectory of legacyDataDirectories) {
     try {
       migrated =
-        mergeDirectoryWhenMissing(
-          legacyDataDirectory,
-          path.join(stableRoot, "python-data"),
-        ) || migrated;
+        mergeDirectoryWhenMissing(legacyDataDirectory, path.join(stableRoot, "python-data")) ||
+        migrated;
     } catch (error) {
-      console.warn(
-        `[Electron] 迁移旧数据库目录失败：${legacyDataDirectory}`,
-        error,
-      );
+      console.warn(`[Electron] 迁移旧数据库目录失败：${legacyDataDirectory}`, error);
     }
   }
 

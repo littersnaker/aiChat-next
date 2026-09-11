@@ -50,9 +50,7 @@ def test_parser_accepts_simple_write_alias_for_new_file() -> None:
 def test_read_accepts_singular_path_field() -> None:
     """模型把 paths 写成 path（单数）时应自动归一化。"""
 
-    action = parse_agent_action(
-        '{"action":"read","workId":"W001","path":"src/mock/user.ts"}'
-    )
+    action = parse_agent_action('{"action":"read","workId":"W001","path":"src/mock/user.ts"}')
 
     assert action.action == "read"
     assert action.paths == ["src/mock/user.ts"]
@@ -61,9 +59,7 @@ def test_read_accepts_singular_path_field() -> None:
 def test_read_accepts_comma_separated_string_paths() -> None:
     """paths 写成逗号分隔字符串时应拆成数组。"""
 
-    action = parse_agent_action(
-        '{"action":"read","workId":"W001","paths":"src/a.ts,src/b.ts"}'
-    )
+    action = parse_agent_action('{"action":"read","workId":"W001","paths":"src/a.ts,src/b.ts"}')
 
     assert action.paths == ["src/a.ts", "src/b.ts"]
 
@@ -78,9 +74,7 @@ def test_read_accepts_target_files_alias() -> None:
     assert action.action == "read"
     assert action.paths == ["src/mock/user.ts"]
 
-    inspect = parse_agent_action(
-        '{"action":"inspect","workId":"W001","files":"src/mock/user.ts"}'
-    )
+    inspect = parse_agent_action('{"action":"inspect","workId":"W001","files":"src/mock/user.ts"}')
 
     assert inspect.action == "inspect"
     assert inspect.paths == ["src/mock/user.ts"]
@@ -146,14 +140,10 @@ def test_tool_style_complete_work_keeps_top_level_work_id() -> None:
     assert action.action == "complete_work"
     assert action.work_id == "W001"
 
-    action = parse_agent_action(
-        '{"tool":"complete_work","workId":"W001","summary":"已完成"}'
-    )
+    action = parse_agent_action('{"tool":"complete_work","workId":"W001","summary":"已完成"}')
     assert action.work_id == "W001"
 
-    action = parse_agent_action(
-        '{"action":"complete_work","workid":"w002","summary":"完成"}'
-    )
+    action = parse_agent_action('{"action":"complete_work","workid":"w002","summary":"完成"}')
     assert action.work_id == "W002"
 
 
@@ -203,9 +193,7 @@ def test_edit_accepts_op_match_replace_aliases() -> None:
 def test_read_accepts_nested_payload_and_dict_paths() -> None:
     """read 的嵌套 payload.paths 与对象数组路径都应归一化。"""
 
-    action = parse_agent_action(
-        '{"action":"read","payload":{"paths":["a.ts","b.ts"]}}'
-    )
+    action = parse_agent_action('{"action":"read","payload":{"paths":["a.ts","b.ts"]}}')
     assert action.paths == ["a.ts", "b.ts"]
 
     action = parse_agent_action(
@@ -218,15 +206,19 @@ def test_read_accepts_nested_payload_and_dict_paths() -> None:
 def test_action_name_aliases_expand_common_tool_names() -> None:
     """常见工具全名应映射到内部动作，例如 read_file / edit_file / complete_task。"""
 
-    assert parse_agent_action(
-        '{"tool":"read_file","arguments":{"paths":["a.ts"]}}'
-    ).action == "read"
-    assert parse_agent_action(
-        '{"tool":"edit_file","arguments":{"workId":"W001","path":"a.ts","content":"x"}}'
-    ).action == "edit"
-    assert parse_agent_action(
-        '{"tool":"complete_task","work_id":"W001","summary":"ok"}'
-    ).action == "complete_work"
+    assert (
+        parse_agent_action('{"tool":"read_file","arguments":{"paths":["a.ts"]}}').action == "read"
+    )
+    assert (
+        parse_agent_action(
+            '{"tool":"edit_file","arguments":{"workId":"W001","path":"a.ts","content":"x"}}'
+        ).action
+        == "edit"
+    )
+    assert (
+        parse_agent_action('{"tool":"complete_task","work_id":"W001","summary":"ok"}').action
+        == "complete_work"
+    )
 
 
 def test_action_name_as_root_key_with_list() -> None:
@@ -250,9 +242,7 @@ def test_action_name_as_root_key_with_object() -> None:
     assert action.action == "read"
     assert action.paths == ["a.ts", "b.ts"]
 
-    done = parse_agent_action(
-        '{"complete_work": {"workId": "W001", "summary": "已完成"}}'
-    )
+    done = parse_agent_action('{"complete_work": {"workId": "W001", "summary": "已完成"}}')
     assert done.action == "complete_work"
     assert done.work_id == "W001"
     assert done.summary == "已完成"
@@ -261,9 +251,7 @@ def test_action_name_as_root_key_with_object() -> None:
 def test_tool_style_read_with_targets_alias() -> None:
     """tool 风格的 targets 字段应归一化为 read paths。"""
 
-    action = parse_agent_action(
-        '{"tool":"read","targets":["config/index.ts","src/index.html"]}'
-    )
+    action = parse_agent_action('{"tool":"read","targets":["config/index.ts","src/index.html"]}')
 
     assert action.action == "read"
     assert action.paths == ["config/index.ts", "src/index.html"]

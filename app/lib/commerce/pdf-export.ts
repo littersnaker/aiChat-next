@@ -2,10 +2,7 @@
 "use client";
 
 import type { CommerceResearchReport } from "./types";
-import {
-  buildCommercePdfFileName,
-  buildCommerceReportHtml,
-} from "./report-html";
+import { buildCommercePdfFileName, buildCommerceReportHtml } from "./report-html";
 
 interface ElectronPdfResult {
   canceled: boolean;
@@ -30,9 +27,7 @@ export async function exportCommerceReportPdf(
 ): Promise<ElectronPdfResult> {
   const html = buildCommerceReportHtml(report);
   const suggestedFileName = buildCommercePdfFileName(report);
-  const electronApi = (
-    window as typeof window & { electronAPI?: CommerceElectronApi }
-  ).electronAPI;
+  const electronApi = (window as typeof window & { electronAPI?: CommerceElectronApi }).electronAPI;
 
   if (electronApi?.exportCommerceReportPdf) {
     return electronApi.exportCommerceReportPdf({ html, suggestedFileName });

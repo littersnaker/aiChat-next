@@ -3,11 +3,7 @@
  * 目录读取使用 Chromium 的 File System Entry API，并设置明确上限避免一次性载入超大目录。
  */
 
-export type AttachmentSourceKind =
-  | "file-picker"
-  | "clipboard"
-  | "drop-file"
-  | "drop-directory";
+export type AttachmentSourceKind = "file-picker" | "clipboard" | "drop-file" | "drop-directory";
 
 export interface AttachmentCandidate {
   file: File;
@@ -23,10 +19,7 @@ interface LegacyFileSystemEntry {
 }
 
 interface LegacyFileSystemFileEntry extends LegacyFileSystemEntry {
-  file(
-    successCallback: (file: File) => void,
-    errorCallback?: (error: DOMException) => void,
-  ): void;
+  file(successCallback: (file: File) => void, errorCallback?: (error: DOMException) => void): void;
 }
 
 interface LegacyFileSystemDirectoryReader {
@@ -98,9 +91,7 @@ async function flattenEntry(
 
   if (!entry.isDirectory || IGNORED_DIRECTORY_NAMES.has(entry.name)) return;
 
-  const children = await readDirectoryEntries(
-    entry as LegacyFileSystemDirectoryEntry,
-  );
+  const children = await readDirectoryEntries(entry as LegacyFileSystemDirectoryEntry);
   for (const child of children) {
     await flattenEntry(child, relativePath, output);
     if (output.length >= MAX_DROPPED_FILES) return;
@@ -117,8 +108,7 @@ export async function collectDroppedAttachments(
   for (const item of items) {
     if (item.kind !== "file") continue;
 
-    const entry = (item as unknown as DataTransferItemWithEntry)
-      .webkitGetAsEntry?.();
+    const entry = (item as unknown as DataTransferItemWithEntry).webkitGetAsEntry?.();
     try {
       if (entry) {
         const beforeCount = output.length;
@@ -157,9 +147,7 @@ export async function collectDroppedAttachments(
 }
 
 /** 从剪贴板提取图片或文件。纯文本粘贴由输入框自身继续处理。 */
-export function collectClipboardAttachments(
-  clipboardData: DataTransfer,
-): AttachmentCandidate[] {
+export function collectClipboardAttachments(clipboardData: DataTransfer): AttachmentCandidate[] {
   return Array.from(clipboardData.files).map((file) => ({
     file,
     sourceKind: "clipboard" as const,

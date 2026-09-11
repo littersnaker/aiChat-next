@@ -54,9 +54,7 @@ async def test_execute_mcp_tool_approval_gate(monkeypatch) -> None:
 
     monkeypatch.setattr(executor, "resolve_mcp_tool", fake_resolve)
     monkeypatch.setattr(executor, "call_tool", fake_call)
-    result = await executor.execute_mcp_tool(
-        Path("."), "mcp__srv__danger", {}, approved=False
-    )
+    result = await executor.execute_mcp_tool(Path("."), "mcp__srv__danger", {}, approved=False)
     assert result["ok"] is False
     assert result["approvalNeeded"] is True
     assert called is False

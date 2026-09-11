@@ -73,11 +73,10 @@ function writeEnvelope(envelope: CredentialEnvelope): void {
   const filePath = getStableDataPath(CREDENTIAL_FILE_NAME);
   const temporaryPath = `${filePath}.${process.pid}.tmp`;
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(
-    temporaryPath,
-    `${JSON.stringify(envelope, null, 2)}\n`,
-    { encoding: "utf8", mode: 0o600 },
-  );
+  fs.writeFileSync(temporaryPath, `${JSON.stringify(envelope, null, 2)}\n`, {
+    encoding: "utf8",
+    mode: 0o600,
+  });
   try {
     fs.renameSync(temporaryPath, filePath);
   } catch {
@@ -96,9 +95,7 @@ function writeEnvelope(envelope: CredentialEnvelope): void {
 export function readSecureCredentials(): CredentialStore {
   try {
     const filePath = getStableDataPath(CREDENTIAL_FILE_NAME);
-    const envelope = JSON.parse(
-      fs.readFileSync(filePath, "utf8"),
-    ) as CredentialEnvelope;
+    const envelope = JSON.parse(fs.readFileSync(filePath, "utf8")) as CredentialEnvelope;
     const encrypted = Buffer.from(envelope.payload, "base64");
     const plainText =
       envelope.format === "safe-storage"

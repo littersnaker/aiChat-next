@@ -53,9 +53,7 @@ def test_load_datasets_reads_json(tmp_path: Path, monkeypatch) -> None:
 
 
 @pytest.mark.asyncio
-async def test_run_evaluation_persists_results(
-    tmp_path: Path, monkeypatch
-) -> None:
+async def test_run_evaluation_persists_results(tmp_path: Path, monkeypatch) -> None:
     """跑分写入 eval_runs 与逐用例结果，指标汇总正确。"""
 
     _isolated_db(monkeypatch, tmp_path)
@@ -79,13 +77,10 @@ async def test_run_evaluation_persists_results(
         run_id="eval_test_0001",
     )
     async with open_database() as connection:
-        cursor = await connection.execute(
-            "SELECT * FROM eval_runs WHERE id = ?", (run_id,)
-        )
+        cursor = await connection.execute("SELECT * FROM eval_runs WHERE id = ?", (run_id,))
         run = await cursor.fetchone()
         case_cursor = await connection.execute(
-            "SELECT passed, tokens FROM eval_case_results WHERE run_id = ? "
-            "ORDER BY case_index",
+            "SELECT passed, tokens FROM eval_case_results WHERE run_id = ? " "ORDER BY case_index",
             (run_id,),
         )
         cases = await case_cursor.fetchall()

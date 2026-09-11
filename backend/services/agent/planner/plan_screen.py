@@ -66,9 +66,7 @@ def screen_plan_anomalies(
         targets = [path for path in work.target_files if path.strip()]
         if targets and any(_path_exists(root, path) for path in targets):
             continue
-        search_text = " ".join(
-            [work.title, work.objective, *work.acceptance_criteria]
-        )
+        search_text = " ".join([work.title, work.objective, *work.acceptance_criteria])
         candidates = score_workspace_paths(
             root,
             search_text,

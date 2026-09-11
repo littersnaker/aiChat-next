@@ -62,7 +62,7 @@ class IndexWatcher:
             try:
                 if self._stop is not None:
                     await asyncio.wait_for(self._stop.wait(), timeout=POLL_SECONDS)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
 
     async def _tick(self) -> None:

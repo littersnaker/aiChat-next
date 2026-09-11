@@ -7,11 +7,7 @@
  */
 import { useState } from "react";
 import { apiFetch } from "../../lib/api-client";
-import {
-  AppleButton,
-  AppleModalCloseButton,
-  AppleSwitch,
-} from "../ui/AppleModalControls";
+import { AppleButton, AppleModalCloseButton, AppleSwitch } from "../ui/AppleModalControls";
 import type { InstalledSkill } from "./skill-card";
 
 interface SkillDetailModalProps {
@@ -46,11 +42,7 @@ function formatDate(iso: string): string {
 }
 
 /** Skill 详情弹窗。 */
-export default function SkillDetailModal({
-  skill,
-  onClose,
-  onConfigSaved,
-}: SkillDetailModalProps) {
+export default function SkillDetailModal({ skill, onClose, onConfigSaved }: SkillDetailModalProps) {
   const [copied, setCopied] = useState(false);
   const [enabled, setEnabled] = useState(Boolean(skill.enabled));
   const [agentIds, setAgentIds] = useState<string[]>(skill.agentIds ?? []);
@@ -126,8 +118,7 @@ export default function SkillDetailModal({
           background:
             "linear-gradient(180deg, color-mix(in srgb, var(--glass-solid) 98%, transparent), color-mix(in srgb, var(--glass-strong) 96%, transparent))",
           borderColor: "var(--border-strong)",
-          boxShadow:
-            "0 34px 100px rgba(15,23,42,0.35), inset 0 1px 0 rgba(255,255,255,0.28)",
+          boxShadow: "0 34px 100px rgba(15,23,42,0.35), inset 0 1px 0 rgba(255,255,255,0.28)",
           backdropFilter: "blur(36px) saturate(155%)",
           WebkitBackdropFilter: "blur(36px) saturate(155%)",
         }}
@@ -152,10 +143,7 @@ export default function SkillDetailModal({
                 v{skill.version}
               </span>
             </div>
-            <p
-              className="mt-1 text-[11px]"
-              style={{ color: "var(--text-tertiary)" }}
-            >
+            <p className="mt-1 text-[11px]" style={{ color: "var(--text-tertiary)" }}>
               {skill.sourceFormat} · 安装于 {formatDate(skill.installedAt)}
             </p>
           </div>
@@ -240,9 +228,7 @@ export default function SkillDetailModal({
                 color: skill.filesExist ? "#30d158" : "#ff9f0a",
               }}
             >
-              {skill.filesExist
-                ? "文件完整，可正常使用"
-                : "文件缺失，重启后自动从数据库恢复"}
+              {skill.filesExist ? "文件完整，可正常使用" : "文件缺失，重启后自动从数据库恢复"}
               {typeof skill.hitCount === "number" && skill.hitCount > 0
                 ? ` · 已被 Agent 使用 ${skill.hitCount} 次`
                 : ""}
@@ -265,10 +251,7 @@ export default function SkillDetailModal({
               }}
             >
               <div className="flex items-center justify-between">
-                <span
-                  className="text-[12px]"
-                  style={{ color: "var(--text-secondary)" }}
-                >
+                <span className="text-[12px]" style={{ color: "var(--text-secondary)" }}>
                   启用 Skill（同时最多 50 个）
                 </span>
                 <AppleSwitch
@@ -287,24 +270,16 @@ export default function SkillDetailModal({
                       onClick={() => toggleAgent(agent.id)}
                       className="flex items-center gap-2 rounded-[10px] border px-2.5 py-2 text-[11px] transition-colors"
                       style={{
-                        borderColor: checked
-                          ? "rgba(10,132,255,0.35)"
-                          : "var(--border)",
-                        background: checked
-                          ? "rgba(10,132,255,0.08)"
-                          : "var(--glass-black)",
-                        color: checked
-                          ? "var(--accent-blue)"
-                          : "var(--text-secondary)",
+                        borderColor: checked ? "rgba(10,132,255,0.35)" : "var(--border)",
+                        background: checked ? "rgba(10,132,255,0.08)" : "var(--glass-black)",
+                        color: checked ? "var(--accent-blue)" : "var(--text-secondary)",
                         cursor: "pointer",
                       }}
                     >
                       <span
                         className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] border"
                         style={{
-                          borderColor: checked
-                            ? "var(--accent-blue)"
-                            : "var(--border-strong)",
+                          borderColor: checked ? "var(--accent-blue)" : "var(--border-strong)",
                           background: checked ? "var(--accent-blue)" : undefined,
                           color: "#ffffff",
                         }}
@@ -327,10 +302,7 @@ export default function SkillDetailModal({
                 })}
               </div>
               {configError && (
-                <p
-                  className="mt-2 text-[11px]"
-                  style={{ color: "#ff6961" }}
-                >
+                <p className="mt-2 text-[11px]" style={{ color: "#ff6961" }}>
                   {configError}
                 </p>
               )}
@@ -368,9 +340,8 @@ export default function SkillDetailModal({
               style={{ color: "var(--text-tertiary)" }}
             >
               <li>
-                固定启用：把 skill id（{skill.id}）加入
-                agents/&lt;agent&gt;/agent.yaml 的 skills 列表，该 Agent
-                每次任务都会加载它。
+                固定启用：把 skill id（{skill.id}）加入 agents/&lt;agent&gt;/agent.yaml 的 skills
+                列表，该 Agent 每次任务都会加载它。
               </li>
               <li>
                 动态启用：给 skill 的 skill.yaml 添加 tags（如

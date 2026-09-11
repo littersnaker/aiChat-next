@@ -20,9 +20,7 @@ class MessageAttachment(FlexibleModel):
     type: str
     data_url: str | None = Field(default=None, alias="dataUrl")
     url: str | None = None
-    asset_kind: Literal["image", "video", "file"] | None = Field(
-        default=None, alias="assetKind"
-    )
+    asset_kind: Literal["image", "video", "file"] | None = Field(default=None, alias="assetKind")
     download_name: str | None = Field(default=None, alias="downloadName")
 
 

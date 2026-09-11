@@ -36,9 +36,7 @@ class ReasoningMemoryEntry:
 
         raw_category = str(value.get("category") or "decision")
         category: MemoryCategory = (
-            raw_category
-            if raw_category in {"decision", "abandoned", "verified"}
-            else "decision"
+            raw_category if raw_category in {"decision", "abandoned", "verified"} else "decision"
         )  # type: ignore[assignment]
         return cls(
             decision=str(value.get("decision") or ""),
@@ -101,11 +99,7 @@ class ReasoningMemory:
         """从 Checkpoint 数组恢复记忆。"""
 
         return cls(
-            [
-                ReasoningMemoryEntry.from_json(item)
-                for item in value
-                if isinstance(item, dict)
-            ]
+            [ReasoningMemoryEntry.from_json(item) for item in value if isinstance(item, dict)]
         )
 
 

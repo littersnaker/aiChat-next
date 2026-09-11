@@ -11,10 +11,7 @@ interface Props {
   selectedModel: string;
   onSelect: (modelId: string) => void;
   onCreateCustomModel?: (input: CustomModelInput) => Promise<void>;
-  onUpdateCustomModel?: (
-    modelId: string,
-    input: CustomModelInput,
-  ) => Promise<void>;
+  onUpdateCustomModel?: (modelId: string, input: CustomModelInput) => Promise<void>;
   onDeleteCustomModel?: (modelId: string) => Promise<void>;
 }
 
@@ -48,10 +45,7 @@ export default function ModelSelector({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -67,8 +61,7 @@ export default function ModelSelector({
     };
   }, []);
 
-  const current =
-    models.find((model) => model.id === selectedModel) ?? models[0];
+  const current = models.find((model) => model.id === selectedModel) ?? models[0];
   if (!current) return null;
 
   const toggleOpen = () => {
@@ -120,20 +113,13 @@ export default function ModelSelector({
             aria-expanded={isOpen}
           >
             <div className="min-w-0">
-              <div className="truncate text-[11px] font-medium">
-                {current.name}
-              </div>
-              <div
-                className="truncate text-[9px]"
-                style={{ color: COLORS.textSubtle }}
-              >
+              <div className="truncate text-[11px] font-medium">{current.name}</div>
+              <div className="truncate text-[9px]" style={{ color: COLORS.textSubtle }}>
                 {current.provider}
               </div>
             </div>
             <svg
-              className={`h-3.5 w-3.5 shrink-0 transition-transform ${
-                isOpen ? "rotate-180" : ""
-              }`}
+              className={`h-3.5 w-3.5 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 20 20"
@@ -171,9 +157,7 @@ export default function ModelSelector({
                     key={model.id}
                     className="mb-0.5 flex items-stretch rounded-[10px]"
                     style={{
-                      background: selected
-                        ? COLORS.selection
-                        : "transparent",
+                      background: selected ? COLORS.selection : "transparent",
                     }}
                   >
                     <button
@@ -188,9 +172,7 @@ export default function ModelSelector({
                       }}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="truncate text-[12px] font-medium">
-                          {model.name}
-                        </span>
+                        <span className="truncate text-[12px] font-medium">{model.name}</span>
                         <span
                           className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px]"
                           style={{
@@ -209,9 +191,7 @@ export default function ModelSelector({
                       </div>
                     </button>
 
-                    {model.isCustom &&
-                    onUpdateCustomModel &&
-                    onDeleteCustomModel ? (
+                    {model.isCustom && onUpdateCustomModel && onDeleteCustomModel ? (
                       <div className="flex shrink-0 items-center gap-1 pr-2 text-[10px]">
                         <button
                           type="button"
@@ -237,10 +217,7 @@ export default function ModelSelector({
             </div>
 
             {onCreateCustomModel ? (
-              <div
-                className="border-t p-1.5"
-                style={{ borderColor: COLORS.border }}
-              >
+              <div className="border-t p-1.5" style={{ borderColor: COLORS.border }}>
                 <button
                   type="button"
                   onClick={openCreateModal}
@@ -250,9 +227,7 @@ export default function ModelSelector({
                   ＋ 添加模型
                 </button>
                 {actionError ? (
-                  <p className="px-2 pb-1 text-[10px] text-red-400">
-                    {actionError}
-                  </p>
+                  <p className="px-2 pb-1 text-[10px] text-red-400">{actionError}</p>
                 ) : null}
               </div>
             ) : null}
@@ -261,10 +236,7 @@ export default function ModelSelector({
       </div>
 
       {showCreateModal && onCreateCustomModel ? (
-        <CustomModelModal
-          onClose={() => setShowCreateModal(false)}
-          onSave={onCreateCustomModel}
-        />
+        <CustomModelModal onClose={() => setShowCreateModal(false)} onSave={onCreateCustomModel} />
       ) : null}
       {editingModel?.customModel && onUpdateCustomModel ? (
         <CustomModelModal

@@ -9,11 +9,7 @@ interface ThemeToggleProps {
   compact?: boolean;
 }
 
-export default function ThemeToggle({
-  theme,
-  onToggle,
-  compact = false,
-}: ThemeToggleProps) {
+export default function ThemeToggle({ theme, onToggle, compact = false }: ThemeToggleProps) {
   const isLight = theme === "light";
 
   return (
@@ -26,8 +22,7 @@ export default function ThemeToggle({
       style={{
         background: "var(--glass)",
         borderColor: "var(--border)",
-        boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.12), var(--shadow-soft)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), var(--shadow-soft)",
       }}
       aria-label={isLight ? "切换到深色模式" : "切换到浅色模式"}
       title={isLight ? "切换到深色模式" : "切换到浅色模式"}
@@ -48,9 +43,7 @@ export default function ThemeToggle({
       >
         <svg
           viewBox="0 0 20 20"
-          className={`transition-all duration-300 ${
-            compact ? "h-3.5 w-3.5" : "h-4 w-4"
-          }`}
+          className={`transition-all duration-300 ${compact ? "h-3.5 w-3.5" : "h-4 w-4"}`}
           fill="none"
           style={{ color: isLight ? "#f5a623" : "#a9c7ff" }}
         >

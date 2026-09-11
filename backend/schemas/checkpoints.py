@@ -13,9 +13,7 @@ class CheckpointCreateBody(FlexibleModel):
     """创建通用 Agent Checkpoint。"""
 
     session_id: str = Field(alias="sessionId")
-    agent_kind: Literal["qa", "code", "media", "commerce", "image"] = Field(
-        alias="agentKind"
-    )
+    agent_kind: Literal["qa", "code", "media", "commerce", "image"] = Field(alias="agentKind")
     route: str
     request: dict[str, Any] = Field(default_factory=dict)
     label: str = ""
@@ -25,9 +23,9 @@ class CheckpointCreateBody(FlexibleModel):
 class CheckpointUpdateBody(FlexibleModel):
     """更新 Checkpoint 状态或执行快照。"""
 
-    status: Literal[
-        "running", "paused", "interrupted", "failed", "completed", "discarded"
-    ] | None = None
+    status: (
+        Literal["running", "paused", "interrupted", "failed", "completed", "discarded"] | None
+    ) = None
     state: dict[str, Any] | None = None
     request: dict[str, Any] | None = None
     error_message: str | None = Field(default=None, alias="errorMessage")

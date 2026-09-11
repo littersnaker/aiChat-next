@@ -15,7 +15,9 @@ async def test_regenerate_manifest_scans_and_hashes(tmp_path: Path) -> None:
     """regenerate_manifest 应扫描项目文件、计算非空 sha256 并写入 output_root。"""
 
     (tmp_path / "src").mkdir()
-    (tmp_path / "src" / "App.tsx").write_text("export const App = () => <h1>hi</h1>;", encoding="utf-8")
+    (tmp_path / "src" / "App.tsx").write_text(
+        "export const App = () => <h1>hi</h1>;", encoding="utf-8"
+    )
     (tmp_path / "package.json").write_text('{"name":"x"}', encoding="utf-8")
     (tmp_path / "features" / "commerce").mkdir(parents=True)
     (tmp_path / "features" / "commerce" / "data-source.ts").write_text(
@@ -77,9 +79,7 @@ async def test_regenerate_manifest_preserves_existing_entries(tmp_path: Path) ->
 
     manifest = json.loads(original_manifest.read_text("utf-8"))
     entry = next(
-        item
-        for item in manifest["files"]
-        if item["path"] == "features/commerce/data-source.ts"
+        item for item in manifest["files"] if item["path"] == "features/commerce/data-source.ts"
     )
     assert entry["sha256"] == "ORIGINAL-HASH"  # 既有条目保留原哈希。
 

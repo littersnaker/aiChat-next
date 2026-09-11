@@ -87,11 +87,7 @@ class LlmProtocolClient:
     def _client_for(self, provider: str) -> httpx.AsyncClient:
         """按供应商选择走代理还是直连。"""
 
-        return (
-            self._client
-            if provider in PROXY_REQUIRED_PROVIDERS
-            else self._direct_client
-        )
+        return self._client if provider in PROXY_REQUIRED_PROVIDERS else self._direct_client
 
     async def measure_connectivity(
         self,
@@ -211,11 +207,7 @@ class LlmProtocolClient:
                     choices = packet.get("choices") or []
                     delta = choices[0].get("delta", {}) if choices else {}
                     text = delta.get("content") or ""
-                    reasoning = (
-                        delta.get("reasoning_content")
-                        or delta.get("reasoning")
-                        or ""
-                    )
+                    reasoning = delta.get("reasoning_content") or delta.get("reasoning") or ""
                     usage = self._read_openai_usage(packet.get("usage"))
                     tool_calls: list[LlmToolCall] = []
                     for call in delta.get("tool_calls") or []:
@@ -257,21 +249,13 @@ class LlmProtocolClient:
     ) -> AsyncIterator[LlmChunk]:
         """调用 Gemini ``streamGenerateContent`` SSE 接口。"""
 
-        base = (
-            endpoint_base or "https://generativelanguage.googleapis.com/v1beta"
-        ).rstrip("/")
+        base = (endpoint_base or "https://generativelanguage.googleapis.com/v1beta").rstrip("/")
         if base.endswith(":streamGenerateContent"):
             url = base
         else:
             url = f"{base}/models/{model.model}:streamGenerateContent"
-        system_text = "\n\n".join(
-            item.content for item in messages if item.role == "system"
-        )
-        contents = [
-            self._to_gemini_content(item)
-            for item in messages
-            if item.role != "system"
-        ]
+        system_text = "\n\n".join(item.content for item in messages if item.role == "system")
+        contents = [self._to_gemini_content(item) for item in messages if item.role != "system"]
         payload: dict[str, Any] = {
             "contents": contents,
             "generationConfig": {"temperature": temperature},
@@ -355,9 +339,7 @@ class LlmProtocolClient:
             parts.append(
                 {
                     "type": "image_url",
-                    "image_url": {
-                        "url": f"data:{image.mime_type};base64,{image.data}"
-                    },
+                    "image_url": {"url": f"data:{image.mime_type};base64,{image.data}"},
                 }
             )
         return {"role": message.role, "content": parts}
@@ -453,8 +435,7 @@ class LlmProtocolClient:
         if status_code == 404:
             return "model"
         if status_code == 400 and any(
-            token in normalized
-            for token in ("model_not_supported", "invalid_model", "model not")
+            token in normalized for token in ("model_not_supported", "invalid_model", "model not")
         ):
             return "model"
         if status_code == 429:

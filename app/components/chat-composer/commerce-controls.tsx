@@ -25,8 +25,7 @@ export function CommerceControls({
     <div
       className="mb-2 rounded-[15px] border px-3 py-2.5"
       style={{
-        background:
-          "linear-gradient(145deg, var(--accent-blue-soft), var(--glass-soft))",
+        background: "linear-gradient(145deg, var(--accent-blue-soft), var(--glass-soft))",
         borderColor: "var(--accent-blue-border)",
       }}
     >
@@ -40,10 +39,12 @@ export function CommerceControls({
           </div>
         </div>
         <div className="flex rounded-[10px] border border-[var(--border)] bg-[var(--glass)] p-1">
-          {([
-            ["research", "市场研究"],
-            ["listing", "Listing Demo"],
-          ] as const).map(([value, label]) => {
+          {(
+            [
+              ["research", "市场研究"],
+              ["listing", "Listing Demo"],
+            ] as const
+          ).map(([value, label]) => {
             const selected = workflowMode === value;
             return (
               <button
@@ -53,12 +54,8 @@ export function CommerceControls({
                 disabled={disabled}
                 className="rounded-[8px] px-2.5 py-1.5 text-[9px] font-semibold transition-colors disabled:opacity-40"
                 style={{
-                  background: selected
-                    ? "var(--selection-bg-strong)"
-                    : "transparent",
-                  color: selected
-                    ? "var(--selection-text)"
-                    : "var(--text-tertiary)",
+                  background: selected ? "var(--selection-bg-strong)" : "transparent",
+                  color: selected ? "var(--selection-text)" : "var(--text-tertiary)",
                 }}
               >
                 {label}
@@ -70,9 +67,7 @@ export function CommerceControls({
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="mr-1 min-w-[92px]">
-          <div className="text-[10px] font-semibold text-[var(--text-secondary)]">
-            目标市场
-          </div>
+          <div className="text-[10px] font-semibold text-[var(--text-secondary)]">目标市场</div>
           <div className="mt-0.5 text-[8px] text-[var(--text-quaternary)]">
             决定本地化语言与货币
           </div>
@@ -88,15 +83,9 @@ export function CommerceControls({
                 disabled={disabled}
                 className="rounded-full border px-2.5 py-1.5 text-[9px] font-medium transition-all disabled:opacity-40"
                 style={{
-                  background: selected
-                    ? "var(--selection-bg)"
-                    : "transparent",
-                  borderColor: selected
-                    ? "var(--selection-border)"
-                    : "var(--border)",
-                  color: selected
-                    ? "var(--selection-text)"
-                    : "var(--text-tertiary)",
+                  background: selected ? "var(--selection-bg)" : "transparent",
+                  borderColor: selected ? "var(--selection-border)" : "var(--border)",
+                  color: selected ? "var(--selection-text)" : "var(--text-tertiary)",
                 }}
                 title={`${marketplace.label} · ${marketplace.currency}`}
               >
@@ -118,18 +107,10 @@ export function CommerceControls({
           onClick={onOpenServiceSettings}
           className="rounded-full border px-2.5 py-1 text-[8px] font-semibold transition-colors hover:bg-[var(--glass-hover)]"
           style={{
-            color:
-              dataSourceState !== "none"
-                ? "var(--accent-blue)"
-                : "var(--text-secondary)",
+            color: dataSourceState !== "none" ? "var(--accent-blue)" : "var(--text-secondary)",
             borderColor:
-              dataSourceState !== "none"
-                ? "var(--accent-blue-border-strong)"
-                : "var(--border)",
-            background:
-              dataSourceState !== "none"
-                ? "var(--accent-blue-soft)"
-                : "var(--glass)",
+              dataSourceState !== "none" ? "var(--accent-blue-border-strong)" : "var(--border)",
+            background: dataSourceState !== "none" ? "var(--accent-blue-soft)" : "var(--glass)",
           }}
           title="设置 TalorData、Keepa 或 Amazon SP-API；未配置时会尝试 Amazon 公开页面爬虫"
         >

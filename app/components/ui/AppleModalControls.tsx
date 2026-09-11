@@ -1,17 +1,12 @@
 // 模块说明：统一维护弹窗中的 Apple 风格按钮、关闭按钮和开关控件。
 "use client";
 
-import type {
-  ButtonHTMLAttributes,
-  CSSProperties,
-  ReactNode,
-} from "react";
+import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from "react";
 
 type AppleButtonVariant = "primary" | "secondary" | "ghost" | "accent";
 type AppleButtonSize = "xs" | "sm" | "md";
 
-interface AppleButtonProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
+interface AppleButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
   children: ReactNode;
   variant?: AppleButtonVariant;
   size?: AppleButtonSize;
@@ -36,8 +31,7 @@ const VARIANT_STYLES: Record<AppleButtonVariant, CSSProperties> = {
     background: "linear-gradient(180deg, #2997ff 0%, #0a84ff 100%)",
     borderColor: "rgba(10,132,255,0.52)",
     color: "#ffffff",
-    boxShadow:
-      "0 8px 20px rgba(10,132,255,0.2), inset 0 1px 0 rgba(255,255,255,0.3)",
+    boxShadow: "0 8px 20px rgba(10,132,255,0.2), inset 0 1px 0 rgba(255,255,255,0.3)",
   },
   secondary: {
     background:
@@ -98,28 +92,17 @@ export function AppleModalCloseButton({
           "linear-gradient(180deg, color-mix(in srgb, var(--glass-active) 86%, white 14%), var(--glass))",
         borderColor: "var(--border)",
         color: "var(--text-secondary)",
-        boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.32), 0 5px 14px rgba(15,23,42,0.06)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.32), 0 5px 14px rgba(15,23,42,0.06)",
       }}
     >
       <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none">
-        <path
-          d="m6 6 8 8m0-8-8 8"
-          stroke="currentColor"
-          strokeWidth="1.65"
-          strokeLinecap="round"
-        />
+        <path d="m6 6 8 8m0-8-8 8" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" />
       </svg>
     </button>
   );
 }
 
-export function AppleSwitch({
-  checked,
-  ariaLabel,
-  disabled = false,
-  onChange,
-}: AppleSwitchProps) {
+export function AppleSwitch({ checked, ariaLabel, disabled = false, onChange }: AppleSwitchProps) {
   return (
     <button
       type="button"
@@ -143,10 +126,8 @@ export function AppleSwitch({
         className="block h-[26px] w-[26px] rounded-full transition-transform duration-300"
         style={{
           transform: checked ? "translateX(20px)" : "translateX(0)",
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.99), rgba(247,247,249,0.97))",
-          boxShadow:
-            "0 3px 9px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.92)",
+          background: "linear-gradient(180deg, rgba(255,255,255,0.99), rgba(247,247,249,0.97))",
+          boxShadow: "0 3px 9px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.92)",
         }}
       />
     </button>

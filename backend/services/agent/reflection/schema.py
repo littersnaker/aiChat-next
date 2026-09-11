@@ -82,7 +82,7 @@ def extract_json_object(text: str) -> dict[str, Any]:
     except (ValueError, TypeError):
         match = _JSON_BLOCK.search(raw)
         if not match:
-            raise ValueError("复盘输出中未找到 JSON 对象")
+            raise ValueError("复盘输出中未找到 JSON 对象") from None
         try:
             parsed = json.loads(match.group(0))
         except (ValueError, TypeError) as exc:

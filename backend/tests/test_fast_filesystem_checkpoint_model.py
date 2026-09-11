@@ -48,7 +48,6 @@ def _filesystem_plan(*operations: FileSystemOperation) -> CodeTaskPlan:
     )
 
 
-
 def test_direct_rename_request_is_parsed_without_planner(tmp_path) -> None:
     """完整明确的重命名指令可直接转换成本地文件操作。"""
 
@@ -60,6 +59,7 @@ def test_direct_rename_request_is_parsed_without_planner(tmp_path) -> None:
 
     assert len(operations) == 1
     assert operations[0] == FileSystemOperation("rename", "old.ts", "src/new.ts")
+
 
 def test_filesystem_executor_supports_swap_rename(tmp_path) -> None:
     """交换重命名会通过事务暂存完成，不覆盖任一文件。"""
@@ -94,9 +94,7 @@ async def test_filesystem_work_finishes_without_worker_llm(tmp_path, monkeypatch
     result = None
     async for event in stream_autonomous_loop(
         root=tmp_path,
-        task_plan=_filesystem_plan(
-            FileSystemOperation("rename", "old.pending", "home.tsx")
-        ),
+        task_plan=_filesystem_plan(FileSystemOperation("rename", "old.pending", "home.tsx")),
         initial_context="",
         preferred_model_id="custom:new-model",
         credentials=LlmCredentials(values={}),

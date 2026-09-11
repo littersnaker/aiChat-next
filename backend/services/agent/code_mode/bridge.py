@@ -77,7 +77,7 @@ class ToolsBridge:
                 content = json.dumps(result, ensure_ascii=False, default=str)
         except (TypeError, ValueError) as exc:
             return {"ok": False, "error": f"工具结果序列化失败：{exc}"}
-        return {"ok": True, "content": content[: _MAX_REQUEST_CHARS]}
+        return {"ok": True, "content": content[:_MAX_REQUEST_CHARS]}
 
 
 __all__ = ["CodeModeEnvironment", "ToolsBridge"]

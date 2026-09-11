@@ -36,18 +36,10 @@ def is_build_output_segment(name: object) -> bool:
 def is_build_output_path(relative_path: object) -> bool:
     """判断相对路径的任一路径段是否命中构建/发布产物目录。"""
 
-    normalized = (
-        str(relative_path or "")
-        .strip()
-        .replace("\\", "/")
-        .strip("/")
-        .lower()
-    )
+    normalized = str(relative_path or "").strip().replace("\\", "/").strip("/").lower()
     if not normalized:
         return False
-    return any(
-        is_build_output_segment(segment) for segment in normalized.split("/")
-    )
+    return any(is_build_output_segment(segment) for segment in normalized.split("/"))
 
 
 def resolve_inside(root: Path, relative_path: str) -> Path:

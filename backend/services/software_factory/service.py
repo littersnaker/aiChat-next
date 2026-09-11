@@ -112,16 +112,13 @@ class SoftwareFactoryService:
         mock_payload, artifacts = build_artifacts(blueprint)
         validation = validate_factory_artifacts(blueprint, mock_payload, artifacts)
         if not validation.ok:
-            raise ValueError(
-                "Software Factory 生成前校验失败：" + "；".join(validation.errors)
-            )
+            raise ValueError("Software Factory 生成前校验失败：" + "；".join(validation.errors))
 
         targets = [(resolve_inside(root, item.path), item.content) for item in artifacts]
         existing = [str(path.relative_to(root.resolve())) for path, _ in targets if path.exists()]
         if existing and not overwrite:
             raise FileExistsError(
-                "生成目标已存在，请先读取确认后再设置 overwrite=true："
-                + ", ".join(existing[:20])
+                "生成目标已存在，请先读取确认后再设置 overwrite=true：" + ", ".join(existing[:20])
             )
 
         self._transactional_write(targets)
@@ -287,7 +284,9 @@ class SoftwareFactoryService:
         manifest_target.write_text(_json_text(manifest), encoding="utf-8")
         return FactoryValidation(
             True,
-            checks=(f"已重建清单：{len(entries)} 个文件，写入 {manifest_target.relative_to(root_resolved)}",),
+            checks=(
+                f"已重建清单：{len(entries)} 个文件，写入 {manifest_target.relative_to(root_resolved)}",
+            ),
         ).to_json()
 
     def _build_blueprint(
@@ -303,9 +302,7 @@ class SoftwareFactoryService:
 
         normalized_domain = domain_id.strip().lower()
         if normalized_domain not in SUPPORTED_DOMAINS:
-            raise ValueError(
-                f"暂不支持领域 {domain_id}；当前支持 commerce-miniapp"
-            )
+            raise ValueError(f"暂不支持领域 {domain_id}；当前支持 commerce-miniapp")
         profile = detect_frontend_profile(root)
         normalized_output = self._normalize_output_root(
             output_root or self._default_output_root(profile.source_root)
@@ -384,13 +381,9 @@ class SoftwareFactoryService:
             return None
 
         entity_names = {
-            str(item.get("name"))
-            for item in domain.get("entities", [])
-            if isinstance(item, dict)
+            str(item.get("name")) for item in domain.get("entities", []) if isinstance(item, dict)
         }
-        schema_names = set(
-            dict(dict(openapi.get("components") or {}).get("schemas") or {})
-        )
+        schema_names = set(dict(dict(openapi.get("components") or {}).get("schemas") or {}))
         if entity_names != schema_names:
             errors.append("domain-schema.json 与 openapi.json 的实体集合不一致")
         for key in ("products", "skus", "cartItems", "orders"):

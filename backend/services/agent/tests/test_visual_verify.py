@@ -26,9 +26,7 @@ def _sample_base64() -> str:
 def test_resolve_dev_command_allows_only_dev(tmp_path: Path) -> None:
     """dev server 通道只放行白名单 dev 脚本，非 dev 脚本拒绝。"""
 
-    (tmp_path / "package.json").write_text(
-        '{"scripts": {"dev": "vite"}}', encoding="utf-8"
-    )
+    (tmp_path / "package.json").write_text('{"scripts": {"dev": "vite"}}', encoding="utf-8")
     assert resolve_dev_command(tmp_path) == ["pnpm", "run", "dev"]
 
     # 没有 dev 脚本的项目应拒绝。

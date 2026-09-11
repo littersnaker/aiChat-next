@@ -72,9 +72,19 @@ def calculate_metrics(
 ) -> dict[str, Any]:
     """根据公开样本计算报告指标，不伪造真实销量或搜索量。"""
 
-    prices = [float(item["price"]) for item in observations if isinstance(item.get("price"), (int, float))]
-    reviews = [float(item["reviewCount"]) for item in observations if isinstance(item.get("reviewCount"), (int, float))]
-    ratings = [float(item["rating"]) for item in observations if isinstance(item.get("rating"), (int, float))]
+    prices = [
+        float(item["price"]) for item in observations if isinstance(item.get("price"), (int, float))
+    ]
+    reviews = [
+        float(item["reviewCount"])
+        for item in observations
+        if isinstance(item.get("reviewCount"), (int, float))
+    ]
+    ratings = [
+        float(item["rating"])
+        for item in observations
+        if isinstance(item.get("rating"), (int, float))
+    ]
     domains = [str(item["domain"]) for item in observations if item.get("domain")]
     domain_counts = Counter(domains)
     top_domain_share = max(domain_counts.values(), default=0) / max(len(domains), 1)
@@ -137,9 +147,7 @@ def calculate_review_stats(reviews: list[dict[str, Any]]) -> dict[str, Any]:
     """根据采集到的评论文本计算评分分布与基础比率。"""
 
     ratings = [
-        float(item["rating"])
-        for item in reviews
-        if isinstance(item.get("rating"), (int, float))
+        float(item["rating"]) for item in reviews if isinstance(item.get("rating"), (int, float))
     ]
     distribution = {str(star): 0 for star in range(1, 6)}
     for rating in ratings:

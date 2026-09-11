@@ -44,8 +44,7 @@ class CodeIntelligenceService:
             all_symbols = self._symbols.build(root)
             matches = self._symbols.search(all_symbols, query)
             symbol_lines = [
-                f"- {item.kind} {item.name} · {item.path}:{item.line}"
-                for item in matches
+                f"- {item.kind} {item.name} · {item.path}:{item.line}" for item in matches
             ]
             sections.append("## Symbol Matches\n" + ("\n".join(symbol_lines) or "未找到匹配符号"))
 

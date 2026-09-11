@@ -33,11 +33,7 @@ function resolveSourceLabel(attachment: AttachedFile): string {
   }
 }
 
-export function AttachmentList({
-  attachments,
-  onRemove,
-  label,
-}: AttachmentListProps) {
+export function AttachmentList({ attachments, onRemove, label }: AttachmentListProps) {
   if (attachments.length === 0) return null;
 
   return (
@@ -63,9 +59,7 @@ export function AttachmentList({
           const imagePreview = isImageAttachment(attachment);
           const videoPreview = isVideoAttachment(attachment);
           const previewUrl =
-            imagePreview || videoPreview
-              ? resolveAttachmentDataUrl(attachment)
-              : "";
+            imagePreview || videoPreview ? resolveAttachmentDataUrl(attachment) : "";
 
           return (
             <div
@@ -90,17 +84,9 @@ export function AttachmentList({
                     className="h-full w-full object-cover"
                   />
                 ) : videoPreview ? (
-                  <video
-                    src={previewUrl}
-                    className="h-full w-full object-cover"
-                    muted
-                  />
+                  <video src={previewUrl} className="h-full w-full object-cover" muted />
                 ) : (
-                  <span>
-                    {attachment.sourceKind === "drop-directory"
-                      ? "目录"
-                      : "文件"}
-                  </span>
+                  <span>{attachment.sourceKind === "drop-directory" ? "目录" : "文件"}</span>
                 )}
               </div>
 

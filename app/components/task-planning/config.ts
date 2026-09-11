@@ -5,10 +5,7 @@ import {
   getCommerceActivityStageId,
 } from "../../lib/commerce/progress-stages";
 import type { CommerceWorkflowMode } from "../../lib/commerce/listing/types";
-import type {
-  PlanningStageDefinition,
-  PlanningStageStatus,
-} from "./types";
+import type { PlanningStageDefinition, PlanningStageStatus } from "./types";
 
 /** QA / Code Agent 使用的稳定阶段定义。 */
 export const CODE_STAGE_DEFINITIONS: PlanningStageDefinition[] = [
@@ -26,12 +23,7 @@ export const CODE_STAGE_DEFINITIONS: PlanningStageDefinition[] = [
     description: "读取项目文件、索引和相关上下文",
     agentTypes: ["researcher"],
     activityKeys: ["search", "read", "搜索", "读取", "上下文"],
-    lifecycleRoles: [
-      "search_agent",
-      "memory_agent",
-      "file_agent",
-      "context_merge",
-    ],
+    lifecycleRoles: ["search_agent", "memory_agent", "file_agent", "context_merge"],
   },
   {
     id: "prompt",
@@ -86,17 +78,10 @@ export const CODE_STAGE_DEFINITIONS: PlanningStageDefinition[] = [
     title: "生成结果",
     description: "沉淀稳定经验，并汇总已执行事实生成最终交付说明",
     agentTypes: ["orchestrator"],
-    activityKeys: [
-      "memory_consolidation",
-      "final_report",
-      "记忆沉淀",
-      "最终报告",
-      "交付",
-    ],
+    activityKeys: ["memory_consolidation", "final_report", "记忆沉淀", "最终报告", "交付"],
     lifecycleRoles: ["memory_consolidation_agent", "final_report_agent"],
   },
 ];
-
 
 /**
  * 将 Commerce 的共享阶段定义映射为右侧任务规划结构。

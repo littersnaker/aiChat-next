@@ -259,9 +259,7 @@ class PlannerInputBuilder:
 
         return result
 
-    def _filter_artifacts(
-        self, artifacts: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    def _filter_artifacts(self, artifacts: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """过滤 Artifact 摘要，只保留关键信息。"""
 
         result = []
@@ -274,9 +272,7 @@ class PlannerInputBuilder:
             result.append(summary)
         return result
 
-    def _filter_existing_works(
-        self, works: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    def _filter_existing_works(self, works: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """过滤已有 Work，只保留未完成项的摘要。"""
 
         result = []

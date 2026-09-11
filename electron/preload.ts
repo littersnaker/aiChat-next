@@ -28,16 +28,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
   backendBaseUrl: readBackendBaseUrl(),
   initialTheme: readInitialTheme(),
   selectFolder: () => ipcRenderer.invoke("dialog:openDirectory"),
-  exportCommerceReportPdf: (payload: {
-    html: string;
-    suggestedFileName: string;
-  }) => ipcRenderer.invoke("commerce:exportPdf", payload),
+  exportCommerceReportPdf: (payload: { html: string; suggestedFileName: string }) =>
+    ipcRenderer.invoke("commerce:exportPdf", payload),
   capturePage: (url: string): Promise<{ base64: string }> =>
     ipcRenderer.invoke("visual:capturePage", url),
   clipboard: {
     readText: (): Promise<string> => ipcRenderer.invoke("clipboard:readText"),
-    writeText: (text: string): Promise<void> =>
-      ipcRenderer.invoke("clipboard:writeText", text),
+    writeText: (text: string): Promise<void> => ipcRenderer.invoke("clipboard:writeText", text),
   },
   setTheme: (theme: AppTheme) => ipcRenderer.invoke("window:setTheme", theme),
   credentials: {
@@ -46,8 +43,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
       ipcRenderer.invoke("credentials:write", values),
   },
   preferences: {
-    read: (): Promise<AppUiPreferences> =>
-      ipcRenderer.invoke("preferences:read"),
+    read: (): Promise<AppUiPreferences> => ipcRenderer.invoke("preferences:read"),
     write: (values: AppUiPreferences): Promise<AppUiPreferences> =>
       ipcRenderer.invoke("preferences:write", values),
   },
@@ -61,8 +57,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
         callback(maximized);
       };
       ipcRenderer.on("window:maximized-changed", listener);
-      return () =>
-        ipcRenderer.removeListener("window:maximized-changed", listener);
+      return () => ipcRenderer.removeListener("window:maximized-changed", listener);
     },
   },
   versions: {

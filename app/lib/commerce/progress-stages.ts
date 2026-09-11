@@ -97,9 +97,7 @@ export function getCommerceActivityStageId(
 export function getCommerceProgressStages(
   mode: CommerceWorkflowMode,
 ): readonly CommerceProgressStageDefinition[] {
-  return mode === "listing"
-    ? AMAZON_LISTING_PROGRESS_STAGES
-    : COMMERCE_RESEARCH_PROGRESS_STAGES;
+  return mode === "listing" ? AMAZON_LISTING_PROGRESS_STAGES : COMMERCE_RESEARCH_PROGRESS_STAGES;
 }
 
 /**
@@ -112,8 +110,5 @@ export function getCommerceProgressTitle(
 ): string {
   if (stage === "done") return DONE_LABELS[mode];
 
-  return (
-    getCommerceProgressStages(mode).find((item) => item.stage === stage)?.title ??
-    stage
-  );
+  return getCommerceProgressStages(mode).find((item) => item.stage === stage)?.title ?? stage;
 }

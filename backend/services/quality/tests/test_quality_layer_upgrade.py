@@ -105,7 +105,9 @@ def test_final_quality_report_exposes_ui_metrics(tmp_path) -> None:
     from backend.services.agent.shared.work_state import WorkWorkerState
 
     target = tmp_path / "module.py"
-    target.write_text('"""测试模块。"""\n\ndef value():\n    """返回稳定值。"""\n    return 1\n', "utf-8")
+    target.write_text(
+        '"""测试模块。"""\n\ndef value():\n    """返回稳定值。"""\n    return 1\n', "utf-8"
+    )
     report = asyncio.run(
         review_execution(
             root=tmp_path,

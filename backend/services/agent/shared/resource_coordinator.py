@@ -34,11 +34,7 @@ def resources_conflict(left: str, right: str) -> bool:
         return False
     if first.startswith("@") or second.startswith("@"):
         return first == second
-    return (
-        first == second
-        or first.startswith(f"{second}/")
-        or second.startswith(f"{first}/")
-    )
+    return first == second or first.startswith(f"{second}/") or second.startswith(f"{first}/")
 
 
 def _is_probable_directory(resource: str) -> bool:
@@ -199,9 +195,7 @@ class WorkspaceResourceCoordinator:
         """按优先级原子锁定资源集合，并在退出时唤醒其他 Work。"""
 
         normalized = frozenset(
-            resource
-            for resource in (normalize_resource(item) for item in resources)
-            if resource
+            resource for resource in (normalize_resource(item) for item in resources) if resource
         )
         if not normalized:
             yield

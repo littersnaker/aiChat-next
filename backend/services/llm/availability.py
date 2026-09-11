@@ -61,9 +61,7 @@ class ModelAvailabilityCache:
 
             fingerprint = self._fingerprint(credentials.get(model.provider))
             success = self._success.get((model.provider, fingerprint))
-            recently_successful = bool(
-                success and success[0] == model.id and success[1] > now
-            )
+            recently_successful = bool(success and success[0] == model.id and success[1] > now)
             return (0 if recently_successful else 1, model.auto_priority)
 
         return tuple(sorted(pool, key=sort_key))
@@ -104,8 +102,8 @@ class ModelAvailabilityCache:
             )
             return
         if scope == "model":
-            self._model_failures[(model.provider, fingerprint, model.id)] = (
-                CacheEntry(now + MODEL_FAILURE_TTL_SECONDS, scope)
+            self._model_failures[(model.provider, fingerprint, model.id)] = CacheEntry(
+                now + MODEL_FAILURE_TTL_SECONDS, scope
             )
 
     def provider_blocked(

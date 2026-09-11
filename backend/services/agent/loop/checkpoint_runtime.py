@@ -76,11 +76,7 @@ def plan_to_json(plan: CodeTaskPlan) -> dict[str, Any]:
 def plan_from_json(value: dict[str, Any]) -> CodeTaskPlan:
     """从 Checkpoint 恢复任务规格。"""
 
-    works = [
-        work_item_from_json(item)
-        for item in value.get("works", [])
-        if isinstance(item, dict)
-    ]
+    works = [work_item_from_json(item) for item in value.get("works", []) if isinstance(item, dict)]
     if not works:
         works = [WorkItem("W001", "恢复任务", "继续上次未完成的代码任务")]
     return CodeTaskPlan(
@@ -98,11 +94,7 @@ def plan_from_json(value: dict[str, Any]) -> CodeTaskPlan:
 def ledger_from_json(value: dict[str, Any]) -> WorkLedger:
     """恢复完整 WorkList，保留成功、失败、跳过和产物信息。"""
 
-    items = [
-        work_item_from_json(item)
-        for item in value.get("items", [])
-        if isinstance(item, dict)
-    ]
+    items = [work_item_from_json(item) for item in value.get("items", []) if isinstance(item, dict)]
     ledger = WorkLedger(items or [WorkItem("W001", "恢复任务", "继续任务")])
     ledger.revision = int(value.get("revision") or 1)
     ledger.reason = str(value.get("reason") or "已从 Checkpoint 恢复")
@@ -141,6 +133,7 @@ def usage_from_json(value: dict[str, Any]) -> LlmUsage:
         completion=int(value.get("completion") or 0),
         total=int(value.get("total") or 0),
     )
+
 
 async def save_loop_checkpoint(
     checkpoint_id: str,

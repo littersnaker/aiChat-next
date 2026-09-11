@@ -110,7 +110,9 @@ async def test_prompt_optimizer_preserves_explicit_model_and_base_url(monkeypatc
             SimpleNamespace(name="Planner Model"),
         )
 
-    monkeypatch.setattr("backend.services.agent.planner.task_planner.GATEWAY.complete", fake_complete)
+    monkeypatch.setattr(
+        "backend.services.agent.planner.task_planner.GATEWAY.complete", fake_complete
+    )
     prepared = await prepare_code_task(
         user_request=(
             "不要修改 model=qwen3.7-plus，Base URL 是 "
@@ -327,9 +329,7 @@ async def test_empty_project_generation_work_uses_one_shot_path(
 
 
 @pytest.mark.asyncio
-async def test_empty_edit_feedback_leads_to_complete_work(
-    tmp_path: Path, monkeypatch
-) -> None:
+async def test_empty_edit_feedback_leads_to_complete_work(tmp_path: Path, monkeypatch) -> None:
     """空 operations 的 edit 应得到针对性反馈而不是协议失败，模型随后可正常完成。"""
 
     (tmp_path / "src").mkdir()
@@ -348,6 +348,7 @@ async def test_empty_edit_feedback_leads_to_complete_work(
             {"action": "complete_work", "workId": "W001", "summary": "无需修改"},
         ]
     )
+
     async def fake_complete(**_kwargs):
         return (
             json.dumps(next(responses), ensure_ascii=False),
@@ -456,9 +457,7 @@ async def test_failed_work_replans_with_full_snapshot_without_repeating_success(
                 "action": "edit",
                 "workId": "W001",
                 "summary": "完成 A",
-                "operations": [
-                    {"type": "write", "path": "a.py", "content": "A = 1\n"}
-                ],
+                "operations": [{"type": "write", "path": "a.py", "content": "A = 1\n"}],
             },
             {"verdict": "complete", "summary": "A 完成"},
             {
@@ -505,9 +504,7 @@ async def test_failed_work_replans_with_full_snapshot_without_repeating_success(
                 "action": "edit",
                 "workId": "W002",
                 "summary": "完成 B",
-                "operations": [
-                    {"type": "write", "path": "b.py", "content": "B = 2\n"}
-                ],
+                "operations": [{"type": "write", "path": "b.py", "content": "B = 2\n"}],
             },
             {"verdict": "complete", "summary": "B 完成"},
             {"action": "finish", "summary": "A 和 B 均完成", "tests": []},
@@ -528,7 +525,9 @@ async def test_failed_work_replans_with_full_snapshot_without_repeating_success(
         )
 
     monkeypatch.setattr("backend.services.agent.loop.runner.GATEWAY.complete", fake_complete)
-    monkeypatch.setattr("backend.services.agent.planner.task_planner.GATEWAY.complete", fake_complete)
+    monkeypatch.setattr(
+        "backend.services.agent.planner.task_planner.GATEWAY.complete", fake_complete
+    )
     result = None
     async for event in stream_autonomous_loop(
         root=tmp_path,

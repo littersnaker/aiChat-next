@@ -6,10 +6,7 @@ import type {
   BuiltinPluginManifest,
   BuiltinPluginState,
 } from "../../lib/plugins/types";
-import {
-  AppleModalCloseButton,
-  AppleSwitch,
-} from "../ui/AppleModalControls";
+import { AppleModalCloseButton, AppleSwitch } from "../ui/AppleModalControls";
 
 interface PluginCenterProps {
   open: boolean;
@@ -85,8 +82,7 @@ export default function PluginCenter({
           background:
             "linear-gradient(180deg, color-mix(in srgb, var(--glass-solid) 98%, transparent), color-mix(in srgb, var(--glass-strong) 96%, transparent))",
           borderColor: "var(--border)",
-          boxShadow:
-            "0 34px 100px rgba(15,23,42,0.24), inset 0 1px 0 rgba(255,255,255,0.32)",
+          boxShadow: "0 34px 100px rgba(15,23,42,0.24), inset 0 1px 0 rgba(255,255,255,0.32)",
           backdropFilter: "blur(36px) saturate(155%)",
           WebkitBackdropFilter: "blur(36px) saturate(155%)",
         }}
@@ -117,16 +113,14 @@ export default function PluginCenter({
           >
             {plugins.map((plugin, index) => {
               const active = enabled[plugin.id];
-              const accent =
-                plugin.id === "code-agent" ? "#0a84ff" : "#5e5ce6";
+              const accent = plugin.id === "code-agent" ? "#0a84ff" : "#5e5ce6";
 
               return (
                 <div
                   key={plugin.id}
                   className="flex items-center gap-4 px-5 py-4"
                   style={{
-                    borderTop:
-                      index === 0 ? "none" : "1px solid var(--border)",
+                    borderTop: index === 0 ? "none" : "1px solid var(--border)",
                   }}
                 >
                   <div

@@ -14,14 +14,8 @@ def _load_media_models() -> list[dict[str, object]]:
     try:
         payload = json.loads(CONFIG_PATH.read_text("utf-8"))
     except (OSError, ValueError) as exc:
-        raise RuntimeError(
-            f"媒体模型配置文件缺失或损坏：{CONFIG_PATH}（{exc}）"
-        ) from exc
-    return [
-        item
-        for item in (payload.get("models") or [])
-        if isinstance(item, dict)
-    ]
+        raise RuntimeError(f"媒体模型配置文件缺失或损坏：{CONFIG_PATH}（{exc}）") from exc
+    return [item for item in (payload.get("models") or []) if isinstance(item, dict)]
 
 
 MEDIA_MODELS: list[dict[str, object]] = _load_media_models()

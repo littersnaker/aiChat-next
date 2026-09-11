@@ -31,8 +31,7 @@ def _runtime_request(
     """把 Commerce 请求转换成统一 RuntimeRequest。"""
 
     messages = tuple(
-        RuntimeMessage(role=message.role, content=message.content)
-        for message in body.messages
+        RuntimeMessage(role=message.role, content=message.content) for message in body.messages
     )
     preferred_model = (
         request.headers.get("x-llm-model-id", AUTO_MODEL_ID).strip()
@@ -54,9 +53,7 @@ def _runtime_request(
             "marketplace": body.marketplace,
             "llm": {
                 "modelId": preferred_model,
-                "credentials": resolve_credentials(request)
-                if request is not None
-                else None,
+                "credentials": resolve_credentials(request) if request is not None else None,
             },
         },
     )

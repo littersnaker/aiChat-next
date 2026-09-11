@@ -31,13 +31,17 @@ _MAX_SEED_FILES = 8
 _MAX_SEED_FILE_CHARS = 4_000
 _MAX_DISCOVERY_FILES = 4
 _TEXT_SUFFIXES = {".ts", ".tsx", ".js", ".jsx", ".vue", ".json", ".py", ".scss", ".css"}
+
+
 def _domain_path_hints() -> tuple[tuple[tuple[str, ...], tuple[str, ...]], ...]:
     """从配置读取功能域路径提示，避免业务词写死在代码里。"""
 
     raw = harness_rules().get("domainPathHints") or []
     return tuple(
-        (tuple(str(item) for item in entry.get("terms") or ()),
-         tuple(str(item) for item in entry.get("paths") or ()))
+        (
+            tuple(str(item) for item in entry.get("terms") or ()),
+            tuple(str(item) for item in entry.get("paths") or ()),
+        )
         for entry in raw
         if isinstance(entry, dict)
     )
@@ -135,11 +139,8 @@ def build_work_seed_context(
             content = (root / path).read_text("utf-8", errors="replace")
         except OSError:
             continue
-        sections.append(
-            f"--- FILE: {path} [Harness 预读] ---\n{content[:_MAX_SEED_FILE_CHARS]}"
-        )
+        sections.append(f"--- FILE: {path} [Harness 预读] ---\n{content[:_MAX_SEED_FILE_CHARS]}")
     return "\n\n".join(sections)
-
 
 
 def _discover_related_files(
@@ -156,8 +157,7 @@ def _discover_related_files(
         return []
     searchable = f"{work.title} {work.objective}".lower()
     hints: set[str] = {
-        token.lower()
-        for token in re.findall(r"[A-Za-z][A-Za-z0-9_-]{2,}", searchable)
+        token.lower() for token in re.findall(r"[A-Za-z][A-Za-z0-9_-]{2,}", searchable)
     }
     for request_terms, path_terms in _domain_path_hints():
         if any(term in searchable for term in request_terms):
@@ -198,6 +198,7 @@ def _discover_related_files(
 
     scored.sort(key=lambda item: (-item[0], item[1]))
     return [relative for _, relative in scored[:limit]]
+
 
 def _extract_skill_directives(runtime_context: str) -> tuple[list[str], list[str]]:
     """从统一 Runtime Context 中提取 Skill，而不携带 Memory 和会话历史。"""
@@ -320,7 +321,6 @@ def _quality_commands(manager: str, scripts: dict[str, str]) -> list[str]:
         if script in scripts:
             commands.append(f"{manager} run {script}")
     return commands[:4]
-
 
 
 __all__ = ["build_project_harness", "build_work_seed_context"]

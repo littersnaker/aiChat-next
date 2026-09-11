@@ -265,14 +265,13 @@ def test_compact_transcript_keeps_last_read_observation() -> None:
     # 窗口外最近的 read 完整观察被保留，模型能看到最近读到的文件内容。
     assert any(".profile {" in item for item in compacted)
     assert any(
-        "最近一次读取结果已保留" in item or "min-height: 100vh;" in item
-        for item in compacted
+        "最近一次读取结果已保留" in item or "min-height: 100vh;" in item for item in compacted
     )
     assert stats["saved_tokens"] > 0
 
 
 def test_compact_transcript_drops_stale_unchanged_read_hint() -> None:
-    """"未变化"瘦身提示不含文件内容，不视为有效 read 观察。"""
+    """ "未变化"瘦身提示不含文件内容，不视为有效 read 观察。"""
 
     compactor = ContextCompactor()
     filler = [f"ACTION search query='q{index}'" for index in range(8)]

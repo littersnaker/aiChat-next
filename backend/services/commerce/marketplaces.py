@@ -10,9 +10,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-MARKETPLACE_CONFIG_PATH = (
-    Path(__file__).resolve().parents[3] / "config" / "marketplaces.json"
-)
+MARKETPLACE_CONFIG_PATH = Path(__file__).resolve().parents[3] / "config" / "marketplaces.json"
 
 
 @dataclass(frozen=True, slots=True)

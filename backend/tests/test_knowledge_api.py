@@ -4,12 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 from fastapi.testclient import TestClient
 
 from backend.core.config import get_settings
 from backend.main import create_app
-from backend.services.workspace.database import initialize_database
 
 
 def _client(monkeypatch, tmp_path: Path) -> TestClient:
@@ -20,9 +18,7 @@ def _client(monkeypatch, tmp_path: Path) -> TestClient:
     return TestClient(create_app())
 
 
-def test_upload_rejects_unsupported_extension(
-    monkeypatch, tmp_path: Path
-) -> None:
+def test_upload_rejects_unsupported_extension(monkeypatch, tmp_path: Path) -> None:
     """不支持的文件类型应返回 400。"""
 
     with _client(monkeypatch, tmp_path) as client:

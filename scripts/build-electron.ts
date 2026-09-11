@@ -19,11 +19,11 @@ function runCommand(command: string): void {
  */
 function pythonCanBuild(python: string): boolean {
   try {
-    execFileSync(
-      python,
-      ["-c", "import fastapi, uvicorn, pydantic, langgraph, PyInstaller"],
-      { cwd: rootDirectory, stdio: "pipe", env: process.env },
-    );
+    execFileSync(python, ["-c", "import fastapi, uvicorn, pydantic, langgraph, PyInstaller"], {
+      cwd: rootDirectory,
+      stdio: "pipe",
+      env: process.env,
+    });
     return true;
   } catch {
     return false;
@@ -76,16 +76,10 @@ function assertBuildOutputs(): void {
     path.join(rootDirectory, ".electron", "main.js"),
     path.join(rootDirectory, ".electron", "preload.js"),
   ];
-  const backendDirectory = path.join(
-    rootDirectory,
-    "python-dist",
-    "multi-agent-backend",
-  );
+  const backendDirectory = path.join(rootDirectory, "python-dist", "multi-agent-backend");
   const backendExecutable = path.join(
     backendDirectory,
-    process.platform === "win32"
-      ? "multi-agent-backend.exe"
-      : "multi-agent-backend",
+    process.platform === "win32" ? "multi-agent-backend.exe" : "multi-agent-backend",
   );
   required.push(backendExecutable, path.join(backendDirectory, "_internal"));
   const missing = required.filter((file) => !fs.existsSync(file));

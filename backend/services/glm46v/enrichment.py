@@ -103,12 +103,15 @@ def _normalize_images(
     images: list[ImageInput] = []
     for attachment in attachments[: settings.max_images]:
         name = _attachment_value(attachment, "name") or "attachment"
-        mime_type = _attachment_value(
-            attachment,
-            "mime_type",
-            "mimeType",
-            "type",
-        ) or "image/png"
+        mime_type = (
+            _attachment_value(
+                attachment,
+                "mime_type",
+                "mimeType",
+                "type",
+            )
+            or "image/png"
+        )
         data = _attachment_value(attachment, "data_url", "dataUrl", "data")
         if not data:
             continue
@@ -138,7 +141,9 @@ def _analysis_prompt(*, agent_id: str, user_text: str, images: list[ImageInput])
 - 输出结构化中文结论，不输出思维过程，不讨论 API Key。
 """
     if agent_id == "coding":
-        return common + """
+        return (
+            common
+            + """
 为后续代码实现额外提取：
 1. 页面/画面的层级、主要区域、组件与相对位置；
 2. 可见文字、字体视觉特征、字号层级、颜色、间距、圆角、边框和阴影；
@@ -146,13 +151,17 @@ def _analysis_prompt(*, agent_id: str, user_text: str, images: list[ImageInput])
 4. 对实现影响最大的约束，以及需要主 Agent 再从项目代码中验证的事项。
 不要生成完整代码，只输出可供 Code Agent 落地的视觉规格和证据。
 """
-    return common + """
+        )
+    return (
+        common
+        + """
 为后续问答额外提取：
 1. 与用户问题直接相关的视觉事实和 OCR；
 2. 表格、图表、对象关系、数量、位置和异常点；
 3. “直接可见事实 / 合理推断 / 无法确认”三类结论。
 不要脱离图片证据扩写背景知识。
 """
+    )
 
 
 def _render_result(
@@ -201,19 +210,18 @@ async def enrich_runtime_context_with_glm46v(
 
     if not _enabled():
         if strict:
-            raise GLM46VError(
-                "GLM-4.6V 视觉 Skill 已被 GLM46V_VISION_ENABLED 配置关闭。"
-            )
+            raise GLM46VError("GLM-4.6V 视觉 Skill 已被 GLM46V_VISION_ENABLED 配置关闭。")
         return context
 
-    settings = client.settings if client is not None else GLM46VSettings.from_credentials(
-        request.credentials
+    settings = (
+        client.settings
+        if client is not None
+        else GLM46VSettings.from_credentials(request.credentials)
     )
     if not settings.api_key:
         if strict:
             raise GLM46VError(
-                "未读取到智谱 GLM API Key。请确认客户端“智谱 GLM”配置已保存，"
-                "并重启后端后重试。"
+                "未读取到智谱 GLM API Key。请确认客户端“智谱 GLM”配置已保存，" "并重启后端后重试。"
             )
         return context
 
@@ -235,12 +243,12 @@ async def enrich_runtime_context_with_glm46v(
         if strict:
             if isinstance(exc, GLM46VError):
                 raise
-            raise _strict_error(f"GLM-4.6V 视觉分析失败：{exc}", cause=exc)
+            raise _strict_error(f"GLM-4.6V 视觉分析失败：{exc}", cause=exc) from exc
         return context
     except Exception as exc:  # noqa: BLE001 - 辅助能力需兼容未知 SDK/网络错误
         LOGGER.warning("GLM-4.6V 视觉分析出现未预期错误：%s", exc)
         if strict:
-            raise _strict_error(f"GLM-4.6V 视觉分析出现未预期错误：{exc}", cause=exc)
+            raise _strict_error(f"GLM-4.6V 视觉分析出现未预期错误：{exc}", cause=exc) from exc
         return context
 
     block = _render_result(result=result, images=images)

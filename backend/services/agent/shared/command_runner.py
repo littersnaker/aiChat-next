@@ -86,11 +86,9 @@ def _load_extra_whitelist() -> tuple[set[str], set[str]]:
 
     try:
         raw = json.loads(
-            (
-                Path(__file__).resolve().parents[4]
-                / "config"
-                / "command-whitelist.json"
-            ).read_text("utf-8")
+            (Path(__file__).resolve().parents[4] / "config" / "command-whitelist.json").read_text(
+                "utf-8"
+            )
         )
     except (OSError, ValueError):
         raw = {}
@@ -207,11 +205,7 @@ def install_packages_allowed(command: str) -> bool:
     elif executable in {"pip", "pip3"}:
         packages = [item for item in args[1:] if not item.startswith("-")]
     elif executable in {"python", "python3", "py"}:
-        if (
-            len(args) >= 3
-            and args[0] == "-m"
-            and args[1] in {"pip", "pip3"}
-        ):
+        if len(args) >= 3 and args[0] == "-m" and args[1] in {"pip", "pip3"}:
             packages = [item for item in args[2:] if not item.startswith("-")]
     return all(package in whitelist for package in packages)
 
@@ -242,7 +236,9 @@ def _split_command(command: str) -> list[str]:
     if not parts:
         raise ValueError("命令不能为空")
     if os.name == "nt":
-        parts = [item[1:-1] if len(item) >= 2 and item[0] == item[-1] == "\"" else item for item in parts]
+        parts = [
+            item[1:-1] if len(item) >= 2 and item[0] == item[-1] == '"' else item for item in parts
+        ]
     return parts
 
 

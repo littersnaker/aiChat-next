@@ -208,7 +208,7 @@ async def _review_common(
         )
         return
 
-    written = await _write_knowledge(
+    await _write_knowledge(
         output=output,
         scope_id=scope_id,
         task_id=task_id,
