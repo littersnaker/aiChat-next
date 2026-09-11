@@ -8,14 +8,14 @@ import logging
 from collections.abc import AsyncIterator
 
 from backend.core import request_audit
-from backend.services.agent.reflection.eval import schedule_memory_eval
-from backend.services.agent.reflection.runner import schedule_runtime_review
 from backend.services.agent.loop.trace import (
     TraceHandle,
     add_trace_event,
     finish_trace,
     start_trace,
 )
+from backend.services.agent.reflection.eval import schedule_memory_eval
+from backend.services.agent.reflection.runner import schedule_runtime_review
 from backend.services.evaluation import RuntimeEvaluator
 from backend.services.glm46v import (
     builtin_skill_catalog,
@@ -30,6 +30,7 @@ from backend.services.runtime.context import ContextManager
 from backend.services.runtime.contracts import RuntimeRequest
 from backend.services.runtime.task_manager import TaskManager
 from backend.services.skills import SkillRegistry
+from backend.services.skills.contracts import SkillDefinition
 from backend.services.skills.installer import restore_installed_skills
 from backend.services.tools.code_tools import register_code_tools
 
@@ -115,9 +116,7 @@ class AgentRuntime:
         try:
             # Memory 作用域优先使用项目，其次使用会话；global 会由 Store 自动补充。
             scopes = tuple(
-                item
-                for item in (request.project_id.strip(), request.session_id.strip())
-                if item
+                item for item in (request.project_id.strip(), request.session_id.strip()) if item
             )
             memories = await self._memory.search(
                 memory_types=registered.config.memory,
@@ -199,7 +198,7 @@ class AgentRuntime:
                 try:
                     await finish_trace(trace, status="completed")
                 except Exception:  # noqa: BLE001
-                    pass
+                    LOGGER.warning("完成 trace 记录失败（status=completed）", exc_info=True)
 
             evaluation = self._evaluator.finish(
                 started_at=started_at,
@@ -233,11 +232,9 @@ class AgentRuntime:
         except Exception as exc:
             if trace is not None:
                 try:
-                    await finish_trace(
-                        trace, status="failed", error_message=str(exc)[:1000]
-                    )
+                    await finish_trace(trace, status="failed", error_message=str(exc)[:1000])
                 except Exception:  # noqa: BLE001
-                    pass
+                    LOGGER.warning("完成 trace 记录失败（status=failed）：%s", exc, exc_info=True)
             evaluation = self._evaluator.finish(
                 started_at=started_at,
                 event_count=event_count,
@@ -303,11 +300,7 @@ class AgentRuntime:
         )
         resolved: list[SkillDefinition] = []
         for item in selected:
-            skill_id = (
-                str(item["id"])
-                if isinstance(item, dict)
-                else item.id
-            )
+            skill_id = str(item["id"]) if isinstance(item, dict) else item.id
             try:
                 resolved.append(self._skills.resolve((skill_id,))[0])
             except KeyError:
@@ -337,15 +330,9 @@ class AgentRuntime:
         from backend.services.tools.gateway import TOOL_GATEWAY
 
         skills = list(self._skills.catalog())
-        known_ids = {
-            str(item.get("id") or "")
-            for item in skills
-            if isinstance(item, dict)
-        }
+        known_ids = {str(item.get("id") or "") for item in skills if isinstance(item, dict)}
         skills.extend(
-            item
-            for item in builtin_skill_catalog()
-            if str(item.get("id") or "") not in known_ids
+            item for item in builtin_skill_catalog() if str(item.get("id") or "") not in known_ids
         )
         return {
             "agents": self._agents.catalog(),

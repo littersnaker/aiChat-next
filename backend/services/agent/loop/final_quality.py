@@ -7,6 +7,7 @@ Artifact Memory，不修改现有 DAG 或并发执行结构。
 from __future__ import annotations
 
 import hashlib
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -24,6 +25,8 @@ from backend.services.quality.code_gate import CodeGate
 from backend.services.quality.patch_analyzer import PatchAnalyzer
 from backend.services.quality.regression_detector import ContractSnapshot, RegressionDetector
 from backend.services.quality.validation_engine import ValidationEngine
+
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -73,10 +76,7 @@ async def review_execution(
         plan.checks = [
             check
             for check in plan.checks
-            if not (
-                check.command not in existing_commands
-                and is_high_risk_command(check.command)
-            )
+            if not (check.command not in existing_commands and is_high_risk_command(check.command))
         ]
         for check in plan.checks:
             if check.command in existing_commands:
@@ -227,25 +227,29 @@ def _record_quality_score(
         from backend.services.workspace.database import dumps_json, open_database, utc_now_iso
 
         work_id = next(iter(worker_states))
-        async def _write() -> None:
-            async with open_database() as connection:
-                await connection.execute(
-                    "INSERT INTO quality_scores "
-                    "(work_id, session_id, score, dimensions_json, active_weights_json, created_at) "
-                    "VALUES (?, '', ?, ?, ?, ?)",
-                    (
-                        work_id,
-                        float(score),
-                        dumps_json(quality_score.get("dimensions") or {}),
-                        dumps_json(quality_score.get("activeWeights") or {}),
-                        utc_now_iso(),
-                    ),
-                )
         import asyncio
+
+        async def _write() -> None:
+            try:
+                async with open_database() as connection:
+                    await connection.execute(
+                        "INSERT INTO quality_scores "
+                        "(work_id, session_id, score, dimensions_json, active_weights_json, created_at) "
+                        "VALUES (?, '', ?, ?, ?, ?)",
+                        (
+                            work_id,
+                            float(score),
+                            dumps_json(quality_score.get("dimensions") or {}),
+                            dumps_json(quality_score.get("activeWeights") or {}),
+                            utc_now_iso(),
+                        ),
+                    )
+            except Exception:  # noqa: BLE001 - 落库失败不影响 review，但必须留痕。
+                LOGGER.warning("质量分落库失败（work_id=%s）", work_id, exc_info=True)
 
         asyncio.get_running_loop().create_task(_write())
     except Exception:  # noqa: BLE001 - 质量分落库失败不影响 review。
-        pass
+        LOGGER.warning("质量分落库任务创建失败", exc_info=True)
 
 
 def _task_summary(worker_states: dict[str, WorkWorkerState]) -> str:
@@ -269,9 +273,7 @@ def _index_artifacts(
 
     index = ArtifactIndex(root / ".agent-data" / "artifact-memory.json")
     source_by_path = {
-        path: work_id
-        for work_id, state in worker_states.items()
-        for path in state.changed_files
+        path: work_id for work_id, state in worker_states.items() for path in state.changed_files
     }
     created = 0
     updated = 0

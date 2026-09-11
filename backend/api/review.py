@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
@@ -18,6 +20,8 @@ from backend.services.agent.reflection.store import (
     list_review_artifacts,
     update_review_artifact_status,
 )
+
+LOGGER = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/agent", tags=["agent-review"])
 
@@ -90,7 +94,8 @@ async def approve_review_artifact(artifact_id: str) -> dict[str, object]:
 
             RUNTIME.reload_skills()
         except Exception:
-            pass
+            # 技能已落盘但运行时没换血会让“批准生效”变成假象，必须留痕。
+            LOGGER.warning("技能更新后重载 Runtime 失败：%s", artifact_id, exc_info=True)
     return {"ok": True, "appliedSkills": applied}
 
 
