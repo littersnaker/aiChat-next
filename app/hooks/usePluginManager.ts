@@ -7,10 +7,7 @@ import {
   createDefaultPluginState,
   isBuiltinPluginId,
 } from "../lib/plugins/registry";
-import type {
-  BuiltinPluginId,
-  BuiltinPluginState,
-} from "../lib/plugins/types";
+import type { BuiltinPluginId, BuiltinPluginState } from "../lib/plugins/types";
 
 const STORAGE_KEY = "agent-workspace:builtin-plugins:v1";
 
@@ -48,18 +45,14 @@ function persistPluginState(next: BuiltinPluginState): void {
  * Electron 偏好优先于网页 Origin 的 localStorage，避免开发地址或启动模式改变后开关丢失。
  */
 export function usePluginManager() {
-  const [enabled, setEnabled] = useState<BuiltinPluginState>(() =>
-    createDefaultPluginState(),
-  );
+  const [enabled, setEnabled] = useState<BuiltinPluginState>(() => createDefaultPluginState());
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     const hydrate = async () => {
-      const localState = parseStoredState(
-        window.localStorage.getItem(STORAGE_KEY),
-      );
-      const preferences = window.electronAPI?.preferences
+      const localState = parseStoredState(window.localStorage.getItem(STORAGE_KEY));
+      const preferences: ElectronUiPreferences = window.electronAPI?.preferences
         ? await window.electronAPI.preferences.read().catch(() => ({}))
         : {};
       const next = preferences.builtinPlugins
@@ -76,16 +69,13 @@ export function usePluginManager() {
     };
   }, []);
 
-  const setPluginEnabled = useCallback(
-    (pluginId: BuiltinPluginId, nextEnabled: boolean) => {
-      setEnabled((current) => {
-        const next = { ...current, [pluginId]: nextEnabled };
-        persistPluginState(next);
-        return next;
-      });
-    },
-    [],
-  );
+  const setPluginEnabled = useCallback((pluginId: BuiltinPluginId, nextEnabled: boolean) => {
+    setEnabled((current) => {
+      const next = { ...current, [pluginId]: nextEnabled };
+      persistPluginState(next);
+      return next;
+    });
+  }, []);
 
   const enabledPlugins = useMemo(
     () => BUILTIN_PLUGINS.filter((plugin) => enabled[plugin.id]),

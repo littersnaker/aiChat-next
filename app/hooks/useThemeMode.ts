@@ -5,20 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { persistTheme, resolveInitialTheme } from "../constants/theme";
 import type { ThemeMode } from "../constants/theme";
-import {
-  loadThemePreference,
-  saveThemePreference,
-} from "../lib/theme-preferences";
-
-interface ViewTransitionHandle {
-  finished: Promise<void>;
-}
-
-interface ViewTransitionDocument extends Document {
-  startViewTransition?: (
-    updateCallback: () => void | Promise<void>,
-  ) => ViewTransitionHandle;
-}
+import { loadThemePreference, saveThemePreference } from "../lib/theme-preferences";
 
 /** 清理一次主题动画写入到 html 节点的临时标记。 */
 function clearThemeTransitionMarkers(): void {
@@ -41,14 +28,12 @@ function hasElectronInitialTheme(): boolean {
 /** 管理应用主题，并在支持 View Transition API 时执行圆弧揭示动画。 */
 export function useThemeMode() {
   const [theme, setTheme] = useState<ThemeMode>(() => resolveInitialTheme());
-  const [preferencesReady, setPreferencesReady] = useState(() =>
-    hasElectronInitialTheme(),
-  );
+  const [preferencesReady, setPreferencesReady] = useState(() => hasElectronInitialTheme());
   const transitionRunningRef = useRef(false);
 
   useEffect(() => {
     if (hasElectronInitialTheme()) {
-      setPreferencesReady(true);
+      // useState 初始化时已用同一条件置 true，这里无需再触发同步 setState。
       return undefined;
     }
 
@@ -79,20 +64,17 @@ export function useThemeMode() {
 
     const nextTheme: ThemeMode = theme === "dark" ? "light" : "dark";
     const root = document.documentElement;
-    const transitionDocument = document as ViewTransitionDocument;
+    // startViewTransition 已进入标准 lib.dom，直接用内置类型并做运行时降级。
+    const transitionDocument = document;
 
-    root.dataset.themeTransition =
-      nextTheme === "dark" ? "to-dark" : "to-light";
+    root.dataset.themeTransition = nextTheme === "dark" ? "to-dark" : "to-light";
     root.classList.add("theme-transition-running");
 
     const commitThemeChange = (): void => {
       flushSync(() => setTheme(nextTheme));
     };
 
-    if (
-      prefersReducedMotion() ||
-      typeof transitionDocument.startViewTransition !== "function"
-    ) {
+    if (prefersReducedMotion() || typeof transitionDocument.startViewTransition !== "function") {
       commitThemeChange();
       clearThemeTransitionMarkers();
       return;

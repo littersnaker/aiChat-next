@@ -2,15 +2,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  AUTO_MODEL_ID,
-  isKnownModelId,
-  normalizeModelId,
-} from "../lib/llm/registry/models";
-import {
-  DEFAULT_MEDIA_MODEL_ID,
-  getMediaModelDefinition,
-} from "../lib/media/catalog";
+import { AUTO_MODEL_ID, isKnownModelId, normalizeModelId } from "../lib/llm/registry/models";
+import { DEFAULT_MEDIA_MODEL_ID, getMediaModelDefinition } from "../lib/media/catalog";
 
 const CHAT_MODEL_STORAGE_KEY = "agent-workspace:selected-chat-model:v2";
 const MEDIA_MODEL_STORAGE_KEY = "agent-workspace:selected-media-model:v2";
@@ -33,9 +26,7 @@ function normalizeChatModel(value: string | undefined): string {
 function normalizeMediaModel(value: string | undefined): string {
   const normalized = value?.trim() || DEFAULT_MEDIA_MODEL_ID;
   if (normalized.startsWith("custom:")) return normalized;
-  return getMediaModelDefinition(normalized)
-    ? normalized
-    : DEFAULT_MEDIA_MODEL_ID;
+  return getMediaModelDefinition(normalized) ? normalized : DEFAULT_MEDIA_MODEL_ID;
 }
 
 /** 管理模型选择，并同时保存到 Electron 固定偏好文件与 localStorage 后备。 */
@@ -44,9 +35,7 @@ export function useModelSelection() {
     normalizeChatModel(readLocalSelection(CHAT_MODEL_STORAGE_KEY, AUTO_MODEL_ID)),
   );
   const [selectedMediaModel, setSelectedMediaModelState] = useState(() =>
-    normalizeMediaModel(
-      readLocalSelection(MEDIA_MODEL_STORAGE_KEY, DEFAULT_MEDIA_MODEL_ID),
-    ),
+    normalizeMediaModel(readLocalSelection(MEDIA_MODEL_STORAGE_KEY, DEFAULT_MEDIA_MODEL_ID)),
   );
 
   useEffect(() => {
@@ -58,13 +47,11 @@ export function useModelSelection() {
       const localMedia = normalizeMediaModel(
         readLocalSelection(MEDIA_MODEL_STORAGE_KEY, DEFAULT_MEDIA_MODEL_ID),
       );
-      const preferences = window.electronAPI?.preferences
+      const preferences: ElectronUiPreferences = window.electronAPI?.preferences
         ? await window.electronAPI.preferences.read().catch(() => ({}))
         : {};
       const chat = normalizeChatModel(preferences.selectedChatModel || localChat);
-      const media = normalizeMediaModel(
-        preferences.selectedMediaModel || localMedia,
-      );
+      const media = normalizeMediaModel(preferences.selectedMediaModel || localMedia);
       if (cancelled) return;
 
       setSelectedChatModelState(chat);

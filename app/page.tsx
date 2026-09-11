@@ -70,9 +70,9 @@ export default function Home() {
   const [pendingProjectFolder, setPendingProjectFolder] = useState<string | null>(null);
   /** 待删除的项目 ID（弹确认框）。 */
   const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
-  const [activePage, setActivePage] = useState<
-    "workspace" | "skills" | "knowledge" | "evaluation"
-  >("workspace");
+  const [activePage, setActivePage] = useState<"workspace" | "skills" | "knowledge" | "evaluation">(
+    "workspace",
+  );
   const { theme, toggleTheme } = useThemeMode();
   const apiKey = useApiKey();
   const composer = useComposer();
@@ -469,7 +469,10 @@ export default function Home() {
                           setSelectedMediaModel(created.id);
                         }
                       }}
-                      onUpdateCustomModel={customModels.updateModel}
+                      onUpdateCustomModel={async (modelId, input) => {
+                        // 组件约定 onUpdate 只关心完成与否，返回值收敛为 void。
+                        await customModels.updateModel(modelId, input);
+                      }}
                       onDeleteCustomModel={customModels.deleteModel}
                       onSubmit={handleSubmit}
                       onStop={

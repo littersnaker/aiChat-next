@@ -121,8 +121,15 @@ export function parseThinkingStream(content: string): ParsedContent {
 }
 
 export function sanitizeToolLabel(label: string): string {
+  // 🛠️/⚙️ 等由基础码点 + U+FE0F 变体选择符组成。字符类里相邻的「基础码点 +
+  // FE0F」会被 no-misleading-character-class 判定为歧义组合，因此拆成两次
+  // 替换：先删基础 emoji，再删残留的变体选择符与零宽连接符。
   return label
-    .replace(/[🤖🎯🔎🧠📂🧩📝🛠️🔧⚙️✅⏳🚀]/gu, "")
+    .replace(
+      /[\u{1F916}\u{1F3AF}\u{1F50E}\u{1F9E0}\u{1F4C2}\u{1F9E9}\u{1F4DD}\u{1F6E0}\u{1F527}\u{2699}\u{2705}\u{23F3}\u{1F680}]/gu,
+      "",
+    )
+    .replace(/[\u{FE0F}\u{200D}]/gu, "")
     .replace(/^(正在|开始|调用|执行|工具调用|智能体执行中)[:：\s-]*/i, "")
     .trim();
 }
@@ -133,9 +140,7 @@ export function resolveToolMeta(label: string): {
   raw: string;
 } {
   const cleaned = sanitizeToolLabel(label);
-  const matched = TOOL_META.find((item) =>
-    cleaned.toLowerCase().includes(item.key.toLowerCase()),
-  );
+  const matched = TOOL_META.find((item) => cleaned.toLowerCase().includes(item.key.toLowerCase()));
 
   if (matched) {
     return {
@@ -229,12 +234,8 @@ export function ToolActivityPanel({
     return () => window.clearInterval(timer);
   }, [activities]);
 
-  const completedCount = activities.filter(
-    (activity) => activity.status === "completed",
-  ).length;
-  const hasRunning = activities.some(
-    (activity) => activity.status === "running",
-  );
+  const completedCount = activities.filter((activity) => activity.status === "completed").length;
+  const hasRunning = activities.some((activity) => activity.status === "running");
   const visibleActivities = activities.slice(-8);
 
   return (
@@ -271,10 +272,7 @@ export function ToolActivityPanel({
           </span>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span
-                className="text-[13px] font-semibold"
-                style={{ color: COLORS.text }}
-              >
+              <span className="text-[13px] font-semibold" style={{ color: COLORS.text }}>
                 Agent 活动
               </span>
               {hasRunning && isStreaming ? (
@@ -285,20 +283,13 @@ export function ToolActivityPanel({
                   运行中
                 </span>
               ) : (
-                <span
-                  className="text-[10px]"
-                  style={{ color: COLORS.textSubtle }}
-                >
+                <span className="text-[10px]" style={{ color: COLORS.textSubtle }}>
                   {completedCount}/{activities.length} 已完成
                 </span>
               )}
             </div>
-            <p
-              className="mt-0.5 truncate text-[11px]"
-              style={{ color: COLORS.textMuted }}
-            >
-              {agentStatus ||
-                (hasRunning ? "正在执行代码任务" : "本轮工具调用已结束")}
+            <p className="mt-0.5 truncate text-[11px]" style={{ color: COLORS.textMuted }}>
+              {agentStatus || (hasRunning ? "正在执行代码任务" : "本轮工具调用已结束")}
             </p>
           </div>
         </div>
@@ -322,10 +313,7 @@ export function ToolActivityPanel({
       </button>
 
       {expanded && (
-        <div
-          className="border-t px-3 pb-3 pt-2"
-          style={{ borderColor: COLORS.border }}
-        >
+        <div className="border-t px-3 pb-3 pt-2" style={{ borderColor: COLORS.border }}>
           {visibleActivities.map((activity, index) => {
             const meta = resolveToolMeta(activity.label);
             const running = activity.status === "running";
@@ -336,21 +324,14 @@ export function ToolActivityPanel({
                 key={activity.id}
                 className="activity-enter relative flex gap-3 rounded-[14px] px-2.5 py-2.5"
                 style={{
-                  background: running
-                    ? "rgba(10, 132, 255, 0.075)"
-                    : "transparent",
-                  border: running
-                    ? "1px solid rgba(10, 132, 255, 0.16)"
-                    : "1px solid transparent",
+                  background: running ? "rgba(10, 132, 255, 0.075)" : "transparent",
+                  border: running ? "1px solid rgba(10, 132, 255, 0.16)" : "1px solid transparent",
                 }}
               >
                 <div className="relative flex shrink-0 flex-col items-center">
                   <StatusGlyph status={activity.status} />
                   {!isLast && (
-                    <span
-                      className="mt-1 w-px flex-1"
-                      style={{ background: COLORS.border }}
-                    />
+                    <span className="mt-1 w-px flex-1" style={{ background: COLORS.border }} />
                   )}
                 </div>
 
@@ -387,8 +368,7 @@ export function ToolActivityPanel({
                       <span
                         className="tool-sweep block h-full w-1/3 rounded-full"
                         style={{
-                          background:
-                            "linear-gradient(90deg, transparent, #64b5ff, transparent)",
+                          background: "linear-gradient(90deg, transparent, #64b5ff, transparent)",
                         }}
                       />
                     </div>

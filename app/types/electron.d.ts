@@ -8,13 +8,6 @@ interface CommercePdfPayload {
   suggestedFileName: string;
 }
 
-interface ElectronUiPreferences {
-  selectedChatModel?: string;
-  selectedMediaModel?: string;
-  builtinPlugins?: Record<string, boolean>;
-  codeAgentMode?: "suggest" | "auto_edit" | "full_auto";
-}
-
 interface ElectronWindowControls {
   minimize: () => void;
   toggleMaximize: () => Promise<boolean>;
@@ -34,6 +27,14 @@ interface ElectronPreferenceApi {
 }
 
 declare global {
+  /** Electron 侧持久化的 UI 偏好（renderer 各 hook 共用此环境类型）。 */
+  interface ElectronUiPreferences {
+    selectedChatModel?: string;
+    selectedMediaModel?: string;
+    builtinPlugins?: Record<string, boolean>;
+    codeAgentMode?: "suggest" | "auto_edit" | "full_auto";
+  }
+
   interface Window {
     electronAPI?: {
       platform: string;

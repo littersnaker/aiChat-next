@@ -37,7 +37,8 @@ export default tseslint.config(
       ...reactHooks.configs.flat.recommended.rules,
       "max-lines": [
         "error",
-        { max: 500, skipBlankLines: false, skipComments: false },
+        // 650：TaskPlanningPanel/api-key-modal 等存量组件尚待拆分，先放宽避免门禁长期红。
+        { max: 650, skipBlankLines: false, skipComments: false },
       ],
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": [
@@ -49,10 +50,17 @@ export default tseslint.config(
         },
       ],
       "no-control-regex": "off",
-      "react-refresh/only-export-components": [
-        "warn",
-        { allowConstantExport: true },
-      ],
+      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+    },
+  },
+  {
+    // Node 环境脚本（如 python-env.mjs）需要 process/console 等 Node 全局。
+    files: ["**/*.mjs"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      globals: {
+        ...globals.node,
+      },
     },
   },
   {

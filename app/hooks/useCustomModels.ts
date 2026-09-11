@@ -33,10 +33,13 @@ export function useCustomModels() {
   }, []);
 
   useEffect(() => {
-    void reload().catch((error) => {
-      console.warn("[Renderer] 自定义模型加载失败", error);
-      setLoaded(true);
-    });
+    // 通过微任务延迟执行，避免在 effect 同步体内触发 setState 级联渲染。
+    void Promise.resolve()
+      .then(() => reload())
+      .catch((error) => {
+        console.warn("[Renderer] 自定义模型加载失败", error);
+        setLoaded(true);
+      });
   }, [reload]);
 
   const createModel = useCallback(async (input: CustomModelInput) => {
@@ -51,31 +54,22 @@ export function useCustomModels() {
     return payload.model;
   }, []);
 
-  const updateModel = useCallback(
-    async (modelId: string, input: CustomModelInput) => {
-      const response = await apiFetch(
-        `/api/models/custom/${encodeURIComponent(modelId)}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(input),
-        },
-      );
-      if (!response.ok) throw new Error(await readError(response));
-      const payload = (await response.json()) as CustomModelMutationResponse;
-      setModels((current) =>
-        current.map((item) => (item.id === modelId ? payload.model : item)),
-      );
-      return payload.model;
-    },
-    [],
-  );
+  const updateModel = useCallback(async (modelId: string, input: CustomModelInput) => {
+    const response = await apiFetch(`/api/models/custom/${encodeURIComponent(modelId)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!response.ok) throw new Error(await readError(response));
+    const payload = (await response.json()) as CustomModelMutationResponse;
+    setModels((current) => current.map((item) => (item.id === modelId ? payload.model : item)));
+    return payload.model;
+  }, []);
 
   const deleteModel = useCallback(async (modelId: string) => {
-    const response = await apiFetch(
-      `/api/models/custom/${encodeURIComponent(modelId)}`,
-      { method: "DELETE" },
-    );
+    const response = await apiFetch(`/api/models/custom/${encodeURIComponent(modelId)}`, {
+      method: "DELETE",
+    });
     if (!response.ok) throw new Error(await readError(response));
     setModels((current) => current.filter((item) => item.id !== modelId));
   }, []);

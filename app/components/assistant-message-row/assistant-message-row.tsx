@@ -6,7 +6,12 @@
 import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { type AssistantMessageRowProps, COLORS, ToolActivityPanel, parseThinkingStream } from "./tool-activity-panel";
+import {
+  type AssistantMessageRowProps,
+  COLORS,
+  ToolActivityPanel,
+  parseThinkingStream,
+} from "./tool-activity-panel";
 import { ThinkingSkeleton } from "./thinking-skeleton";
 import { StepsTimeline } from "./steps-timeline";
 export function AssistantMessageRow({
@@ -99,10 +104,7 @@ export function AssistantMessageRow({
               </span>
               <div>
                 <div className="flex items-center gap-2">
-                  <span
-                    className="text-[12px] font-medium"
-                    style={{ color: COLORS.text }}
-                  >
+                  <span className="text-[12px] font-medium" style={{ color: COLORS.text }}>
                     推理概要
                   </span>
                   {isThinking && (
@@ -112,23 +114,14 @@ export function AssistantMessageRow({
                     />
                   )}
                 </div>
-                <span
-                  className="text-[10px]"
-                  style={{ color: COLORS.textSubtle }}
-                >
-                  {isThinking
-                    ? "正在思考..."
-                    : isThinkingExpanded
-                      ? "收起详情"
-                      : "查看思考过程"}
+                <span className="text-[10px]" style={{ color: COLORS.textSubtle }}>
+                  {isThinking ? "正在思考..." : isThinkingExpanded ? "收起详情" : "查看思考过程"}
                 </span>
               </div>
             </div>
             <svg
               viewBox="0 0 20 20"
-              className={`h-4 w-4 transition-transform ${
-                isThinkingExpanded ? "rotate-180" : ""
-              }`}
+              className={`h-4 w-4 transition-transform ${isThinkingExpanded ? "rotate-180" : ""}`}
               fill="none"
               style={{ color: COLORS.textSubtle }}
             >
@@ -152,9 +145,7 @@ export function AssistantMessageRow({
             >
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
-                urlTransform={(url: string) =>
-                  /^(https?:|data:image\/)/i.test(url) ? url : ""
-                }
+                urlTransform={(url: string) => (/^(https?:|data:image\/)/i.test(url) ? url : "")}
                 disallowedElements={[
                   "script",
                   "iframe",
@@ -180,26 +171,13 @@ export function AssistantMessageRow({
         >
           {finalText.trim() ? (
             <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                urlTransform={(url: string) =>
-                  /^(https?:|data:image\/)/i.test(url) ? url : ""
-                }
-                disallowedElements={[
-                "script",
-                "iframe",
-                "object",
-                "embed",
-                "form",
-                "input",
-                "style",
-              ]}
+              remarkPlugins={[remarkGfm]}
+              urlTransform={(url: string) => (/^(https?:|data:image\/)/i.test(url) ? url : "")}
+              disallowedElements={["script", "iframe", "object", "embed", "form", "input", "style"]}
               unwrapDisallowed
               components={{
                 p: ({ children }) => (
-                  <p
-                    className="my-2.5 leading-7"
-                    style={{ color: COLORS.text }}
-                  >
+                  <p className="my-2.5 leading-7" style={{ color: COLORS.text }}>
                     {children}
                   </p>
                 ),
@@ -228,13 +206,11 @@ export function AssistantMessageRow({
                         isFencedCode
                           ? undefined
                           : {
-                              background:
-                                "color-mix(in srgb, var(--text-primary) 8%, transparent)",
+                              background: "color-mix(in srgb, var(--text-primary) 8%, transparent)",
                               color: "var(--text-primary)",
                               border:
                                 "1px solid color-mix(in srgb, var(--text-primary) 13%, transparent)",
-                              boxShadow:
-                                "inset 0 1px 0 color-mix(in srgb, white 12%, transparent)",
+                              boxShadow: "inset 0 1px 0 color-mix(in srgb, white 12%, transparent)",
                               fontWeight: 500,
                             }
                       }
@@ -247,13 +223,10 @@ export function AssistantMessageRow({
                   <pre
                     className="markdown-code-block my-4 overflow-x-auto rounded-[14px] border px-4 py-3.5 font-mono text-[12px] leading-6"
                     style={{
-                      background:
-                        "color-mix(in srgb, var(--app-bg) 92%, var(--text-primary) 8%)",
-                      borderColor:
-                        "color-mix(in srgb, var(--text-primary) 14%, transparent)",
+                      background: "color-mix(in srgb, var(--app-bg) 92%, var(--text-primary) 8%)",
+                      borderColor: "color-mix(in srgb, var(--text-primary) 14%, transparent)",
                       color: "var(--text-primary)",
-                      boxShadow:
-                        "inset 0 1px 0 color-mix(in srgb, white 10%, transparent)",
+                      boxShadow: "inset 0 1px 0 color-mix(in srgb, white 10%, transparent)",
                     }}
                   >
                     {children}
@@ -269,7 +242,7 @@ export function AssistantMessageRow({
         </div>
       )}
 
-      <style jsx global>{`
+      <style>{`
         .markdown-code-block > code {
           display: block;
           min-width: max-content;

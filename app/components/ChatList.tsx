@@ -227,10 +227,7 @@ function ChatList({
                   </div>
 
                   <div className="mt-1 flex h-7 items-center justify-end pr-0.5">
-                    <span
-                      className="mr-2 text-[10px]"
-                      style={{ color: COLORS.textMuted }}
-                    >
+                    <span className="mr-2 text-[10px]" style={{ color: COLORS.textMuted }}>
                       {formatMessageTime(message.createdAt)}
                     </span>
                     <button
@@ -419,7 +416,7 @@ function ChatList({
         computeItemKey={(index, item) => `${item.role}-${index}`}
       />
 
-      <style jsx global>{`
+      <style>{`
         .message-copy-tooltip {
           opacity: 0;
           transform: translateY(3px) scale(0.98);

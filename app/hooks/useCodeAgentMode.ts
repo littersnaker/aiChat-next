@@ -24,7 +24,7 @@ export function useCodeAgentMode() {
     let cancelled = false;
     const hydrate = async () => {
       const local = normalizeMode(window.localStorage.getItem(STORAGE_KEY));
-      const preferences = window.electronAPI?.preferences
+      const preferences: ElectronUiPreferences = window.electronAPI?.preferences
         ? await window.electronAPI.preferences.read().catch(() => ({}))
         : {};
       const next = normalizeMode(preferences.codeAgentMode ?? local);

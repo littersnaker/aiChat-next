@@ -25,7 +25,10 @@ export function useAgentCheckpoints(sessionId?: string) {
   const [checkpoint, setCheckpoint] = useState<AgentCheckpoint | null>(null);
   const [loading, setLoading] = useState(false);
   const sessionRef = useRef(sessionId);
-  sessionRef.current = sessionId;
+  useEffect(() => {
+    // 异步回调用它判断会话是否已切换；放到 effect 里写，避免 render 期碰 ref。
+    sessionRef.current = sessionId;
+  }, [sessionId]);
 
   const refresh = useCallback(async () => {
     if (!sessionId) {
@@ -51,7 +54,15 @@ export function useAgentCheckpoints(sessionId?: string) {
   }, [sessionId]);
 
   useEffect(() => {
-    void refresh();
+    // 通过微任务延迟执行，避免在 effect 同步体内触发 setState 级联渲染。
+    let cancelled = false;
+    void Promise.resolve().then(() => {
+      if (!cancelled) return refresh();
+      return undefined;
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [refresh]);
 
   const begin = useCallback(
@@ -107,9 +118,7 @@ export function useAgentCheckpoints(sessionId?: string) {
   const discard = useCallback(async (checkpointId: string) => {
     try {
       await apiFetch(`/api/checkpoints/${checkpointId}`, { method: "DELETE" });
-      setCheckpoint((current) =>
-        current?.id === checkpointId ? null : current,
-      );
+      setCheckpoint((current) => (current?.id === checkpointId ? null : current));
     } catch (error) {
       console.warn("[Checkpoint] 删除失败", error);
     }
