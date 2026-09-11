@@ -34,8 +34,8 @@ export interface ToastData {
   message: string;
 }
 
-/** 上传接口支持的文件扩展名白名单。 */
-export const ACCEPT_EXTENSIONS = ".md,.txt,.pdf,.docx";
+/** 上传接口支持的文件扩展名白名单（与后端 knowledge_doc_extensions 保持一致）。 */
+export const ACCEPT_EXTENSIONS = ".md,.markdown,.txt,.pdf,.docx,.xlsx,.csv";
 
 /** Jina 免费额度估算值（非商用，embedding 与重排共用）。 */
 export const FREE_TOKEN_QUOTA = 10_000_000;

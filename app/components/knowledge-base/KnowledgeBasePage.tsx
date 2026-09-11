@@ -53,6 +53,9 @@ export default function KnowledgeBasePage({
   const [toast, setToast] = useState<ToastData | null>(null);
   const [showEval, setShowEval] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  // 与 jinaKey state 同步的镜像：loadData 在 loadKey 之后立即执行，
+  // 直接读 state 会拿到旧闭包值，用 ref 保证请求头带的是最新 Key。
+  const jinaKeyRef = useRef("");
 
   /** 展示一次性提示，4 秒后自动消失。 */
   const showToast = useCallback((kind: ToastData["kind"], message: string) => {
@@ -70,14 +73,20 @@ export default function KnowledgeBasePage({
     } catch {
       // 读取失败时继续使用 localStorage 兜底值。
     }
+    jinaKeyRef.current = value;
     setJinaKey(value);
   }, []);
 
-  /** 加载知识库状态与文档列表。 */
+  /** 加载知识库状态与文档列表；状态接口带头才能正确反映 Key 已配置。 */
   const loadData = useCallback(async () => {
     try {
+      const keyHeaders = jinaKeyRef.current ? { "x-jina-api-key": jinaKeyRef.current } : undefined;
       const [statusResponse, docsResponse] = await Promise.all([
-        apiFetch("/api/knowledge/status", { method: "GET", cache: "no-store" }),
+        apiFetch("/api/knowledge/status", {
+          method: "GET",
+          cache: "no-store",
+          headers: keyHeaders,
+        }),
         apiFetch("/api/knowledge/documents", {
           method: "GET",
           cache: "no-store",
@@ -130,6 +139,7 @@ export default function KnowledgeBasePage({
         });
       }
       window.localStorage.setItem(JINA_STORAGE_KEY, value);
+      jinaKeyRef.current = value;
       showToast("success", "Jina API Key 已保存");
       await loadData();
     } catch (caught) {
@@ -144,23 +154,27 @@ export default function KnowledgeBasePage({
   const uploadDocument = async (event: FormEvent) => {
     event.preventDefault();
     const file = fileInputRef.current?.files?.[0];
-    if (!file) return;
+    if (!file) {
+      showToast("error", "请先点击「选择文件」再上传");
+      return;
+    }
     setUploading(true);
     try {
       const form = new FormData();
       form.append("file", file);
       const response = await apiFetch("/api/knowledge/documents", {
         method: "POST",
-        headers: { "x-jina-api-key": jinaKey.trim() },
+        headers: { "x-jina-api-key": jinaKeyRef.current },
         body: form,
       });
       const payload = (await response.json()) as {
         document?: KnowledgeDocument;
         index?: { ok?: boolean; error?: string };
-        detail?: string;
+        error?: string;
       };
       if (!response.ok) {
-        throw new Error(payload.detail || "上传失败");
+        // 后端统一返回 {"error": ...}（main.py 异常处理器），不是 detail。
+        throw new Error(payload.error || "上传失败");
       }
       if (payload.index?.ok === false) {
         showToast("error", `文件已保存，但索引失败：${payload.index.error || ""}`);
@@ -186,8 +200,8 @@ export default function KnowledgeBasePage({
         method: "DELETE",
       });
       if (!response.ok) {
-        const payload = (await response.json()) as { detail?: string };
-        throw new Error(payload.detail || "删除失败");
+        const payload = (await response.json()) as { error?: string };
+        throw new Error(payload.error || "删除失败");
       }
       showToast("success", "文档已删除");
       await loadData();
@@ -205,11 +219,11 @@ export default function KnowledgeBasePage({
     try {
       const response = await apiFetch("/api/knowledge/reindex", {
         method: "POST",
-        headers: { "x-jina-api-key": jinaKey.trim() },
+        headers: { "x-jina-api-key": jinaKeyRef.current },
       });
       if (!response.ok) {
-        const payload = (await response.json()) as { detail?: string };
-        throw new Error(payload.detail || "重建失败");
+        const payload = (await response.json()) as { error?: string };
+        throw new Error(payload.error || "重建失败");
       }
       showToast("success", "已开始后台重建，稍后刷新可见结果");
       window.setTimeout(() => void loadData(), 1500);

@@ -129,7 +129,9 @@ def get_settings() -> Settings:
     (data_dir / "knowledge").mkdir(parents=True, exist_ok=True)
 
     enabled_raw = os.getenv("JINA_EMBEDDING_ENABLED", "1").strip().lower()
-    extensions_raw = os.getenv("KNOWLEDGE_DOC_EXTENSIONS", ".md,.txt,.pdf,.docx").strip()
+    extensions_raw = os.getenv(
+        "KNOWLEDGE_DOC_EXTENSIONS", ".md,.markdown,.txt,.pdf,.docx,.xlsx,.csv"
+    ).strip()
     code_extensions_raw = os.getenv(
         "JINA_CODE_STRUCTURAL_EXTENSIONS",
         (

@@ -105,7 +105,7 @@ def extract_pdf_pages(path: Path) -> list[str]:
 
 
 def extract_document_text(path: Path) -> str:
-    """按扩展名解析知识库文档为纯文本（支持 md/txt/pdf/docx）。"""
+    """按扩展名解析知识库文档为纯文本（支持 md/markdown/txt/pdf/docx/xlsx/csv）。"""
 
     suffix = path.suffix.lower()
     try:
@@ -115,6 +115,10 @@ def extract_document_text(path: Path) -> str:
             return _extract_pdf_text(path)
         if suffix == ".docx":
             return _extract_docx_text(path)
+        if suffix == ".xlsx":
+            return _extract_xlsx_text(path)
+        if suffix == ".csv":
+            return _extract_csv_text(path)
     except OSError as exc:
         LOGGER.warning("读取知识库文档失败：%s（%s）", path, exc)
     return ""
@@ -158,4 +162,47 @@ def _extract_docx_text(path: Path) -> str:
         return "\n".join(parts)
     except Exception as exc:  # noqa: BLE001 - 单文档解析失败不应中断整个知识库
         LOGGER.warning("解析 DOCX 失败：%s（%s）", path, exc)
+        return ""
+
+
+def _extract_xlsx_text(path: Path) -> str:
+    """使用 openpyxl 逐工作表抽取单元格文本，行内用 ' | ' 连接。"""
+
+    try:
+        from openpyxl import load_workbook
+
+        # data_only=True：读公式的缓存结果而不是公式本身，检索才有意义。
+        workbook = load_workbook(str(path), read_only=True, data_only=True)
+        parts: list[str] = []
+        for worksheet in workbook.worksheets:
+            sheet_title = worksheet.title.strip()
+            for row in worksheet.iter_rows(values_only=True):
+                cells = [
+                    str(cell).strip() for cell in row if cell is not None and str(cell).strip()
+                ]
+                if cells:
+                    line = " | ".join(cells)
+                    parts.append(f"[{sheet_title}] {line}" if sheet_title else line)
+        workbook.close()
+        return "\n".join(parts)
+    except Exception as exc:  # noqa: BLE001 - 单文档解析失败不应中断整个知识库
+        LOGGER.warning("解析 XLSX 失败：%s（%s）", path, exc)
+        return ""
+
+
+def _extract_csv_text(path: Path) -> str:
+    """按 CSV 行抽取文本；兼容带 BOM 的 Excel 导出文件。"""
+
+    try:
+        import csv
+
+        parts: list[str] = []
+        with path.open("r", encoding="utf-8-sig", errors="replace", newline="") as handle:
+            for row in csv.reader(handle):
+                cells = [cell.strip() for cell in row if cell.strip()]
+                if cells:
+                    parts.append(" | ".join(cells))
+        return "\n".join(parts)
+    except Exception as exc:  # noqa: BLE001 - 单文档解析失败不应中断整个知识库
+        LOGGER.warning("解析 CSV 失败：%s（%s）", path, exc)
         return ""

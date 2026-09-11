@@ -95,9 +95,9 @@ export default function KnowledgeEvalModal({ open, jinaKey, onClose }: Knowledge
         },
         body: JSON.stringify({ cases }),
       });
-      const payload = (await response.json()) as EvalResult & { detail?: string };
+      const payload = (await response.json()) as EvalResult & { error?: string };
       if (!response.ok) {
-        throw new Error(payload.detail || "评估失败");
+        throw new Error(payload.error || "评估失败");
       }
       setResult(payload);
     } catch (caught) {
